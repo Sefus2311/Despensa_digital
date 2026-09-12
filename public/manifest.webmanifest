@@ -1,0 +1,10 @@
+{
+  "name": "Despensa Inteligente",
+  "short_name": "Despensa",
+  "description": "Fotografía tus tickets y controla tu despensa.",
+  "start_url": "/inicio",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#0f766e",
+  "icons": []
+}
