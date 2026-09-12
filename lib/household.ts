@@ -18,12 +18,16 @@ export async function getCurrentUserAndHousehold() {
     redirect("/login");
   }
 
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from("household_members")
     .select("household_id, role, households(id, name)")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
+
+  if (membershipError) {
+    console.error("[getCurrentUserAndHousehold] fallo al buscar membership:", membershipError);
+  }
 
   if (!membership) {
     // No debería ocurrir (el trigger crea el household al registrarse),
