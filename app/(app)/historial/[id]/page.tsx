@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/Card";
+import { Icon } from "@/components/icons/Icon";
 import { getCurrentUserAndHousehold } from "@/lib/household";
 import { getReceiptImageUrl } from "../../tickets/actions";
+import { ReceiptImage } from "@/components/ReceiptImage";
 
 export default async function ReceiptDetailPage({
   params,
@@ -30,13 +32,23 @@ export default async function ReceiptDetailPage({
     .order("created_at", { ascending: true });
 
   const imageUrl = await getReceiptImageUrl(receipt.image_path);
+  const isPdf = receipt.image_path.toLowerCase().endsWith(".pdf");
 
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <Link href="/historial" className="text-sm text-teal-700">
-          ← Historial
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/historial" className="text-sm text-teal-700">
+            ← Historial
+          </Link>
+          <Link
+            href={`/tickets/${receipt.id}/review`}
+            className="flex items-center gap-1 text-sm font-medium text-teal-700"
+          >
+            <Icon name="editar" size={16} />
+            Editar
+          </Link>
+        </div>
         <h1 className="text-2xl font-semibold mt-1">
           {receipt.store_name || "Ticket"}
         </h1>
@@ -51,14 +63,7 @@ export default async function ReceiptDetailPage({
         </p>
       </header>
 
-      {imageUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageUrl}
-          alt="Ticket"
-          className="max-h-56 w-full object-contain rounded-2xl bg-white border border-neutral-100"
-        />
-      )}
+      {imageUrl && <ReceiptImage src={imageUrl} isPdf={isPdf} />}
 
       <div className="flex flex-col gap-2">
         {(items ?? []).map((item) => (

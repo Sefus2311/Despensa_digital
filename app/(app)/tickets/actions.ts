@@ -63,9 +63,12 @@ export async function uploadReceipt(
 /** Devuelve una signed URL temporal para mostrar la imagen del ticket. */
 export async function getReceiptImageUrl(imagePath: string) {
   const supabase = await createClient();
+  // 1 hora: la página puede quedarse abierta en una pestaña o reabrirse
+  // desde el historial de navegación; 10 min caducaba antes de que el
+  // usuario llegase a verla, mostrando la imagen rota.
   const { data } = await supabase.storage
     .from("receipts")
-    .createSignedUrl(imagePath, 60 * 10);
+    .createSignedUrl(imagePath, 60 * 60);
 
   return data?.signedUrl ?? null;
 }

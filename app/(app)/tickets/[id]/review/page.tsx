@@ -29,11 +29,14 @@ export default async function ReviewTicketPage({
     .order("created_at", { ascending: true });
 
   const imageUrl = await getReceiptImageUrl(receipt.image_path);
+  const isPdf = receipt.image_path.toLowerCase().endsWith(".pdf");
 
   return (
     <ReviewForm
       receiptId={receipt.id}
       imageUrl={imageUrl}
+      isPdf={isPdf}
+      isEditing={receipt.status === "reviewed"}
       initialStoreName={receipt.store_name ?? ""}
       initialPurchaseDate={
         receipt.purchase_date ?? new Date().toISOString().slice(0, 10)

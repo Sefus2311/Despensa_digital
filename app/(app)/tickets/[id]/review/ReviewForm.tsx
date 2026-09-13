@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { Card } from "@/components/Card";
+import { ReceiptImage } from "@/components/ReceiptImage";
 import { saveReceiptReview, type SaveReviewState } from "../actions";
 
 interface ItemDraft {
@@ -15,6 +16,8 @@ interface ItemDraft {
 export function ReviewForm({
   receiptId,
   imageUrl,
+  isPdf,
+  isEditing,
   initialStoreName,
   initialPurchaseDate,
   initialTotalAmount,
@@ -22,6 +25,8 @@ export function ReviewForm({
 }: {
   receiptId: string;
   imageUrl: string | null;
+  isPdf: boolean;
+  isEditing: boolean;
   initialStoreName: string;
   initialPurchaseDate: string;
   initialTotalAmount: string;
@@ -59,20 +64,15 @@ export function ReviewForm({
   return (
     <form action={formAction} className="flex flex-col gap-5">
       <header>
-        <h1 className="text-2xl font-semibold">Revisar ticket</h1>
+        <h1 className="text-2xl font-semibold">
+          {isEditing ? "Editar ticket" : "Revisar ticket"}
+        </h1>
         <p className="text-sm text-neutral-500 mt-1">
           Comprueba los datos y ajusta los productos antes de guardar.
         </p>
       </header>
 
-      {imageUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageUrl}
-          alt="Ticket subido"
-          className="max-h-48 w-full object-contain rounded-2xl bg-white border border-neutral-100"
-        />
-      )}
+      {imageUrl && <ReceiptImage src={imageUrl} isPdf={isPdf} />}
 
       <Card className="flex flex-col gap-3">
         <div>

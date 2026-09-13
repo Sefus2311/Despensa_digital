@@ -89,7 +89,8 @@ export async function saveReceiptReview(
   }
 
   revalidatePath("/historial");
+  revalidatePath(`/historial/${receiptId}`);
   revalidatePath("/despensa");
   revalidatePath("/inicio");
-  redirect("/historial");
+  redirect(`/historial/${receiptId}`);
 }
