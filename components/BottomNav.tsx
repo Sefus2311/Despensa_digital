@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Icon, type IconName } from "@/components/icons/Icon";
 
-const TABS = [
-  { href: "/inicio", label: "Inicio", icon: "🏠" },
-  { href: "/despensa", label: "Despensa", icon: "🥫" },
-  { href: "/historial", label: "Historial", icon: "🧾" },
-  { href: "/perfil", label: "Perfil", icon: "👤" },
+const TABS: { href: string; label: string; icon: IconName }[] = [
+  { href: "/inicio", label: "Inicio", icon: "home" },
+  { href: "/despensa", label: "Despensa", icon: "despensa" },
+  { href: "/historial", label: "Historial", icon: "documentos" },
+  { href: "/perfil", label: "Perfil", icon: "usuario" },
 ];
 
 export function BottomNav() {
@@ -19,16 +20,14 @@ export function BottomNav() {
       <Link
         href="/tickets/new"
         aria-label="Escanear ticket"
-        className="fixed z-20 bottom-20 right-4 sm:right-1/2 sm:translate-x-[9.5rem] flex items-center gap-2 rounded-full bg-teal-700 text-white px-5 py-4 shadow-lg active:scale-95 transition-transform"
+        className="fixed z-20 bottom-20 right-4 sm:right-1/2 sm:translate-x-[9.5rem] flex items-center gap-2 rounded-full bg-[var(--color-primary)] text-white px-5 py-4 shadow-lg active:scale-95 transition-transform"
       >
-        <span className="text-lg" aria-hidden>
-          📷
-        </span>
+        <Icon name="camara" size={20} />
         <span className="font-medium">Escanear</span>
       </Link>
 
       <nav
-        className="fixed bottom-0 inset-x-0 z-10 bg-white border-t border-neutral-200 pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 inset-x-0 z-10 bg-white border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom)]"
         aria-label="Navegación principal"
       >
         <ul className="flex justify-around">
@@ -41,12 +40,10 @@ export function BottomNav() {
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-1 py-3 text-xs font-medium ${
-                    active ? "text-teal-700" : "text-neutral-500"
+                    active ? "text-[var(--color-primary)]" : "text-[var(--color-muted)]"
                   }`}
                 >
-                  <span className="text-xl" aria-hidden>
-                    {tab.icon}
-                  </span>
+                  <Icon name={tab.icon} size={22} />
                   {tab.label}
                 </Link>
               </li>

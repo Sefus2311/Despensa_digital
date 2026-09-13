@@ -1,0 +1,55 @@
+/*
+ * Design tokens — Despensa Digital / Mayordomo Digital.
+ *
+ * Estructura (escalas de espaciado/radio/elevación) adaptada del design
+ * system de RealMargin, con identidad de color propia: no reutiliza la
+ * paleta de marca de RealMargin. Los componentes de /components/ui y
+ * /components/icons consumen estos tokens en vez de valores sueltos, para
+ * poder cambiar la identidad visual sin tocar cada componente.
+ */
+
+:root {
+  /* Color */
+  --color-primary: #0f766e;
+  --color-primary-hover: #115e59;
+  --color-secondary: #64748b;
+  --color-background: #fafaf9;
+  --color-surface: #ffffff;
+  --color-text: #171717;
+  --color-muted: #737373;
+  --color-border: #e5e7eb;
+  --color-focus: #0f766e;
+
+  /* Estado (avisos de caducidad, confirmaciones, errores de formulario) */
+  --color-success: #15803d;
+  --color-warning: #a16207;
+  --color-danger: #dc2626;
+
+  /* Radios */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Espaciado — base 4px */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Elevación */
+  --shadow-none: none;
+  --shadow-raised: 0 8px 24px rgba(23, 23, 23, 0.1);
+  --shadow-overlay: 0 20px 50px rgba(23, 23, 23, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0a0a0a;
+    --color-surface: #171717;
+    --color-text: #ededed;
+    --color-muted: #a3a3a3;
+    --color-border: #262626;
+  }
+}

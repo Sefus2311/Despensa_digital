@@ -1,17 +1,3 @@
-import type { ReactNode } from "react";
-
-export function Card({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`bg-white rounded-2xl shadow-sm border border-neutral-100 p-4 ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
+// Reexport de compatibilidad: la implementación real vive en components/ui,
+// junto al resto del kit de componentes reutilizables (ver components/ui/Card.tsx).
+export { Card, type CardProps } from "./ui/Card";
