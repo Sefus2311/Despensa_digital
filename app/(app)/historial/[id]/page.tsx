@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { Icon } from "@/components/icons/Icon";
-import { getCurrentUserAndHousehold } from "@/lib/household";
+import { getCurrentUserAndHome } from "@/lib/home";
 import { getReceiptImageUrl } from "../../tickets/actions";
 import { ReceiptImage } from "@/components/ReceiptImage";
 
@@ -12,13 +12,13 @@ export default async function ReceiptDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, householdId } = await getCurrentUserAndHousehold();
+  const { supabase, homeId } = await getCurrentUserAndHome();
 
   const { data: receipt } = await supabase
     .from("receipts")
     .select("id, store_name, purchase_date, total_amount, image_path")
     .eq("id", id)
-    .eq("household_id", householdId)
+    .eq("home_id", homeId)
     .maybeSingle();
 
   if (!receipt) {

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { getCurrentUserAndHousehold } from "@/lib/household";
+import { getCurrentUserAndHome } from "@/lib/home";
 
 export type SaveReviewState = { error?: string } | null;
 
@@ -25,7 +25,7 @@ export async function saveReceiptReview(
   _prevState: SaveReviewState,
   formData: FormData
 ): Promise<SaveReviewState> {
-  const { supabase, householdId } = await getCurrentUserAndHousehold();
+  const { supabase, homeId } = await getCurrentUserAndHome();
 
   const storeName = String(formData.get("store_name") ?? "").trim() || null;
   const purchaseDate = String(formData.get("purchase_date") ?? "") || null;
@@ -48,9 +48,9 @@ export async function saveReceiptReview(
 
   const { data: receipt } = await supabase
     .from("receipts")
-    .select("id, household_id")
+    .select("id, home_id")
     .eq("id", receiptId)
-    .eq("household_id", householdId)
+    .eq("home_id", homeId)
     .maybeSingle();
 
   if (!receipt) {

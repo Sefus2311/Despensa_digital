@@ -1,15 +1,24 @@
 import { Card } from "@/components/Card";
-import { getCurrentUserAndHousehold } from "@/lib/household";
+import { getCurrentUserAndHome } from "@/lib/home";
 import { logout } from "@/app/(auth)/actions";
+import { RenameHomeForm } from "@/components/RenameHomeForm";
+import { HomeInvitePanel } from "@/components/HomeInvitePanel";
 
 export default async function PerfilPage() {
-  const { supabase, user, householdName } = await getCurrentUserAndHousehold();
+  const { supabase, user, homeId, homeName } = await getCurrentUserAndHome();
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("display_name")
     .eq("id", user.id)
     .maybeSingle();
+
+  const { data: pendingInvitations } = await supabase
+    .from("home_invitations")
+    .select("id, invited_email")
+    .eq("home_id", homeId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
 
   return (
     <div className="flex flex-col gap-4">
@@ -27,9 +36,13 @@ export default async function PerfilPage() {
           <p className="font-medium">{user.email}</p>
         </div>
         <div className="pt-3">
-          <p className="text-xs text-neutral-500">Hogar</p>
-          <p className="font-medium">{householdName}</p>
+          <p className="text-xs text-neutral-500">Casa</p>
+          <RenameHomeForm homeId={homeId} homeName={homeName} />
         </div>
+      </Card>
+
+      <Card>
+        <HomeInvitePanel homeId={homeId} pendingInvitations={pendingInvitations ?? []} />
       </Card>
 
       <form action={logout}>

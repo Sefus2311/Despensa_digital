@@ -1,4 +1,4 @@
-// Tipos mínimos alineados con supabase/migrations/0001_init.sql
+// Tipos mínimos alineados con supabase/migrations/*.sql
 // (no generados automáticamente todavía; en V0.2 se recomienda `supabase gen types typescript`)
 
 export type ReceiptStatus = "uploaded" | "processing" | "reviewed" | "error";
@@ -13,28 +13,30 @@ export interface Profile {
   id: string;
   email: string;
   display_name: string | null;
+  default_home_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export interface Household {
+export interface Home {
   id: string;
   name: string;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export interface HouseholdMember {
+export interface HomeMember {
   id: string;
-  household_id: string;
+  home_id: string;
   user_id: string;
-  role: "owner" | "member";
+  role: "owner" | "member" | "guest";
   created_at: string;
 }
 
 export interface Receipt {
   id: string;
-  household_id: string;
+  home_id: string;
   user_id: string;
   store_name: string | null;
   purchase_date: string | null;
@@ -67,9 +69,23 @@ export interface ReceiptItem {
   created_at: string;
 }
 
+export type HomeInvitationStatus = "pending" | "accepted" | "declined" | "cancelled";
+
+export interface HomeInvitation {
+  id: string;
+  home_id: string;
+  home_name: string;
+  invited_email: string;
+  invited_by: string;
+  status: HomeInvitationStatus;
+  created_at: string;
+  responded_at: string | null;
+  responded_by: string | null;
+}
+
 export interface InventoryEvent {
   id: string;
-  household_id: string;
+  home_id: string;
   product_id: string;
   event_type: InventoryEventType;
   quantity: number;

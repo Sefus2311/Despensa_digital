@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUserAndHousehold } from "@/lib/household";
+import { getCurrentUserAndHome } from "@/lib/home";
 
 export type UploadReceiptState = { error?: string } | null;
 
@@ -28,10 +28,10 @@ export async function uploadReceipt(
     return { error: "La imagen es demasiado grande (máximo 15 MB)." };
   }
 
-  const { supabase, user, householdId } = await getCurrentUserAndHousehold();
+  const { supabase, user, homeId } = await getCurrentUserAndHome();
 
   const extension = file.name.split(".").pop() ?? "jpg";
-  const path = `${householdId}/${crypto.randomUUID()}.${extension}`;
+  const path = `${homeId}/${crypto.randomUUID()}.${extension}`;
 
   const { error: uploadError } = await supabase.storage
     .from("receipts")
@@ -44,7 +44,7 @@ export async function uploadReceipt(
   const { data: receipt, error: insertError } = await supabase
     .from("receipts")
     .insert({
-      household_id: householdId,
+      home_id: homeId,
       user_id: user.id,
       image_path: path,
       status: "uploaded",

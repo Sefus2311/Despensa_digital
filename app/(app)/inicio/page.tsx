@@ -1,20 +1,32 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
-import { getCurrentUserAndHousehold } from "@/lib/household";
+import { getCurrentUserAndHome } from "@/lib/home";
+import { PendingInvitations } from "@/components/PendingInvitations";
 
 export default async function InicioPage() {
-  const { supabase, householdId } = await getCurrentUserAndHousehold();
+  const { supabase, user, homeId } = await getCurrentUserAndHome();
 
   const { count: productCount } = await supabase
     .from("receipt_items")
-    .select("id, receipts!inner(household_id)", { count: "exact", head: true })
-    .eq("receipts.household_id", householdId);
+    .select("id, receipts!inner(home_id)", { count: "exact", head: true })
+    .eq("receipts.home_id", homeId);
+
+  const { data: invitations } = await supabase
+    .from("home_invitations")
+    .select("id, home_name")
+    .eq("invited_email", (user.email ?? "").toLowerCase())
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
 
   return (
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-semibold">Inicio</h1>
       </header>
+
+      <PendingInvitations
+        invitations={(invitations ?? []).map((i) => ({ id: i.id, homeName: i.home_name }))}
+      />
 
       <Card>
         <h2 className="font-medium mb-1">Próximamente necesitarás</h2>

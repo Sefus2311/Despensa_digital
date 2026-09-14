@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
-import { getCurrentUserAndHousehold } from "@/lib/household";
+import { getCurrentUserAndHome } from "@/lib/home";
 
 export default async function HistorialPage() {
-  const { supabase, householdId } = await getCurrentUserAndHousehold();
+  const { supabase, homeId } = await getCurrentUserAndHome();
 
   const { data: receipts } = await supabase
     .from("receipts")
     .select("id, store_name, purchase_date, total_amount, status")
-    .eq("household_id", householdId)
+    .eq("home_id", homeId)
     .order("purchase_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
 

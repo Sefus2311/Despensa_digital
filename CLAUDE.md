@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project
 
 "Despensa Digital" (smart-pantry-mvp) — a Next.js App Router MVP where users photograph/upload grocery
-receipts, manually review the extracted line items, and track what's in their household pantry. V0.1:
+receipts, manually review the extracted line items, and track what's in their home's pantry. V0.1:
 receipt parsing is fully manual (user types in the data); the parser is designed to be swapped for a
 real OCR/AI implementation later without touching the rest of the app.
 
@@ -37,7 +37,8 @@ Next.js 16 (App Router, Server Components + Server Actions), React 19, Tailwind 
 ### Route groups
 - `app/(auth)/` — `/login`, `/register`, `/recuperar` (password reset). Public.
 - `app/(app)/` — `/inicio`, `/despensa`, `/historial`, `/perfil`, `/tickets/*`. Private, wrapped in
-  a shared layout (`app/(app)/layout.tsx`) with a bottom tab bar (`components/BottomNav.tsx`).
+  a shared layout (`app/(app)/layout.tsx`) with a header (`components/AppHeader.tsx`, home switcher)
+  and a bottom tab bar (`components/BottomNav.tsx`).
 - Route names are in Spanish (e.g. `despensa` = pantry, `historial` = history, `perfil` = profile,
   `recuperar` = recover). Follow this convention for new routes.
 
@@ -51,33 +52,54 @@ Next.js 16 (App Router, Server Components + Server Actions), React 19, Tailwind 
 - Auth actions (`app/(auth)/actions.ts`): `login`, `register`, `logout`, `requestPasswordReset` — all
   Server Actions using `useActionState`-style `(prevState, formData)` signatures.
 
-### Household model
-Every user belongs to exactly one household (auto-created by a DB trigger on signup — see
-`handle_new_user()` in `supabase/migrations/0001_init.sql`). `lib/household.ts` exports
-`getCurrentUserAndHousehold()`, the single entry point every private page/action uses to get the
-current `supabase` client, `user`, and `householdId`. This is intentionally centralized so
-multi-household support can be added later without touching every screen — always use this helper
-rather than querying `household_members` directly.
+### Home model ("Casa")
+The **Casa** (`home`), not the user, owns all domestic data. A user can belong to several homes
+(`home_members`, roles owner/member/guest — only owner is actually used in V0.1) and has one principal
+home (`profiles.default_home_id`), auto-created and auto-assigned by a DB trigger on signup (see
+`handle_new_user()` in `supabase/migrations/0001_init.sql`, renamed/extended by `0003_rename_household_to_home.sql`).
 
-### Data model (see `supabase/migrations/0001_init.sql` and `lib/types/database.ts`)
-`profiles` / `households` / `household_members` (roles: owner/member) → `receipts` (status:
-uploaded/processing/reviewed/error) → `receipt_items` (raw, user-entered/parsed line items, optionally
-linked to a `products` catalog row) → `inventory_events` (purchase/correction/consumed/adjustment;
-minimally used in V0.1, prepared for real stock tracking in V0.2+).
+`lib/home.ts` exports `getCurrentUserAndHome()`, the single entry point every private page/action uses
+to get the current `supabase` client, `user`, `homeId`, `homeName`, and the full list of the user's
+`homes` (for the switcher). It resolves the active home as: the `current_home_id` cookie (set when the
+user switches homes via the header) → `profiles.default_home_id` → oldest membership as a fallback.
+Wrapped in React's `cache()` so the layout (header) and the page share one query per request. Always
+use this helper rather than querying `home_members` directly.
 
-All tables have Row Level Security scoped to household membership (via a `household_id in (select ...
-from household_members where user_id = auth.uid())` pattern). `products` is a shared read/insert
-catalog for any authenticated user, not scoped to a household. There's also a private Storage bucket
-`receipts`, with objects stored under `{household_id}/{filename}` and RLS policies mirroring table
-access. When adding new tables that hold user data, add equivalent RLS policies in the same migration
-style.
+Changing/creating homes goes through `app/(app)/actions.ts`: `switchHome` (sets the cookie, after
+checking membership — called directly as a function from a click handler, not via `<form action>`,
+because it lives inside a self-closing dropdown menu and unmounting the form mid-submit could cancel
+it) and `createHome` (calls the `create_home` SQL RPC, a `SECURITY DEFINER` function — the only way to
+insert into `homes`/`home_members` from the app, so no direct INSERT RLS policies are needed on those
+tables). The header (`components/AppHeader.tsx` + `components/HomeSwitcher.tsx`) is the only multi-home
+UI in V0.1 — keep it that way; no member management or roles UI beyond inviting.
+
+Inviting someone to a home (`home_invitations` table, `supabase/migrations/0004_home_invitations.sql`)
+follows the same `SECURITY DEFINER` RPC pattern: `invite_to_home` (owner only, works even if the
+invited email has no account yet), `respond_to_invitation` (accept/decline, matched by the invitee's
+`profiles.email`), `cancel_invitation`. UI: `components/HomeInvitePanel.tsx` in `/perfil` (send/cancel)
+and `components/PendingInvitations.tsx` on `/inicio` (accept/decline banner for the invitee).
+
+### Data model (see `supabase/migrations/*.sql` and `lib/types/database.ts`)
+`profiles` (has `default_home_id`) / `homes` / `home_members` (roles: owner/member/guest) → `receipts`
+(status: uploaded/processing/reviewed/error) → `receipt_items` (raw, user-entered/parsed line items,
+optionally linked to a `products` catalog row) → `inventory_events` (purchase/correction/consumed/
+adjustment; minimally used in V0.1, prepared for real stock tracking in V0.2+).
+
+All tables have Row Level Security scoped to home membership (via `home_id in (select public.
+get_my_home_ids())`, a `SECURITY DEFINER` helper that avoids RLS recursion on `home_members` — see
+`0002_fix_household_members_rls_recursion.sql` / `0003_rename_household_to_home.sql`). `products` is a
+shared read/insert catalog for any authenticated user, not scoped to a home. There's also a private
+Storage bucket `receipts`, with objects stored under `{home_id}/{filename}` and RLS policies mirroring
+table access. When adding new tables that hold domestic data, scope them by `home_id` (not `user_id`;
+keep `user_id`-style columns only for real attribution, e.g. `created_by`/`assigned_to`) and add
+equivalent RLS policies in the same migration style.
 
 `lib/types/database.ts` types are hand-written to match the migration, not generated — keep them in
 sync manually, or regenerate with `supabase gen types typescript` (noted in the file as a V0.2 TODO).
 
 ### Receipt flow
 1. `/tickets/new` → `uploadReceipt` action (`app/(app)/tickets/actions.ts`): validates file
-   type/size, uploads to Storage under `{householdId}/{uuid}.{ext}`, inserts a `receipts` row
+   type/size, uploads to Storage under `{homeId}/{uuid}.{ext}`, inserts a `receipts` row
    (`status: uploaded`), redirects to `/tickets/{id}/review`.
 2. `/tickets/[id]/review` (`ReviewForm.tsx`) — user manually fills in store/date/total/line items.
    Currently backed by `lib/receipt-parser/index.ts`'s `MockReceiptParser`, which returns an empty

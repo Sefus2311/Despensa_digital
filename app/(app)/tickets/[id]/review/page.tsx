@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getCurrentUserAndHousehold } from "@/lib/household";
+import { getCurrentUserAndHome } from "@/lib/home";
 import { getReceiptImageUrl } from "../../actions";
 import { ReviewForm } from "./ReviewForm";
 
@@ -9,13 +9,13 @@ export default async function ReviewTicketPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, householdId } = await getCurrentUserAndHousehold();
+  const { supabase, homeId } = await getCurrentUserAndHome();
 
   const { data: receipt } = await supabase
     .from("receipts")
     .select("id, store_name, purchase_date, total_amount, image_path, status")
     .eq("id", id)
-    .eq("household_id", householdId)
+    .eq("home_id", homeId)
     .maybeSingle();
 
   if (!receipt) {

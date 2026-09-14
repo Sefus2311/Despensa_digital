@@ -1,23 +1,23 @@
 import { Card } from "@/components/Card";
-import { getCurrentUserAndHousehold } from "@/lib/household";
+import { getCurrentUserAndHome } from "@/lib/home";
 
 interface Row {
   raw_name: string;
   quantity: number;
   unit: string | null;
   created_at: string;
-  receipts: { household_id: string; purchase_date: string | null } | null;
+  receipts: { home_id: string; purchase_date: string | null } | null;
 }
 
 export default async function DespensaPage() {
-  const { supabase, householdId } = await getCurrentUserAndHousehold();
+  const { supabase, homeId } = await getCurrentUserAndHome();
 
   const { data } = await supabase
     .from("receipt_items")
     .select(
-      "raw_name, quantity, unit, created_at, receipts!inner(household_id, purchase_date)"
+      "raw_name, quantity, unit, created_at, receipts!inner(home_id, purchase_date)"
     )
-    .eq("receipts.household_id", householdId)
+    .eq("receipts.home_id", homeId)
     .order("created_at", { ascending: false });
 
   const rows = (data ?? []) as unknown as Row[];
