@@ -6,10 +6,10 @@ import { PendingInvitations } from "@/components/PendingInvitations";
 export default async function InicioPage() {
   const { supabase, user, homeId } = await getCurrentUserAndHome();
 
-  const { count: productCount } = await supabase
-    .from("receipt_items")
-    .select("id, receipts!inner(home_id)", { count: "exact", head: true })
-    .eq("receipts.home_id", homeId);
+  // Mismo criterio que /despensa: sólo cuenta productos ya validados por el
+  // intérprete (con alias aprobado), no cualquier línea de ticket.
+  const { data: pantryData } = await supabase.rpc("get_home_pantry", { p_home_id: homeId });
+  const productCount = pantryData?.length ?? 0;
 
   const { data: invitations } = await supabase
     .from("home_invitations")

@@ -113,6 +113,24 @@ sync manually, or regenerate with `supabase gen types typescript` (noted in the 
    and keeping the most recent purchase — there's no real stock/quantity tracking yet; that's what
    `inventory_events` is reserved for in a later version.
 
+### System roles (platform-level, separate from home membership)
+`profiles.system_role` (`user` default / `delegate` / `admin`, see `supabase/migrations/0005_system_roles.sql`)
+controls platform-wide capabilities (moderating the global product interpreter, managing users) — it is
+**orthogonal to `home_members`** and grants no access to any home's private data by itself. Use
+`lib/roles.ts` (`getCurrentSystemRole()`, `isAdmin()`, `isDelegate()`, `canModerateInterpreter()`,
+`canManageUsers()`) instead of comparing role strings directly. `system_role` cannot be changed by the
+owning user or via a plain client update — a DB trigger blocks it; changes go exclusively through the
+`set_user_role`/`set_user_role_by_email` SQL RPCs, which verify the caller is an admin and log to
+`admin_audit_log`. Admin routes live under `app/(app)/admin/*` (`/admin` dashboard, `/users`,
+`/interpreter`, `/interpreter/pending`, `/interpreter/conflicts`, `/products`, `/audit`), gated in
+`layout.tsx`/`page.tsx` via `lib/roles.ts` (never rely on hiding nav links alone) — every mutating RPC
+repeats the same role check server-side, so a direct `supabase.rpc(...)` call can't bypass it either.
+See `docs/ROLES_AND_PERMISSIONS.md` for the full model/permission matrix/first-admin bootstrap, and
+`docs/INTERPRETER_ARCHITECTURE.md` for the global product interpreter (`canonical_products` /
+`retailer_products` / `product_aliases` / `interpreter_proposals`, see
+`supabase/migrations/0006_interpreter_and_admin.sql`) — proposal submission/matching, approval
+(transactional, also resolves conflicts), rejection, and editing already-approved knowledge.
+
 ### Conventions
 - Server Actions return a `{ error?: string } | null` state shape and are driven by forms using
   React's `useActionState`; follow this pattern for new mutations rather than route handlers.

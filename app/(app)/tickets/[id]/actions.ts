@@ -88,6 +88,27 @@ export async function saveReceiptReview(
     return { error: "No se pudieron guardar los productos." };
   }
 
+  // Alimenta el intérprete global con lo que el usuario acaba de escribir.
+  // V0.1 no tiene OCR/IA todavía: el texto que el usuario teclea es a la vez
+  // el "texto crudo del ticket" y su propia interpretación, así que se envían
+  // ambos iguales. submit_interpreter_proposal ya sabe confirmar/detectar
+  // conflicto si otro usuario ha propuesto algo distinto para el mismo
+  // (supermercado, texto). Es un intento best-effort: si falla, no debe
+  // impedir guardar el ticket (el intérprete es auxiliar, no crítico).
+  if (storeName) {
+    await Promise.allSettled(
+      validItems.map((item) =>
+        supabase.rpc("submit_interpreter_proposal", {
+          p_retailer: storeName,
+          p_raw_name: item.rawName.trim(),
+          p_proposed_canonical_name: item.rawName.trim(),
+          p_proposed_quantity: item.quantity || null,
+          p_proposed_unit: item.unit,
+        })
+      )
+    );
+  }
+
   revalidatePath("/historial");
   revalidatePath(`/historial/${receiptId}`);
   revalidatePath("/despensa");

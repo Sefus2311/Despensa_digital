@@ -1,11 +1,14 @@
+import Link from "next/link";
 import { Card } from "@/components/Card";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { logout } from "@/app/(auth)/actions";
 import { RenameHomeForm } from "@/components/RenameHomeForm";
 import { HomeInvitePanel } from "@/components/HomeInvitePanel";
+import { getCurrentSystemRole } from "@/lib/roles";
 
 export default async function PerfilPage() {
   const { supabase, user, homeId, homeName } = await getCurrentUserAndHome();
+  const systemRole = await getCurrentSystemRole();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -44,6 +47,19 @@ export default async function PerfilPage() {
       <Card>
         <HomeInvitePanel homeId={homeId} pendingInvitations={pendingInvitations ?? []} />
       </Card>
+
+      {(systemRole === "admin" || systemRole === "delegate") && (
+        <Card className="flex flex-col gap-2">
+          {systemRole === "admin" && (
+            <Link href="/admin" className="font-medium text-[var(--color-primary)]">
+              Administración
+            </Link>
+          )}
+          <Link href="/admin/interpreter" className="font-medium text-[var(--color-primary)]">
+            Intérprete
+          </Link>
+        </Card>
+      )}
 
       <form action={logout}>
         <button

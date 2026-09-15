@@ -1,5 +1,10 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+For project-specific architecture (stack, auth, data model, receipt flow) see `CLAUDE.md`. For the
+system role model (`user`/`delegate`/`admin`), the admin panel, and how to bootstrap the first
+administrator, see `docs/ROLES_AND_PERMISSIONS.md`. For the global product interpreter (proposals,
+approval, conflicts, aliases) see `docs/INTERPRETER_ARCHITECTURE.md`.
+
 ## Getting Started
 
 First, run the development server:

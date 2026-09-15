@@ -107,6 +107,8 @@
   color: var(--color-danger);
 }
 .ui-field__input {
+  inline-size: 100%;
+  min-inline-size: 0;
   min-block-size: 44px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
