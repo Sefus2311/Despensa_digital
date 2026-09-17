@@ -1,7 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
-import { updateAliasAction, type AliasActionState } from "@/app/(app)/admin/interpreter/actions";
+import { useActionState, useState } from "react";
+import { Dropdown } from "@/components/ui/Dropdown";
+import { AliasDetailPanel } from "@/components/admin/AliasDetailPanel";
+import {
+  restoreAliasAction,
+  updateAliasAction,
+  type AliasActionState,
+} from "@/app/(app)/admin/interpreter/actions";
+
+type PanelMode = "view" | "edit" | "delete";
 
 export function AliasRow({
   aliasId,
@@ -13,6 +21,7 @@ export function AliasRow({
   confidenceScore,
   timesConfirmed,
   active,
+  deleted,
 }: {
   aliasId: string;
   retailer: string;
@@ -23,38 +32,113 @@ export function AliasRow({
   confidenceScore: number | null;
   timesConfirmed: number;
   active: boolean;
+  deleted: boolean;
 }) {
-  const [state, formAction, pending] = useActionState<AliasActionState, FormData>(
+  const [panelMode, setPanelMode] = useState<PanelMode | null>(null);
+  const [activeState, activeFormAction, activePending] = useActionState<AliasActionState, FormData>(
     updateAliasAction,
+    null
+  );
+  const [restoreState, restoreFormAction, restorePending] = useActionState<AliasActionState, FormData>(
+    restoreAliasAction,
     null
   );
 
   return (
-    <div className={`flex flex-col gap-1 py-3 ${active ? "" : "opacity-50"}`}>
-      <span className="text-xs text-neutral-400">{retailer}</span>
-      <p className="font-mono text-xs text-neutral-500">{rawName}</p>
-      <p className="font-medium">→ {canonicalName}</p>
-      <p className="text-xs text-neutral-500">
-        {[brand, category].filter(Boolean).join(" · ") || "—"}
-      </p>
-      <div className="flex items-center justify-between gap-2 mt-1">
-        <div className="flex gap-3 text-xs text-neutral-500">
-          {confidenceScore != null && <span>{Math.round(confidenceScore * 100)}% confianza</span>}
-          <span>{timesConfirmed} confirmaciones</span>
+    // El panel de detalle (Modal, position: fixed) se renderiza FUERA de este
+    // div: si quedara dentro heredaría el opacity-50 de abajo y aparecería
+    // translúcido, dejando ver el listado detrás (bug ya visto en pantalla).
+    <>
+      <div className={`flex flex-col gap-1 py-3 ${active && !deleted ? "" : "opacity-50"}`}>
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <span className="text-xs text-neutral-400">{retailer}</span>
+            <p className="font-mono text-xs text-neutral-500 truncate">{rawName}</p>
+            <p className="font-medium">→ {canonicalName}</p>
+            <p className="text-xs text-neutral-500">{[brand, category].filter(Boolean).join(" · ") || "—"}</p>
+          </div>
+
+          <Dropdown label="⋮" align="right">
+            <ul className="flex flex-col gap-1 min-w-[180px]">
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setPanelMode("view")}
+                  className="w-full rounded-md px-2 py-2 text-sm text-left hover:bg-neutral-50"
+                >
+                  Ver / Revisar
+                </button>
+              </li>
+              {!deleted && (
+                <>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => setPanelMode("edit")}
+                      className="w-full rounded-md px-2 py-2 text-sm text-left hover:bg-neutral-50"
+                    >
+                      Editar
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => setPanelMode("delete")}
+                      className="w-full rounded-md px-2 py-2 text-sm text-left text-red-600 hover:bg-neutral-50"
+                    >
+                      Eliminar
+                    </button>
+                  </li>
+                </>
+              )}
+              {deleted && (
+                <li>
+                  <form action={restoreFormAction}>
+                    <input type="hidden" name="alias_id" value={aliasId} />
+                    <button
+                      type="submit"
+                      disabled={restorePending}
+                      className="w-full rounded-md px-2 py-2 text-sm text-left hover:bg-neutral-50 disabled:opacity-60"
+                    >
+                      Restaurar
+                    </button>
+                  </form>
+                </li>
+              )}
+            </ul>
+          </Dropdown>
         </div>
-        <form action={formAction} onChange={(e) => e.currentTarget.requestSubmit()}>
-          <input type="hidden" name="alias_id" value={aliasId} />
-          <label className="flex items-center gap-1 text-xs text-neutral-500">
-            <input type="checkbox" name="active" defaultChecked={active} disabled={pending} />
-            Activo
-          </label>
-        </form>
+
+        <div className="flex items-center justify-between gap-2 mt-1">
+          <div className="flex gap-3 text-xs text-neutral-500">
+            {confidenceScore != null && <span>{Math.round(confidenceScore * 100)}% confianza</span>}
+            <span>{timesConfirmed} confirmaciones</span>
+            {deleted && <span className="text-red-600">Eliminado</span>}
+          </div>
+          <form action={activeFormAction} onChange={(e) => e.currentTarget.requestSubmit()}>
+            <input type="hidden" name="alias_id" value={aliasId} />
+            <label className="flex items-center gap-1 text-xs text-neutral-500">
+              <input type="checkbox" name="active" defaultChecked={active} disabled={activePending || deleted} />
+              Activo
+            </label>
+          </form>
+        </div>
+
+        {activeState?.error && (
+          <p role="alert" className="text-xs text-red-600">
+            {activeState.error}
+          </p>
+        )}
+        {restoreState?.error && (
+          <p role="alert" className="text-xs text-red-600">
+            {restoreState.error}
+          </p>
+        )}
       </div>
-      {state?.error && (
-        <p role="alert" className="text-xs text-red-600">
-          {state.error}
-        </p>
+
+      {panelMode && (
+        <AliasDetailPanel aliasId={aliasId} initialMode={panelMode} onClose={() => setPanelMode(null)} />
       )}
-    </div>
+    </>
   );
 }

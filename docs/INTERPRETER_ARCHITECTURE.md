@@ -1,9 +1,11 @@
 # Arquitectura del intérprete global de productos
 
-Implementado en `supabase/migrations/0006_interpreter_and_admin.sql`. Este
-documento describe el modelo de datos, el flujo de propuestas/aprobación, la
-detección de conflictos, la seguridad y la auditoría. La UI de moderación
-vive bajo `app/(app)/admin/interpreter*` y `app/(app)/admin/products`.
+Implementado en `supabase/migrations/0006_interpreter_and_admin.sql`, extendido
+por `0010_interpreter_management.sql` (ver "Borrado, edición combinada e
+historial" más abajo). Este documento describe el modelo de datos, el flujo
+de propuestas/aprobación, la detección de conflictos, la seguridad, la
+auditoría y la trazabilidad. La UI de moderación vive bajo
+`app/(app)/admin/interpreter*` y `app/(app)/admin/products`.
 
 No incluye todavía: lectura OCR, motor de IA real, ni fusión de productos
 (ver "Pendiente" al final).
@@ -32,10 +34,11 @@ interpreter_proposals  --(aprobar)-->  product_aliases  --(N:1)-->  retailer_pro
   normalized_commercial_name)`.
 - **`product_aliases`** — conocimiento **aprobado y global**: para un
   `(retailer, normalized_raw_name)` dado, a qué `retailer_products`
-  corresponde. Único por `(retailer, normalized_raw_name)` — como mucho un
-  alias activo por texto de ticket y tienda. Lleva `confidence_score`,
-  `times_seen`, `times_confirmed` y un flag `active` (desactivar en vez de
-  borrar, ver más abajo).
+  corresponde. Único por `(retailer, normalized_raw_name)` entre los **no
+  eliminados** (índice único parcial `where deleted_at is null`, desde 0010).
+  Lleva `confidence_score`, `times_seen`, `times_confirmed`, un flag `active`
+  (desactivar reversible, para el matching) y `deleted_at`/`updated_by`
+  (soft delete y trazabilidad, ver "Borrado, edición combinada e historial").
 - **`interpreter_proposals`** — conocimiento **pendiente de revisión**:
   propuestas generadas por IA, por usuarios al revisar su ticket, o
   correcciones. Estados: `pending`, `conflict`, `approved`, `rejected`.
@@ -129,13 +132,22 @@ global.
 - `update_canonical_product(id, canonical_name, category, default_unit)`
 - `update_retailer_product(id, brand, commercial_name, package_quantity, package_unit, canonical_product_id)`
 - `update_product_alias(id, retailer_product_id, active)` — para corregir a
-  qué producto apunta un alias, o para **desactivarlo** en vez de borrarlo.
+  qué producto apunta un alias, o para **desactivarlo** (reversible, afecta
+  al matching pero no al histórico).
+- `update_interpreter_alias_full(alias_id, canonical_name, category,
+  default_unit, brand, commercial_name, package_quantity, package_unit)`
+  (0010) — edición combinada desde la ficha de detalle de
+  `/admin/interpreter`: orquesta las dos primeras funciones sobre el
+  `canonical_product`/`retailer_product` de un alias en una única
+  transacción, sin duplicar su lógica de validación.
 
-Las tres exigen `delegate` o `admin` y registran auditoría. **No existe
-ninguna función de borrado** sobre `canonical_products`, `retailer_products`
-o `product_aliases`: la sección 14 de la tarea que originó este documento
-pide explícitamente preferir editar/desactivar/fusionar frente a borrar
-conocimiento histórico.
+Todas exigen `delegate` o `admin`, registran auditoría (`admin_audit_log`) y,
+desde 0010, también historial (`interpreter_history`, ver abajo). **Sigue
+sin existir ninguna función de borrado sobre `canonical_products` o
+`retailer_products`** (son compartidos por varios alias; fusionarlos o
+borrarlos queda fuera de alcance, ver "Pendiente"). `product_aliases` sí
+tiene borrado desde 0010, pero **soft delete**, nunca físico — ver siguiente
+sección.
 
 ### Detección de duplicados
 
@@ -188,6 +200,77 @@ integración de IA los rellene. La IA **nunca escribirá directamente**
 filas en `interpreter_proposals` a través de
 `submit_interpreter_proposal` (o una función equivalente), exactamente igual
 que un usuario. La aprobación siempre la hace una persona.
+
+## Borrado, edición combinada e historial (`0010_interpreter_management.sql`)
+
+Añadido para poder gestionar cada registro del intérprete desde la interfaz
+de administración (ver/editar/eliminar) tratándolo como un activo crítico de
+datos, sin perder lo ya construido en 0006.
+
+- **Soft delete de `product_aliases`**: `deleted_at timestamptz`. Un alias
+  eliminado deja de contar en el matching (`submit_interpreter_proposal`,
+  `get_home_pantry`, `count_home_pending_interpretation` filtran
+  `deleted_at is null`) y desaparece del listado normal de
+  `/admin/interpreter`, pero conserva su `id` y todas sus filas relacionadas
+  de historial — `delete_product_alias(id)` / `restore_product_alias(id)`,
+  simétricas, ambas `delegate`/`admin`. Es independiente del flag `active`
+  existente: `active` sigue siendo el toggle reversible de siempre;
+  "eliminado" es un estado más fuerte, sólo reversible con "Restaurar". El
+  índice único de `product_aliases` pasó a ser parcial
+  (`where deleted_at is null`) para poder re-aprobar el mismo
+  `(retailer, raw_name)` tras eliminar un alias erróneo.
+- **`updated_by`** en `canonical_products`, `retailer_products` y
+  `product_aliases`: quién hizo la última edición. Se fija con `auth.uid()`
+  **dentro** de cada función `SECURITY DEFINER`, nunca a partir de un
+  parámetro que envíe el cliente — no se puede falsear llamando a la RPC con
+  otro valor.
+- **`interpreter_history`**: tabla genérica (`entry_type`, `entry_id`,
+  `change_type` — `create`/`update`/`delete`/`restore` —, `previous_data`/
+  `new_data` en JSONB, `changed_by`, `changed_at`) que registra cada alta,
+  edición, baja y restauración sobre las tres tablas de conocimiento, escrita
+  únicamente desde `log_interpreter_history()` (llamada internamente por el
+  resto de funciones, nunca expuesta para ser llamada con datos arbitrarios
+  desde fuera). Lectura restringida a `delegate`/`admin` vía RLS — mismo
+  nivel que el resto del dominio del intérprete (no tan restrictivo como
+  `admin_audit_log`, que es un log de plataforma más amplio y sólo lo lee
+  `admin`). En `approve_interpreter_proposal` sólo se registra el estado
+  "after" para `canonical_products`/`retailer_products` (el "before" completo
+  sólo importa para poder deshacer una edición manual, que es donde sí se
+  captura); en las ediciones manuales (`update_canonical_product`,
+  `update_retailer_product`, `update_product_alias`, borrado/restauración) se
+  captura el "before" completo.
+- **`get_interpreter_alias_detail(id)`**: única lectura agregada que hace
+  bypass de RLS (dentro de una función `SECURITY DEFINER` ya gateada por
+  rol) para resolver el email de `updated_by`/`changed_by` vía
+  `public.profiles` — no abre ninguna política RLS nueva sobre esa tabla.
+  Devuelve el alias, su `retailer_product`, su `canonical_product` y sus
+  últimas ~20 entradas de `interpreter_history`, todo en un único `jsonb`.
+
+## Preparación para edición externa/offline (futuro, no implementado)
+
+El objetivo a medio plazo es poder gestionar este mismo conocimiento desde
+una herramienta externa, potencialmente local-first/offline. Nada de eso se
+ha construido todavía, pero 0010 evita decisiones que lo dificultarían:
+
+- Cada registro ya tiene un `uuid` estable como identificador (no hay IDs
+  autoincrementales ni compuestos).
+- `updated_at`/`updated_by` son ya consistentes en las tres tablas de
+  conocimiento, y `interpreter_history` da una fuente de verdad completa de
+  qué cambió y cuándo — la base para que un futuro protocolo de sync decida
+  qué enviar/aplicar.
+- Toda escritura sigue centralizada en funciones `SECURITY DEFINER`: ningún
+  cliente (incluida la futura app externa) puede hacer `INSERT`/`UPDATE`/
+  `DELETE` directo sobre estas tablas, sólo llamar a las mismas RPCs que ya
+  usa este panel de administración.
+- La lógica de llamada a esas RPCs vive en `lib/interpreter/repository.ts`
+  (no repartida dentro de componentes), como contrato único a replicar.
+
+**Explícitamente fuera de alcance de este cambio** (no resuelto, para que
+quede constancia de que se pospuso a propósito, no se olvidó):
+protocolo de sincronización en sí, resolución de conflictos entre ediciones
+offline concurrentes (qué pasa si la app externa y un admin editan el mismo
+alias sin conexión a la vez), y autenticación/autorización de la herramienta
+externa frente a Supabase.
 
 ## Datos de ejemplo (seed)
 

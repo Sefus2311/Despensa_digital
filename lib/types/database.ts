@@ -120,6 +120,7 @@ export interface CanonicalProduct {
   default_unit: string | null;
   created_at: string;
   updated_at: string;
+  updated_by: string | null;
 }
 
 export interface RetailerProduct {
@@ -133,6 +134,7 @@ export interface RetailerProduct {
   package_unit: string | null;
   created_at: string;
   updated_at: string;
+  updated_by: string | null;
 }
 
 export interface ProductAlias {
@@ -147,6 +149,25 @@ export interface ProductAlias {
   active: boolean;
   created_at: string;
   updated_at: string;
+  updated_by: string | null;
+  deleted_at: string | null;
+}
+
+// interpreter_history (0010_interpreter_management.sql): rastro de
+// altas/ediciones/bajas/restauraciones sobre las tres tablas de arriba.
+export type InterpreterEntryType = "canonical_product" | "retailer_product" | "product_alias";
+export type InterpreterChangeType = "create" | "update" | "delete" | "restore";
+
+export interface InterpreterHistoryEntry {
+  id: string;
+  entry_type: InterpreterEntryType;
+  entry_id: string;
+  change_type: InterpreterChangeType;
+  previous_data: Record<string, unknown> | null;
+  new_data: Record<string, unknown> | null;
+  changed_by: string | null;
+  changed_by_email?: string | null;
+  changed_at: string;
 }
 
 export interface InterpreterProposal {

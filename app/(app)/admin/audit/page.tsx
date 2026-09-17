@@ -10,7 +10,7 @@ const ACTION_LABELS: Record<string, string> = {
   interpreter_proposal_approved: "Propuesta aprobada",
   interpreter_proposal_edited_and_approved: "Propuesta editada y aprobada",
   interpreter_proposal_rejected: "Propuesta rechazada",
-  canonical_product_edited: "Producto canónico editado",
+  canonical_product_edited: "Producto normalizado editado",
   retailer_product_edited: "Producto de tienda editado",
   product_alias_edited: "Alias editado",
 };

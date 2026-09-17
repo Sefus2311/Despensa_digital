@@ -17,6 +17,7 @@ type AliasRowShape = {
   confidence_score: number | null;
   times_confirmed: number;
   active: boolean;
+  deleted_at: string | null;
   retailer_products: {
     brand: string | null;
     canonical_products: { canonical_name: string; category: string | null } | null;
@@ -26,20 +27,30 @@ type AliasRowShape = {
 export default async function AdminInterpreterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; retailer?: string; category?: string; min_confidence?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    retailer?: string;
+    category?: string;
+    min_confidence?: string;
+    estado?: string;
+  }>;
 }) {
   const params = await searchParams;
   const q = params.q?.trim().toLowerCase() ?? "";
   const retailer = params.retailer?.trim().toLowerCase() ?? "";
   const category = params.category?.trim().toLowerCase() ?? "";
   const minConfidence = Number(params.min_confidence) || 0;
+  const estado = params.estado === "eliminados" ? "eliminados" : "activos";
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("product_aliases")
     .select(
-      "id, retailer, raw_name, confidence_score, times_confirmed, active, retailer_products(brand, canonical_products(canonical_name, category))"
-    )
+      "id, retailer, raw_name, confidence_score, times_confirmed, active, deleted_at, retailer_products(brand, canonical_products(canonical_name, category))"
+    );
+  query = estado === "eliminados" ? query.not("deleted_at", "is", null) : query.is("deleted_at", null);
+
+  const { data, error } = await query
     .order("updated_at", { ascending: false })
     .limit(100)
     .overrideTypes<AliasRowShape[]>();
@@ -93,12 +104,18 @@ export default async function AdminInterpreterPage({
               className="ui-field__input flex-1"
             />
           </div>
-          <select name="min_confidence" defaultValue={params.min_confidence ?? ""} className="ui-field__input">
-            <option value="">Cualquier confianza</option>
-            <option value="0.5">50%+</option>
-            <option value="0.8">80%+</option>
-            <option value="0.95">95%+</option>
-          </select>
+          <div className="flex gap-2">
+            <select name="min_confidence" defaultValue={params.min_confidence ?? ""} className="ui-field__input flex-1">
+              <option value="">Cualquier confianza</option>
+              <option value="0.5">50%+</option>
+              <option value="0.8">80%+</option>
+              <option value="0.95">95%+</option>
+            </select>
+            <select name="estado" defaultValue={estado} className="ui-field__input flex-1">
+              <option value="activos">Activos</option>
+              <option value="eliminados">Eliminados</option>
+            </select>
+          </div>
           <button type="submit" className="rounded-xl border border-[var(--color-border)] py-2 font-medium">
             Buscar
           </button>
@@ -120,6 +137,7 @@ export default async function AdminInterpreterPage({
             confidenceScore={a.confidence_score}
             timesConfirmed={a.times_confirmed}
             active={a.active}
+            deleted={a.deleted_at != null}
           />
         ))}
       </Card>

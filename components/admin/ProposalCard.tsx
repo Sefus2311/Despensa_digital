@@ -68,7 +68,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
         >
           <input type="hidden" name="proposal_id" value={proposal.id} />
           <label className="text-xs text-neutral-500">
-            Producto canónico
+            Producto normalizado
             <input
               name="canonical_name"
               defaultValue={proposal.proposed_canonical_name}

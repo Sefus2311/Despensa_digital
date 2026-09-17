@@ -36,7 +36,7 @@ export async function updateCanonicalProductAction(
   }
 
   revalidatePath("/admin/products");
-  return { success: "Producto canónico actualizado." };
+  return { success: "Producto normalizado actualizado." };
 }
 
 export async function updateRetailerProductAction(

@@ -3,6 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { canModerateInterpreter } from "@/lib/roles";
+import { parseAliasEditInput } from "@/lib/interpreter/validation";
+import {
+  deleteAlias,
+  getAliasDetail,
+  restoreAlias,
+  updateAliasActive,
+  updateAliasFull,
+} from "@/lib/interpreter/repository";
+import type { AliasDetailData } from "@/lib/interpreter/types";
 
 export type ProposalActionState = { error?: string; success?: string } | null;
 
@@ -104,10 +113,7 @@ export async function updateAliasAction(
   const active = formData.get("active") === "on";
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("update_product_alias", {
-    p_id: aliasId,
-    p_active: active,
-  });
+  const { error } = await updateAliasActive(supabase, aliasId, active);
 
   if (error) {
     return { error: error.message };
@@ -115,4 +121,108 @@ export async function updateAliasAction(
 
   revalidatePath("/admin/interpreter");
   return { success: active ? "Alias activado." : "Alias desactivado." };
+}
+
+// ----------------------------------------------------------------------------
+// Ficha de detalle: ver / editar completo / eliminar / restaurar un registro
+// del Intérprete (product_alias + su retailer_product + su canonical_product).
+// ----------------------------------------------------------------------------
+
+export type AliasDetailResult = { ok: true; data: AliasDetailData } | { ok: false; error: string };
+
+/**
+ * No va ligada a un <form>/useActionState: se llama directamente desde el
+ * client component al abrir la ficha (mismo patrón que switchHome en
+ * app/(app)/actions.ts).
+ */
+export async function getAliasDetailAction(aliasId: string): Promise<AliasDetailResult> {
+  if (!(await canModerateInterpreter())) {
+    return { ok: false, error: "No autorizado." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await getAliasDetail(supabase, aliasId);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true, data: data as AliasDetailData };
+}
+
+export async function updateAliasFullAction(
+  _prevState: AliasActionState,
+  formData: FormData
+): Promise<AliasActionState> {
+  if (!(await canModerateInterpreter())) {
+    return { error: "No autorizado." };
+  }
+
+  const aliasId = String(formData.get("alias_id") ?? "");
+  if (!aliasId) {
+    return { error: "Alias no válido." };
+  }
+
+  const parsed = parseAliasEditInput(formData);
+  if (!parsed.ok) {
+    return { error: parsed.error };
+  }
+
+  const supabase = await createClient();
+  const { error } = await updateAliasFull(supabase, aliasId, parsed.data);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/admin/interpreter");
+  return { success: "Registro actualizado." };
+}
+
+export async function deleteAliasAction(
+  _prevState: AliasActionState,
+  formData: FormData
+): Promise<AliasActionState> {
+  if (!(await canModerateInterpreter())) {
+    return { error: "No autorizado." };
+  }
+
+  const aliasId = String(formData.get("alias_id") ?? "");
+  if (!aliasId) {
+    return { error: "Alias no válido." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await deleteAlias(supabase, aliasId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/admin/interpreter");
+  return { success: "Registro eliminado." };
+}
+
+export async function restoreAliasAction(
+  _prevState: AliasActionState,
+  formData: FormData
+): Promise<AliasActionState> {
+  if (!(await canModerateInterpreter())) {
+    return { error: "No autorizado." };
+  }
+
+  const aliasId = String(formData.get("alias_id") ?? "");
+  if (!aliasId) {
+    return { error: "Alias no válido." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await restoreAlias(supabase, aliasId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/admin/interpreter");
+  return { success: "Registro restaurado." };
 }
