@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { Icon } from "@/components/icons/Icon";
 import { getCurrentUserAndHome } from "@/lib/home";
+import { formatCurrency } from "@/lib/format";
 import { getReceiptImageUrl } from "../../tickets/actions";
 import { ReceiptImage } from "@/components/ReceiptImage";
 
@@ -57,9 +58,7 @@ export default async function ReceiptDetailPage({
             ? new Date(receipt.purchase_date).toLocaleDateString("es-ES")
             : "Sin fecha"}{" "}
           ·{" "}
-          {receipt.total_amount != null
-            ? `${Number(receipt.total_amount).toFixed(2)} €`
-            : "Sin total"}
+          {receipt.total_amount != null ? formatCurrency(receipt.total_amount) : "Sin total"}
         </p>
       </header>
 
@@ -75,9 +74,7 @@ export default async function ReceiptDetailPage({
               </p>
             </div>
             <span className="text-sm font-medium">
-              {item.total_price != null
-                ? `${Number(item.total_price).toFixed(2)} €`
-                : "—"}
+              {item.total_price != null ? formatCurrency(item.total_price) : "—"}
             </span>
           </Card>
         ))}

@@ -46,6 +46,8 @@ export interface Receipt {
   home_id: string;
   user_id: string;
   store_name: string | null;
+  /** Columna generada (normalize_product_text(store_name), 0011) -- "" si store_name es nulo. */
+  store_key: string | null;
   purchase_date: string | null;
   total_amount: number | null;
   image_path: string;
