@@ -152,7 +152,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
           <button
             type="button"
             onClick={() => setMode("reject")}
-            className="rounded-lg border border-[var(--color-danger)] text-[var(--color-danger)] px-3 py-2 text-[15px]"
+            className="rounded-lg border border-[var(--color-danger)] text-[var(--color-danger-text)] px-3 py-2 text-[15px]"
           >
             Rechazar
           </button>
@@ -196,12 +196,12 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
       )}
 
       {approveState?.error && (
-        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+        <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
           {approveState.error}
         </p>
       )}
       {rejectState?.error && (
-        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+        <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
           {rejectState.error}
         </p>
       )}

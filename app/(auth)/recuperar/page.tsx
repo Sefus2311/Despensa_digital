@@ -28,7 +28,7 @@ export default function RecuperarPage() {
             type="email"
             autoComplete="email"
             required
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+            className="ui-field__input mt-1"
           />
         </div>
 
@@ -48,7 +48,7 @@ export default function RecuperarPage() {
       </form>
 
       <div className="mt-6 text-[15px] text-center">
-        <Link href="/login" className="text-[var(--color-primary)] font-medium">
+        <Link href="/login" className="text-[var(--color-primary-text)] font-medium">
           Volver a entrar
         </Link>
       </div>

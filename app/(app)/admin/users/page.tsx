@@ -72,7 +72,7 @@ export default async function AdminUsersPage({
       </Card>
 
       <Card className="divide-y divide-neutral-100">
-        {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudo cargar la lista de usuarios.</p>}
+        {error && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudo cargar la lista de usuarios.</p>}
         {!error && rows.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>}
         {rows.map((u) => (
           <UserRoleRow
@@ -89,7 +89,7 @@ export default async function AdminUsersPage({
       {rows.length === PAGE_SIZE && (
         <a
           href={`/admin/users?${nextParams.toString()}`}
-          className="text-center text-[15px] text-[var(--color-primary)] font-medium py-2"
+          className="text-center text-[15px] text-[var(--color-primary-text)] font-medium py-2"
         >
           Cargar más
         </a>

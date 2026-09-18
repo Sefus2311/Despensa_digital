@@ -52,7 +52,7 @@ export function PendingInvitations({ invitations }: { invitations: Invitation[] 
             </button>
           </div>
           {errorFor?.id === inv.id && (
-            <p role="alert" className="text-[15px] text-[var(--color-danger)] mt-2">
+            <p role="alert" className="text-[15px] text-[var(--color-danger-text)] mt-2">
               {errorFor.message}
             </p>
           )}

@@ -35,7 +35,7 @@ export default async function AdminInterpreterConflictsPage() {
         </p>
       </header>
 
-      {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudieron cargar los conflictos.</p>}
+      {error && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudieron cargar los conflictos.</p>}
       {!error && groups.size === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin conflictos abiertos.</p>}
 
       <div className="flex flex-col gap-4">

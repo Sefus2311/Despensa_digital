@@ -64,7 +64,7 @@ export function AliasRow({
                 <button
                   type="button"
                   onClick={() => setPanelMode("view")}
-                  className="w-full rounded-md px-2 py-2 text-[15px] text-left hover:bg-neutral-50"
+                  className="w-full rounded-md px-2 py-2 text-[15px] text-left hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
                 >
                   Ver / Revisar
                 </button>
@@ -75,7 +75,7 @@ export function AliasRow({
                     <button
                       type="button"
                       onClick={() => setPanelMode("edit")}
-                      className="w-full rounded-md px-2 py-2 text-[15px] text-left hover:bg-neutral-50"
+                      className="w-full rounded-md px-2 py-2 text-[15px] text-left hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
                     >
                       Editar
                     </button>
@@ -84,7 +84,7 @@ export function AliasRow({
                     <button
                       type="button"
                       onClick={() => setPanelMode("delete")}
-                      className="w-full rounded-md px-2 py-2 text-[15px] text-left text-[var(--color-danger)] hover:bg-neutral-50"
+                      className="w-full rounded-md px-2 py-2 text-[15px] text-left text-[var(--color-danger-text)] hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
                     >
                       Eliminar
                     </button>
@@ -98,7 +98,7 @@ export function AliasRow({
                     <button
                       type="submit"
                       disabled={restorePending}
-                      className="w-full rounded-md px-2 py-2 text-[15px] text-left hover:bg-neutral-50 disabled:opacity-60"
+                      className="w-full rounded-md px-2 py-2 text-[15px] text-left hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] disabled:opacity-60"
                     >
                       Restaurar
                     </button>
@@ -113,7 +113,7 @@ export function AliasRow({
           <div className="flex gap-3 text-[15px] text-[var(--color-muted)]">
             {confidenceScore != null && <span>{Math.round(confidenceScore * 100)}% confianza</span>}
             <span>{timesConfirmed} confirmaciones</span>
-            {deleted && <span className="text-[var(--color-danger)]">Eliminado</span>}
+            {deleted && <span className="text-[var(--color-danger-text)]">Eliminado</span>}
           </div>
           <form action={activeFormAction} onChange={(e) => e.currentTarget.requestSubmit()}>
             <input type="hidden" name="alias_id" value={aliasId} />
@@ -125,12 +125,12 @@ export function AliasRow({
         </div>
 
         {activeState?.error && (
-          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+          <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
             {activeState.error}
           </p>
         )}
         {restoreState?.error && (
-          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+          <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
             {restoreState.error}
           </p>
         )}

@@ -99,7 +99,7 @@ export default async function AdminProductsPage({
       <div>
         <h2 className="text-[15px] font-semibold mb-2">Productos canónicos</h2>
         <Card className="divide-y divide-neutral-100">
-          {canonicalError && <p className="text-[15px] text-[var(--color-danger)]">No se pudieron cargar.</p>}
+          {canonicalError && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudieron cargar.</p>}
           {!canonicalError && (canonicalProducts ?? []).length === 0 && (
             <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>
           )}
@@ -120,7 +120,7 @@ export default async function AdminProductsPage({
       <div>
         <h2 className="text-[15px] font-semibold mb-2">Productos de tienda</h2>
         <Card className="divide-y divide-neutral-100">
-          {retailerError && <p className="text-[15px] text-[var(--color-danger)]">No se pudieron cargar.</p>}
+          {retailerError && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudieron cargar.</p>}
           {!retailerError && (retailerProducts ?? []).length === 0 && (
             <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>
           )}

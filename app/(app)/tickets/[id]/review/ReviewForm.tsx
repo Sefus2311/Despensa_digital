@@ -84,7 +84,7 @@ export function ReviewForm({
             name="store_name"
             defaultValue={initialStoreName}
             placeholder="Mercadona, Carrefour..."
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+            className="ui-field__input mt-1"
           />
         </div>
         <div className="flex gap-3">
@@ -97,7 +97,7 @@ export function ReviewForm({
               name="purchase_date"
               type="date"
               defaultValue={initialPurchaseDate}
-              className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+              className="ui-field__input mt-1"
             />
           </div>
           <div className="flex-1">
@@ -111,7 +111,7 @@ export function ReviewForm({
               step="0.01"
               inputMode="decimal"
               defaultValue={initialTotalAmount}
-              className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+              className="ui-field__input mt-1"
             />
           </div>
         </div>
@@ -194,7 +194,7 @@ export function ReviewForm({
             <button
               type="button"
               onClick={() => removeItem(index)}
-              className="self-end text-[15px] text-[var(--color-danger)] font-medium py-1"
+              className="self-end text-[15px] text-[var(--color-danger-text)] font-medium py-1"
             >
               Eliminar línea
             </button>
@@ -204,7 +204,7 @@ export function ReviewForm({
         <button
           type="button"
           onClick={addItem}
-          className="w-full rounded-xl border border-dashed border-neutral-300 py-3 text-[15px] font-medium text-[var(--color-primary)]"
+          className="w-full rounded-xl border border-dashed border-[var(--color-border)] py-3 text-[15px] font-medium text-[var(--color-primary-text)]"
         >
           + Añadir producto
         </button>
@@ -213,7 +213,7 @@ export function ReviewForm({
       <input type="hidden" name="items_json" value={JSON.stringify(items)} />
 
       {state?.error && (
-        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+        <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
           {state.error}
         </p>
       )}

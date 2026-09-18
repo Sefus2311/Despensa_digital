@@ -28,7 +28,7 @@ export default function LoginPage() {
             type="email"
             autoComplete="email"
             required
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+            className="ui-field__input mt-1"
           />
         </div>
 
@@ -42,12 +42,12 @@ export default function LoginPage() {
             type="password"
             autoComplete="current-password"
             required
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+            className="ui-field__input mt-1"
           />
         </div>
 
         {state?.error && (
-          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+          <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
             {state.error}
           </p>
         )}
@@ -62,7 +62,7 @@ export default function LoginPage() {
       </form>
 
       <div className="mt-6 flex flex-col gap-2 text-[15px] text-center">
-        <Link href="/register" className="text-[var(--color-primary)] font-medium">
+        <Link href="/register" className="text-[var(--color-primary-text)] font-medium">
           Crear una cuenta
         </Link>
         <Link href="/recuperar" className="text-[var(--color-muted)]">

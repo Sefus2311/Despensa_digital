@@ -13,7 +13,7 @@ export function ReceiptImage({ src, isPdf }: { src: string; isPdf: boolean }) {
         href={src}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-4 text-[15px] font-medium text-[var(--color-primary)]"
+        className="flex items-center gap-2 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-4 text-[15px] font-medium text-[var(--color-primary-text)]"
       >
         <Icon name="documentos" size={22} />
         Ver PDF del ticket

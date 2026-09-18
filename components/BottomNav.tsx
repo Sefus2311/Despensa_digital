@@ -40,7 +40,7 @@ export function BottomNav() {
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
                   className={`flex flex-col items-center justify-center gap-1 py-3 text-[15px] font-medium ${
-                    active ? "text-[var(--color-primary)]" : "text-[var(--color-muted)]"
+                    active ? "text-[var(--color-primary-text)]" : "text-[var(--color-muted)]"
                   }`}
                 >
                   <Icon name={tab.icon} size={22} />

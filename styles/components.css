@@ -58,11 +58,11 @@
   text-underline-offset: 5px;
 }
 .ui-button--secondary:hover:not(:disabled) {
-  color: var(--color-primary);
+  color: var(--color-primary-text);
 }
 
 .ui-button--destructive {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   background: var(--color-surface);
   border-color: var(--color-danger);
 }
@@ -112,7 +112,7 @@
   color: var(--color-text);
 }
 .ui-field__required {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 .ui-field__input {
   inline-size: 100%;
@@ -145,7 +145,7 @@
 }
 .ui-field__error {
   font: 600 15px/1.4 var(--font-ui);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   margin: 0;
 }
 .ui-field__input::placeholder,
@@ -198,22 +198,22 @@
   background: var(--color-background);
 }
 .ui-badge--success {
-  color: var(--color-success);
-  background: color-mix(in srgb, var(--color-success) 12%, white);
+  color: var(--color-success-text);
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
 }
 .ui-badge--warning {
-  color: var(--color-warning);
-  background: color-mix(in srgb, var(--color-warning) 12%, white);
+  color: var(--color-warning-text);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
 }
 .ui-badge--danger {
-  color: var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger) 12%, white);
+  color: var(--color-danger-text);
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
 }
 .ui-badge--primary {
   /* Verde de acento con moderación: solo el tinte de fondo de una etiqueta
      pequeña, nunca como color dominante (ver tokens.css). */
-  color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary-accent) 35%, white);
+  color: var(--color-primary-text);
+  background: color-mix(in srgb, var(--color-primary-accent) 35%, var(--color-surface));
 }
 
 /* --- Card --- */
@@ -236,7 +236,7 @@
    intérprete) — misma receta color-mix() que .ui-badge--warning/.ui-alert--warning,
    para no reintroducir un hex ámbar suelto. */
 .ui-card--warning-tint {
-  background: color-mix(in srgb, var(--color-warning) 12%, white);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
 }
 
 /* --- Modal / Dialog --- */
@@ -347,19 +347,19 @@
   color: var(--color-text);
 }
 .ui-alert--warning {
-  background: color-mix(in srgb, var(--color-warning) 12%, white);
-  border-color: color-mix(in srgb, var(--color-warning) 35%, white);
-  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-warning) 35%, var(--color-surface));
+  color: var(--color-warning-text);
 }
 .ui-alert--danger {
-  background: color-mix(in srgb, var(--color-danger) 12%, white);
-  border-color: color-mix(in srgb, var(--color-danger) 35%, white);
-  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-surface));
+  color: var(--color-danger-text);
 }
 .ui-alert--success {
-  background: color-mix(in srgb, var(--color-success) 12%, white);
-  border-color: color-mix(in srgb, var(--color-success) 35%, white);
-  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-success) 35%, var(--color-surface));
+  color: var(--color-success-text);
 }
 
 /* --- Table --- */

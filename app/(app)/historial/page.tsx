@@ -31,8 +31,8 @@ interface SpendingSummaryRow {
 }
 
 const ARROW_BASE = "w-11 h-11 flex items-center justify-center text-lg leading-none rounded-md";
-const ARROW_ENABLED = `${ARROW_BASE} text-[var(--color-primary)] hover:bg-neutral-50`;
-const ARROW_DISABLED = `${ARROW_BASE} text-neutral-300`;
+const ARROW_ENABLED = `${ARROW_BASE} text-[var(--color-primary-text)] hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]`;
+const ARROW_DISABLED = `${ARROW_BASE} text-[var(--color-muted)] opacity-50`;
 
 function SpendingStat({
   label,

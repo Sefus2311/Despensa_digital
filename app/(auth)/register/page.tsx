@@ -28,7 +28,7 @@ export default function RegisterPage() {
             type="text"
             autoComplete="name"
             required
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+            className="ui-field__input mt-1"
           />
         </div>
 
@@ -42,7 +42,7 @@ export default function RegisterPage() {
             type="email"
             autoComplete="email"
             required
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+            className="ui-field__input mt-1"
           />
         </div>
 
@@ -57,13 +57,13 @@ export default function RegisterPage() {
             autoComplete="new-password"
             minLength={8}
             required
-            className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
+            className="ui-field__input mt-1"
           />
           <p className="mt-1 text-[15px] text-[var(--color-muted)]">Mínimo 8 caracteres.</p>
         </div>
 
         {state?.error && (
-          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+          <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
             {state.error}
           </p>
         )}
@@ -79,7 +79,7 @@ export default function RegisterPage() {
 
       <div className="mt-6 text-[15px] text-center">
         <span className="text-[var(--color-muted)]">¿Ya tienes cuenta? </span>
-        <Link href="/login" className="text-[var(--color-primary)] font-medium">
+        <Link href="/login" className="text-[var(--color-primary-text)] font-medium">
           Entra
         </Link>
       </div>

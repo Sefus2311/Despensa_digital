@@ -55,6 +55,18 @@
      brillo manteniendo el mismo matiz -> 4.64:1 (decisión 2026-09-18). */
   --color-danger: #b65a3f;
 
+  /* Variantes de TEXTO de primary/danger/warning/success — distintas de
+     los tokens base porque estos también se usan como fondo sólido con
+     texto blanco encima (botones): aclarar el tono ayuda al texto sobre
+     --color-surface oscuro (ver bloque dark más abajo) pero perjudicaría
+     el contraste del texto blanco sobre el botón. En claro son idénticas
+     a la base; solo divergen en dark mode. Usar siempre estas variantes
+     para `color`/texto, y las bases para fondo/borde. */
+  --color-primary-text: var(--color-primary);
+  --color-danger-text: var(--color-danger);
+  --color-warning-text: var(--color-warning);
+  --color-success-text: var(--color-primary-text);
+
   /* Radios */
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -69,12 +81,16 @@
   --spacing-xl: 32px;
 
   /* Elevación — sombras suaves y discretas, tintadas con el propio
-     --color-text (no negro puro). Blur/opacidad bajos a propósito: nada de
-     efectos exagerados (decisión 2026-09-18, sustituye la fórmula anterior
-     copiada de RealMargin, más marcada). */
+     --color-text (no negro puro) vía color relativo (rgb(from ...)), para
+     que la sombra se adapte sola al modo oscuro: en claro --color-text es
+     oscuro y da una sombra normal; en oscuro --color-text es claro y el
+     mismo cálculo da un halo tenue en vez de "negro sobre negro"
+     invisible (decisión 2026-09-18, sustituye la fórmula anterior copiada
+     de RealMargin, que era un rgba() fijo y no se adaptaba). Blur/opacidad
+     bajos a propósito: nada de efectos exagerados. */
   --shadow-none: none;
-  --shadow-raised: 0 4px 12px rgba(32, 37, 31, 0.06);
-  --shadow-overlay: 0 12px 32px rgba(32, 37, 31, 0.14);
+  --shadow-raised: 0 4px 12px rgb(from var(--color-text) r g b / 0.06);
+  --shadow-overlay: 0 12px 32px rgb(from var(--color-text) r g b / 0.14);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -85,5 +101,16 @@
     --color-text: #ededed;
     --color-muted: #a3a3a3;
     --color-border: #262626;
+
+    /* Aclaradas ~10-15% de brillo manteniendo el matiz, para que el texto
+       en este color cumpla AA (>=4.5:1) sobre --color-surface oscuro
+       (#171717): en claro daban 4.58-4.64:1, en oscuro caían a 3.6-3.9:1
+       sin este ajuste (medido 2026-09-18). No se tocan los tokens base
+       --color-primary/--color-danger/--color-warning: esos siguen fijos
+       porque también son fondo sólido de botones con texto blanco encima,
+       y aclararlos ahí rompería ESE contraste en la otra dirección. */
+    --color-primary-text: #698c40;
+    --color-danger-text: #c86345;
+    --color-warning-text: #b97108;
   }
 }

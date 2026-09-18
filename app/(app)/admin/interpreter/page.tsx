@@ -123,7 +123,7 @@ export default async function AdminInterpreterPage({
       </Card>
 
       <Card className="divide-y divide-neutral-100">
-        {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudo cargar el diccionario.</p>}
+        {error && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudo cargar el diccionario.</p>}
         {!error && aliases.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>}
         {aliases.map((a) => (
           <AliasRow

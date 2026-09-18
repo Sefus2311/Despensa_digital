@@ -51,11 +51,11 @@ export default async function PerfilPage() {
       {(systemRole === "admin" || systemRole === "delegate") && (
         <Card className="flex flex-col gap-2">
           {systemRole === "admin" && (
-            <Link href="/admin" className="font-medium text-[var(--color-primary)]">
+            <Link href="/admin" className="font-medium text-[var(--color-primary-text)]">
               Administración
             </Link>
           )}
-          <Link href="/admin/interpreter" className="font-medium text-[var(--color-primary)]">
+          <Link href="/admin/interpreter" className="font-medium text-[var(--color-primary-text)]">
             Intérprete
           </Link>
         </Card>
@@ -64,7 +64,7 @@ export default async function PerfilPage() {
       <form action={logout}>
         <button
           type="submit"
-          className="w-full rounded-xl border border-[var(--color-danger)] text-[var(--color-danger)] py-3.5 font-medium active:scale-[0.98] transition-transform"
+          className="w-full rounded-xl border border-[var(--color-danger)] text-[var(--color-danger-text)] py-3.5 font-medium active:scale-[0.98] transition-transform"
         >
           Cerrar sesión
         </button>

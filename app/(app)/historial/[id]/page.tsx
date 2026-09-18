@@ -39,12 +39,12 @@ export default async function ReceiptDetailPage({
     <div className="flex flex-col gap-4">
       <header>
         <div className="flex items-center justify-between">
-          <Link href="/historial" className="text-[15px] text-[var(--color-primary)]">
+          <Link href="/historial" className="text-[15px] text-[var(--color-primary-text)]">
             ← Historial
           </Link>
           <Link
             href={`/tickets/${receipt.id}/review`}
-            className="flex items-center gap-1 text-[15px] font-medium text-[var(--color-primary)]"
+            className="flex items-center gap-1 text-[15px] font-medium text-[var(--color-primary-text)]"
           >
             <Icon name="editar" size={16} />
             Editar

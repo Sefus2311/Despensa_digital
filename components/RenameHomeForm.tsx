@@ -33,7 +33,7 @@ export function RenameHomeForm({
           type="button"
           onClick={() => setEditing(true)}
           aria-label="Renombrar casa"
-          className="text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+          className="text-[var(--color-muted)] hover:text-[var(--color-primary-text)]"
         >
           <Icon name="editar" size={16} />
         </button>
@@ -56,7 +56,7 @@ export function RenameHomeForm({
           type="submit"
           disabled={pending}
           aria-label="Guardar nombre"
-          className="text-[var(--color-primary)]"
+          className="text-[var(--color-primary-text)]"
         >
           <Icon name="guardar" size={18} />
         </button>
@@ -70,7 +70,7 @@ export function RenameHomeForm({
         </button>
       </div>
       {state?.error && (
-        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+        <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
           {state.error}
         </p>
       )}

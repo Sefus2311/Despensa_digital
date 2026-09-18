@@ -32,7 +32,7 @@ export default async function AdminInterpreterPendingPage() {
         </p>
       </header>
 
-      {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudieron cargar las propuestas.</p>}
+      {error && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudieron cargar las propuestas.</p>}
       {!error && proposals.length === 0 && (
         <p className="text-[15px] text-[var(--color-muted)]">No hay propuestas pendientes.</p>
       )}

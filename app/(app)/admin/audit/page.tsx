@@ -47,7 +47,7 @@ export default async function AdminAuditPage() {
       </header>
 
       <Card className="divide-y divide-neutral-100">
-        {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudo cargar el registro.</p>}
+        {error && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudo cargar el registro.</p>}
         {!error && rows.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin actividad todavía.</p>}
         {rows.map((entry) => (
           <div key={entry.id} className="py-3 flex flex-col gap-1">

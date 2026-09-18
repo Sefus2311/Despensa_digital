@@ -40,7 +40,7 @@ export default function NewTicketPage() {
       <form action={formAction} className="flex flex-col gap-4">
         <label
           htmlFor="file"
-          className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface)] py-10 px-4 text-center active:bg-neutral-50"
+          className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface)] py-10 px-4 text-center active:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
         >
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -54,7 +54,7 @@ export default function NewTicketPage() {
               <span className="text-4xl" aria-hidden>
                 🧾
               </span>
-              <span className="font-medium text-[var(--color-primary)]">
+              <span className="font-medium text-[var(--color-primary-text)]">
                 {fileName ?? "Toca para fotografiar o subir"}
               </span>
               <span className="text-[15px] text-[var(--color-muted)]">
@@ -77,7 +77,7 @@ export default function NewTicketPage() {
         />
 
         {state?.error && (
-          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+          <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
             {state.error}
           </p>
         )}

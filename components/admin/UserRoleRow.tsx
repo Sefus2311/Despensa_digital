@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Badge } from "@/components/ui/Badge";
 import { changeUserRoleAction, type ChangeUserRoleState } from "@/app/(app)/admin/users/actions";
 import type { SystemRole } from "@/lib/types/database";
 
@@ -29,7 +30,7 @@ export function UserRoleRow({
           <p className="font-medium truncate">{displayName || email}</p>
           <p className="text-[15px] text-[var(--color-muted)] truncate">{email}</p>
         </div>
-        <span className="text-[15px] rounded-full bg-neutral-100 px-2 py-1 shrink-0">{role}</span>
+        <Badge tone="neutral" className="shrink-0">{role}</Badge>
       </div>
       <p className="text-[15px] text-[var(--color-muted)]">
         Alta: {new Date(createdAt).toLocaleDateString("es-ES")}
@@ -64,11 +65,11 @@ export function UserRoleRow({
       </form>
 
       {state?.error && (
-        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
+        <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">
           {state.error}
         </p>
       )}
-      {state?.success && <p className="text-[15px] text-green-700">{state.success}</p>}
+      {state?.success && <p className="text-[15px] text-[var(--color-success-text)]">{state.success}</p>}
     </div>
   );
 }

@@ -124,9 +124,16 @@ Reglas derivadas de las dos anteriores, ya aplicadas en el código:
 | `--color-success` | `= --color-primary` | — | Confirmaciones (mismo verde, sin token propio) |
 | `--color-warning` | `#a16207` | — | Avisos de caducidad, riesgo, badges/alerts/cards de "pendiente"/"conflicto" |
 | `--color-danger` | `#b65a3f` | — | Errores, acciones destructivas (ver nota de contraste en §2) |
+| `--color-primary-text` | `= --color-primary` | `#698c40` | **Solo para `color` (texto)** de primary: enlaces, "Escanear"/etc. cuando van como texto, no como fondo |
+| `--color-danger-text` | `= --color-danger` | `#c86345` | **Solo para `color`** de danger: "Cerrar sesión", "Rechazar", errores |
+| `--color-warning-text` | `= --color-warning` | `#b97108` | **Solo para `color`** de warning: badges/alerts "pendiente"/"conflicto" |
+| `--color-success-text` | `= --color-primary-text` | `= --color-primary-text` | **Solo para `color`** de success |
 
-El modo oscuro solo redefine fondo/superficie/cabecera/texto/muted/borde vía `prefers-color-scheme: dark`; no
-hay toggle manual ni se ha revisado su lectura con la paleta nueva (ver §7).
+No hay toggle manual, solo `prefers-color-scheme: dark`. Fondo/superficie/cabecera/texto/muted/borde se
+redefinen directamente. `--color-primary`/`--color-danger`/`--color-warning` (las bases) **no** se redefinen
+en oscuro a propósito: también son el fondo sólido de sus botones con texto blanco encima, y aclararlas ahí
+rompería ese contraste. Por eso existen las variantes `-text` de arriba, que sí se aclaran en oscuro — usar
+siempre la variante `-text` para `color`/clases `text-*`, y la base para `background`/`border`.
 
 ### Tipografía
 
@@ -172,8 +179,8 @@ hay toggle manual ni se ha revisado su lectura con la paleta nueva (ver §7).
 | Token | Valor | Uso |
 |---|---|---|
 | `--shadow-none` | `none` | Cajas sin elevación explícita |
-| `--shadow-raised` | `0 4px 12px rgba(32, 37, 31, 0.06)` | Elevación por defecto de toda `<Card>` |
-| `--shadow-overlay` | `0 12px 32px rgba(32, 37, 31, 0.14)` | Modal, dropdown flotante |
+| `--shadow-raised` | `0 4px 12px rgb(from var(--color-text) r g b / 0.06)` | Elevación por defecto de toda `<Card>` |
+| `--shadow-overlay` | `0 12px 32px rgb(from var(--color-text) r g b / 0.14)` | Modal, dropdown flotante |
 
 Sombras suaves y discretas a propósito — tintadas con el propio `--color-text` (nunca negro puro), con blur y
 opacidad bajos. **Decisión 2026-09-18:** se suaviza la fórmula respecto a la que se copiaba antes de
@@ -183,6 +190,11 @@ aspecto más "premium" y menos pesado, y se generaliza a **todas las `<Card>` de
 para tarjetas de login/registro y su tarjeta de métrica protagonista. Pasar `elevation="none"` explícitamente
 cuando la caja necesita un borde con significado propio en vez de sombra (ver `components/PendingInvitations.tsx`,
 que resalta una invitación pendiente con un borde de color en vez de con sombra).
+
+**Resuelto 2026-09-18 — modo oscuro:** el valor se calcula con color relativo (`rgb(from var(--color-text) ...)`)
+en vez de un `rgba()` fijo, así que se adapta solo: en claro `--color-text` es oscuro y da una sombra normal;
+en oscuro es claro y el mismo cálculo da un halo tenue en vez de "negro sobre negro" invisible sobre
+`--color-background: #0a0a0a`.
 
 ## 4. Componentes visuales
 
@@ -224,9 +236,12 @@ Foco visible en los tres: `outline: 3px solid var(--color-focus)`.
 ### Badges y alerts (`.ui-badge`, `.ui-alert`)
 
 Los cinco/cuatro tonos (`neutral/success/warning/danger/primary` y `info/warning/danger/success`) tiñen su
-fondo con `color-mix(in srgb, <token semántico> 12%, white)` (35% para el borde de los alerts) en vez de hex
-sueltos — así el fondo siempre sigue el color del token, incluida `--color-primary-accent` en el caso concreto
-de `.ui-badge--primary` (ver §2, "verde de acento").
+fondo con `color-mix(in srgb, <token semántico> 12%, var(--color-surface))` (35% para el borde de los alerts)
+en vez de hex sueltos — así el fondo siempre sigue el color del token, incluida `--color-primary-accent` en el
+caso concreto de `.ui-badge--primary` (ver §2, "verde de acento"). Se mezcla con `--color-surface`, no con
+`white` a secas (fix 2026-09-18): en oscuro `--color-surface` es `#171717`, así que el tinte sale oscuro en
+vez de un chip pastel claro fuera de lugar sobre una página oscura. El texto de cada tono usa la variante
+`-text` correspondiente (ver §3), no el token base.
 
 ### Navegación activa (`BottomNav`, `AppHeader`)
 
@@ -250,9 +265,8 @@ origen de cada icono y uso: ver `components/icons/README.md` — no se duplica a
 - Foco: outline de `--color-focus`, 3px, con offset — nunca solo cambio de color de fondo.
 - Ningún estado depende solo del color: badges y alerts llevan siempre texto, no solo tinte; las acciones
   destructivas llevan además la palabra "Eliminar"/similar, no solo el terracota.
-- `--color-danger` (`#d66a4a`) se eligió deliberadamente menos saturado que un rojo puro; si en el futuro se
-  detecta que el contraste texto/fondo no llega a AA en algún componente concreto, es deuda a corregir con
-  prioridad (ver §7).
+- `--color-danger` (`#b65a3f`) se eligió deliberadamente menos saturado que un rojo puro, ya ajustado a AA
+  (ver §2). En modo oscuro se usa `--color-danger-text` (más claro) para el texto, no la base — ver §3.
 - `prefers-reduced-motion` respetado en las animaciones existentes (spinner de `.ui-button`).
 
 ## 7. Relación con RealMargin — qué se copió y qué no
@@ -284,9 +298,22 @@ origen de cada icono y uso: ver `components/icons/README.md` — no se duplica a
    `<img>` (no pueden ser un `Card`: uno es un enlace, la otra una imagen suelta) pasaron a
    `bg-[var(--color-surface)]`/`border-[var(--color-border)]`. Mismo token swap en el dropzone de
    `tickets/new`.
-5. El modo oscuro solo cubre fondo/superficie/cabecera/texto/borde; no se ha comprobado si las sombras
-   (tintadas con `--color-text` claro) siguen leyéndose bien sobre superficies oscuras, ni si merece una
-   variante de header oscuro distinta de `--color-surface`.
+5. ~~Modo oscuro sin revisar con la paleta nueva~~ — **Resuelto 2026-09-18**, medido con la misma fórmula
+   WCAG de §2, no solo comprobado a ojo:
+   - Sombra: pasó de `rgba()` fijo a color relativo (`rgb(from var(--color-text) ...)`, ver §3) — ya no
+     desaparece sobre `--color-background` oscuro.
+   - `--color-primary`/`--color-danger`/`--color-warning` como texto sobre `--color-surface` oscuro
+     (`#171717`) daban 3.6–3.9:1, por debajo de AA — se añadieron las variantes `-text` (§3), ~10-15% más
+     claras solo en oscuro, que dan 4.55–4.63:1. Las bases no se tocan porque también son fondo de botón con
+     texto blanco encima (ese contraste ya era ajustado, 4.58:1 en claro; aclarar la base lo habría roto).
+   - Fondos tintados de badge/alert mezclaban con `white` literal (ver §4) — en oscuro salía un chip pastel
+     claro sobre página oscura. Ahora mezclan con `--color-surface`, que ya es oscuro en ese modo.
+   - De paso se tokenizaron 3 mensajes de éxito en `text-green-700` (ahora `--color-success-text`), el badge
+     de rol en `bg-neutral-100` (ahora `<Badge tone="neutral">`), los `<input>` principales de
+     `login`/`register`/`recuperar`/`ReviewForm` en `border-neutral-300` (ahora `.ui-field__input`), y el
+     tinte `hover:bg-neutral-50` de menús/dropdowns (ahora `color-mix()` sobre `--color-text`, para no
+     destellar claro sobre superficie oscura). Se mantiene sin tocar `--color-header` en oscuro
+     (`#171717`, igual que `--color-surface`): sin datos de que necesite un tono propio distinto.
 6. ~~Contraste de `--color-danger` por debajo de AA para texto normal~~ — **Resuelto 2026-09-18.** El
    terracota de referencia (`#d66a4a`, 3.49:1 sobre blanco) se oscureció un 15% de brillo manteniendo el
    matiz → `#b65a3f`, 4.64:1 (ver nota de accesibilidad en §2). El resto de la paleta ya cumplía AA con
