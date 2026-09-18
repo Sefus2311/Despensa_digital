@@ -35,12 +35,14 @@ export default async function InicioPage() {
         </p>
       </Card>
 
-      <Card>
-        <h2 className="font-medium mb-1">¿Qué puedo cocinar?</h2>
-        <p className="text-[15px] text-[var(--color-muted)]">
-          Cuando conozcamos mejor tu despensa podremos proponerte comidas.
-        </p>
-      </Card>
+      <Link href="/recetas">
+        <Card>
+          <h2 className="font-medium mb-1">¿Qué puedo cocinar?</h2>
+          <p className="text-[15px] text-[var(--color-muted)]">
+            Consulta tus recetas y comprueba qué puedes cocinar con tu despensa.
+          </p>
+        </Card>
+      </Link>
 
       <Link href="/despensa">
         <Card>

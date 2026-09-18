@@ -21,9 +21,8 @@ npm run dev      # start dev server (Next.js, Turbopack)
 npm run build    # production build
 npm run start    # run production build
 npm run lint     # eslint
+npm run test     # vitest — pure-logic unit tests under lib/*.test.ts
 ```
-
-There is no test suite configured yet.
 
 Database schema changes go in `supabase/migrations/*.sql`, applied via the Supabase CLI or dashboard
 (no local Supabase CLI config is checked in — check with the user how migrations are applied to their project).
@@ -36,9 +35,11 @@ Next.js 16 (App Router, Server Components + Server Actions), React 19, Tailwind 
 
 ### Route groups
 - `app/(auth)/` — `/login`, `/register`, `/recuperar` (password reset). Public.
-- `app/(app)/` — `/inicio`, `/despensa`, `/historial`, `/perfil`, `/tickets/*`. Private, wrapped in
-  a shared layout (`app/(app)/layout.tsx`) with a header (`components/AppHeader.tsx`, home switcher)
-  and a bottom tab bar (`components/BottomNav.tsx`).
+- `app/(app)/` — `/inicio`, `/despensa`, `/historial`, `/perfil`, `/tickets/*`, `/recetas/*`,
+  `/lista-compra`. Private, wrapped in a shared layout (`app/(app)/layout.tsx`) with a header
+  (`components/AppHeader.tsx`, home switcher) and a bottom tab bar (`components/BottomNav.tsx`).
+  `/recetas` and `/lista-compra` are reachable only via the "¿Qué puedo cocinar?" card on `/inicio` and
+  from within the recipe flow — not in `BottomNav` (no free slot after the floating camera button).
 - Route names are in Spanish (e.g. `despensa` = pantry, `historial` = history, `perfil` = profile,
   `recuperar` = recover). Follow this convention for new routes.
 
@@ -92,7 +93,10 @@ shared read/insert catalog for any authenticated user, not scoped to a home. The
 Storage bucket `receipts`, with objects stored under `{home_id}/{filename}` and RLS policies mirroring
 table access. When adding new tables that hold domestic data, scope them by `home_id` (not `user_id`;
 keep `user_id`-style columns only for real attribution, e.g. `created_by`/`assigned_to`) and add
-equivalent RLS policies in the same migration style.
+equivalent RLS policies in the same migration style. **Exception:** `recetas` (see Recipes flow below)
+is scoped by `autor_id`, not `home_id` — a recipe belongs to its author, not a Casa, so it can be shared
+(public/friends) independently of where it was created; only the pantry-comparison step reads the active
+Casa, at query time, never a Casa stored on the recipe itself.
 
 `lib/types/database.ts` types are hand-written to match the migration, not generated — keep them in
 sync manually, or regenerate with `supabase gen types typescript` (noted in the file as a V0.2 TODO).
@@ -113,6 +117,20 @@ sync manually, or regenerate with `supabase gen types typescript` (noted in the 
    and keeping the most recent purchase — there's no real stock/quantity tracking yet; that's what
    `inventory_events` is reserved for in a later version.
 
+### Recipes flow (Fase 1)
+`recetas` / `receta_ingredientes` / `receta_pasos` / `shopping_list_items`
+(`supabase/migrations/0015_recetas.sql`) — see `docs/RECIPES_ARCHITECTURE.md` for the full model. Key
+points: `recetas` is scoped by `autor_id`, not `home_id` (see exception noted in Data model above);
+`receta_ingredientes.producto_id` references the same `canonical_products` catalog used by
+despensa/interpreter/receipts (nullable — an ingredient can be saved without a match; it's then always
+treated as missing and surfaced to admins on `/admin/products`); availability comparison
+(`lib/recipes.ts`: `classifyIngredient`/`summarizeAvailability`) always runs against the viewer's active
+Casa via `getCurrentUserAndHome()`. `shopping_list_items` (new — no shopping-list feature existed
+before this) is home-scoped like `receipts`; `add_to_shopping_list()` (SQL) is the single write path from
+both the recipe flow and the manual `/lista-compra` page, and merges into an existing unchecked line
+instead of duplicating. Visibility (`privada`/`amigos`/`publica`): `amigos` intentionally behaves like
+`privada` until a friends/relationships system exists — there is none today.
+
 ### System roles (platform-level, separate from home membership)
 `profiles.system_role` (`user` default / `delegate` / `admin`, see `supabase/migrations/0005_system_roles.sql`)
 controls platform-wide capabilities (moderating the global product interpreter, managing users) — it is
@@ -129,7 +147,8 @@ See `docs/ROLES_AND_PERMISSIONS.md` for the full model/permission matrix/first-a
 `docs/INTERPRETER_ARCHITECTURE.md` for the global product interpreter (`canonical_products` /
 `retailer_products` / `product_aliases` / `interpreter_proposals`, see
 `supabase/migrations/0006_interpreter_and_admin.sql`) — proposal submission/matching, approval
-(transactional, also resolves conflicts), rejection, and editing already-approved knowledge.
+(transactional, also resolves conflicts), rejection, and editing already-approved knowledge. See
+`docs/RECIPES_ARCHITECTURE.md` for the recipes module (Recipes flow above).
 
 ### Conventions
 - Server Actions return a `{ error?: string } | null` state shape and are driven by forms using

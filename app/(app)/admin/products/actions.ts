@@ -39,6 +39,40 @@ export async function updateCanonicalProductAction(
   return { success: "Producto normalizado actualizado." };
 }
 
+// Única vía para crear un producto canónico desde cero (antes solo se
+// creaban vía approve_interpreter_proposal) -- cierra el aviso de
+// "ingrediente de receta sin producto normalizado".
+export async function createCanonicalProductAction(
+  _prevState: ProductActionState,
+  formData: FormData
+): Promise<ProductActionState> {
+  if (!(await canModerateInterpreter())) {
+    return { error: "No autorizado." };
+  }
+
+  const canonicalName = String(formData.get("canonical_name") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim() || null;
+  const defaultUnit = String(formData.get("default_unit") ?? "").trim() || null;
+
+  if (!canonicalName) {
+    return { error: "Falta el nombre." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("create_canonical_product_admin", {
+    p_canonical_name: canonicalName,
+    p_category: category,
+    p_default_unit: defaultUnit,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/admin/products");
+  return { success: "Producto canónico creado." };
+}
+
 export async function updateRetailerProductAction(
   _prevState: ProductActionState,
   formData: FormData

@@ -1,8 +1,9 @@
 import { Card } from "@/components/Card";
 import { CanonicalProductRow } from "@/components/admin/CanonicalProductRow";
 import { RetailerProductRow } from "@/components/admin/RetailerProductRow";
+import { CreateCanonicalProductForm } from "@/components/admin/CreateCanonicalProductForm";
 import { createClient } from "@/lib/supabase/server";
-import type { CanonicalProduct, RetailerProduct } from "@/lib/types/database";
+import type { CanonicalProduct, RecetaIngrediente, RetailerProduct } from "@/lib/types/database";
 
 type SimilarProduct = { id: string; canonical_name: string; category: string | null; similarity: number };
 type RetailerProductRowShape = RetailerProduct & {
@@ -45,6 +46,20 @@ export default async function AdminProductsPage({
   if (dup) {
     const { data } = await supabase.rpc("find_similar_canonical_products", { p_name: dup, p_limit: 10 });
     similar = (data ?? []) as SimilarProduct[];
+  }
+
+  // Ingredientes de receta que se guardaron sin coincidencia en
+  // canonical_products (Recetas Fase 1, sección "aviso al admin") --
+  // agrupados por nombre para no repetir el mismo aviso muchas veces.
+  const { data: sinProductoData } = await supabase
+    .from("receta_ingredientes")
+    .select("nombre_mostrado")
+    .is("producto_id", null)
+    .limit(200);
+  const sinProductoCounts = new Map<string, number>();
+  for (const row of (sinProductoData ?? []) as Pick<RecetaIngrediente, "nombre_mostrado">[]) {
+    const key = row.nombre_mostrado.trim();
+    sinProductoCounts.set(key, (sinProductoCounts.get(key) ?? 0) + 1);
   }
 
   return (
@@ -95,6 +110,27 @@ export default async function AdminProductsPage({
           </div>
         )}
       </Card>
+
+      {sinProductoCounts.size > 0 && (
+        <div>
+          <h2 className="text-[15px] font-semibold mb-2">
+            Ingredientes de recetas sin producto normalizado ({sinProductoCounts.size})
+          </h2>
+          <Card className="flex flex-col divide-y divide-[var(--color-border)]">
+            {Array.from(sinProductoCounts.entries()).map(([nombre, count]) => (
+              <div key={nombre} className="py-3 flex flex-col gap-2">
+                <p className="text-[15px]">
+                  <span className="font-medium">{nombre}</span>{" "}
+                  <span className="text-[var(--color-muted)]">
+                    ({count} receta{count === 1 ? "" : "s"})
+                  </span>
+                </p>
+                <CreateCanonicalProductForm defaultName={nombre} />
+              </div>
+            ))}
+          </Card>
+        </div>
+      )}
 
       <div>
         <h2 className="text-[15px] font-semibold mb-2">Productos canónicos</h2>

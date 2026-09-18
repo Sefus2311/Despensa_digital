@@ -199,6 +199,68 @@ export interface InterpreterProposal {
   updated_at: string;
 }
 
+// ----------------------------------------------------------------------------
+// Recetas (supabase/migrations/0015_recetas.sql) — ver docs/RECIPES_ARCHITECTURE.md.
+// `recetas` no lleva home_id: es del autor, no de una Casa; la comprobación
+// de stock se hace en tiempo de consulta contra la Casa activa de quien
+// mira la receta, no contra una Casa fija guardada en ella.
+// ----------------------------------------------------------------------------
+
+export type RecetaVisibilidad = "privada" | "amigos" | "publica";
+export type RecetaEstado = "borrador" | "activa";
+
+export interface Receta {
+  id: string;
+  titulo: string;
+  descripcion: string | null;
+  raciones: number;
+  tiempo_preparacion_min: number | null;
+  tiempo_coccion_min: number | null;
+  autor_id: string;
+  visibilidad: RecetaVisibilidad;
+  estado: RecetaEstado;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecetaIngrediente {
+  id: string;
+  receta_id: string;
+  /** null = sin coincidencia en canonical_products todavía (ver nombre_mostrado). */
+  producto_id: string | null;
+  nombre_mostrado: string;
+  cantidad: number | null;
+  unidad: string | null;
+  opcional: boolean;
+  control_stock: boolean;
+  orden: number;
+  notas: string | null;
+}
+
+export interface RecetaPaso {
+  id: string;
+  receta_id: string;
+  numero: number;
+  texto: string;
+}
+
+// shopping_list_items (nueva: no existía ningún sistema de lista de la
+// compra en la app antes de Recetas Fase 1).
+export interface ShoppingListItem {
+  id: string;
+  home_id: string;
+  canonical_product_id: string | null;
+  display_name: string;
+  quantity: number | null;
+  unit: string | null;
+  is_checked: boolean;
+  source: "manual" | "receta";
+  source_receta_id: string | null;
+  added_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AdminAuditLogEntry {
   id: string;
   actor_user_id: string | null;
