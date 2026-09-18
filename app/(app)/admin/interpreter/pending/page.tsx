@@ -27,14 +27,14 @@ export default async function AdminInterpreterPendingPage() {
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-semibold font-display">Propuestas pendientes</h1>
-        <p className="text-sm text-neutral-500">
+        <p className="text-[15px] text-[var(--color-muted)]">
           Ordenadas por conflictos, confirmaciones, confianza IA y antigüedad.
         </p>
       </header>
 
-      {error && <p className="text-sm text-red-600">No se pudieron cargar las propuestas.</p>}
+      {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudieron cargar las propuestas.</p>}
       {!error && proposals.length === 0 && (
-        <p className="text-sm text-neutral-500">No hay propuestas pendientes.</p>
+        <p className="text-[15px] text-[var(--color-muted)]">No hay propuestas pendientes.</p>
       )}
 
       <div className="flex flex-col gap-3">

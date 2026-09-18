@@ -32,12 +32,12 @@ export default async function AdminLayout({
 
   return (
     <div className="flex flex-col gap-4">
-      <nav className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 text-sm">
+      <nav className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 text-[15px]">
         {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="shrink-0 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-neutral-600 whitespace-nowrap"
+            className="shrink-0 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-[var(--color-muted)] whitespace-nowrap"
           >
             {link.label}
           </Link>

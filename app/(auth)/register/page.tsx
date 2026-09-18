@@ -13,13 +13,13 @@ export default function RegisterPage() {
   return (
     <main className="min-h-dvh flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
       <h1 className="text-2xl font-semibold font-display mb-1">Crea tu cuenta</h1>
-      <p className="text-neutral-500 mb-8">
+      <p className="text-[var(--color-muted)] mb-8">
         En menos de un minuto empiezas a fotografiar tickets.
       </p>
 
       <form action={formAction} className="flex flex-col gap-4">
         <div>
-          <label htmlFor="display_name" className="text-sm font-medium">
+          <label htmlFor="display_name" className="ui-field__label">
             Nombre
           </label>
           <input
@@ -33,7 +33,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="email" className="text-sm font-medium">
+          <label htmlFor="email" className="ui-field__label">
             Email
           </label>
           <input
@@ -47,7 +47,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label htmlFor="password" className="text-sm font-medium">
+          <label htmlFor="password" className="ui-field__label">
             Contraseña
           </label>
           <input
@@ -59,11 +59,11 @@ export default function RegisterPage() {
             required
             className="mt-1 w-full rounded-xl border border-neutral-300 px-4 py-3 text-base"
           />
-          <p className="mt-1 text-[15px] text-neutral-500">Mínimo 8 caracteres.</p>
+          <p className="mt-1 text-[15px] text-[var(--color-muted)]">Mínimo 8 caracteres.</p>
         </div>
 
         {state?.error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
             {state.error}
           </p>
         )}
@@ -71,15 +71,15 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 w-full rounded-xl bg-teal-700 text-white py-3.5 font-medium active:scale-[0.98] transition-transform disabled:opacity-60"
+          className="mt-2 w-full rounded-xl bg-[var(--color-primary)] text-white py-3.5 font-medium active:scale-[0.98] transition-transform disabled:opacity-60"
         >
           {pending ? "Creando cuenta..." : "Crear cuenta"}
         </button>
       </form>
 
-      <div className="mt-6 text-sm text-center">
-        <span className="text-neutral-500">¿Ya tienes cuenta? </span>
-        <Link href="/login" className="text-teal-700 font-medium">
+      <div className="mt-6 text-[15px] text-center">
+        <span className="text-[var(--color-muted)]">¿Ya tienes cuenta? </span>
+        <Link href="/login" className="text-[var(--color-primary)] font-medium">
           Entra
         </Link>
       </div>

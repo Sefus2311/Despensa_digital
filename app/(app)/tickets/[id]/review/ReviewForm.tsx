@@ -67,7 +67,7 @@ export function ReviewForm({
         <h1 className="text-2xl font-semibold font-display">
           {isEditing ? "Editar ticket" : "Revisar ticket"}
         </h1>
-        <p className="text-sm text-neutral-500 mt-1">
+        <p className="text-[15px] text-[var(--color-muted)] mt-1">
           Comprueba los datos y ajusta los productos antes de guardar.
         </p>
       </header>
@@ -76,7 +76,7 @@ export function ReviewForm({
 
       <Card className="flex flex-col gap-3">
         <div>
-          <label htmlFor="store_name" className="text-sm font-medium">
+          <label htmlFor="store_name" className="ui-field__label">
             Supermercado
           </label>
           <input
@@ -89,7 +89,7 @@ export function ReviewForm({
         </div>
         <div className="flex gap-3">
           <div className="flex-1">
-            <label htmlFor="purchase_date" className="text-sm font-medium">
+            <label htmlFor="purchase_date" className="ui-field__label">
               Fecha
             </label>
             <input
@@ -101,7 +101,7 @@ export function ReviewForm({
             />
           </div>
           <div className="flex-1">
-            <label htmlFor="total_amount" className="text-sm font-medium">
+            <label htmlFor="total_amount" className="ui-field__label">
               Total (€)
             </label>
             <input
@@ -127,11 +127,11 @@ export function ReviewForm({
               value={item.rawName}
               onChange={(e) => updateItem(index, { rawName: e.target.value })}
               placeholder="Ej. YOG GRIE NAT H 6U"
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm font-medium"
+              className="ui-field__input font-medium"
             />
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-[15px] text-neutral-500">Cantidad</label>
+                <label className="text-[15px] text-[var(--color-muted)]">Cantidad</label>
                 <input
                   type="number"
                   step="0.01"
@@ -140,24 +140,24 @@ export function ReviewForm({
                   onChange={(e) =>
                     updateItem(index, { quantity: Number(e.target.value) })
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                  className="ui-field__input"
                 />
               </div>
               <div className="flex-1">
-                <label className="text-[15px] text-neutral-500">Unidad</label>
+                <label className="text-[15px] text-[var(--color-muted)]">Unidad</label>
                 <input
                   value={item.unit ?? ""}
                   onChange={(e) =>
                     updateItem(index, { unit: e.target.value || null })
                   }
                   placeholder="uds, kg..."
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                  className="ui-field__input"
                 />
               </div>
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-[15px] text-neutral-500">
+                <label className="text-[15px] text-[var(--color-muted)]">
                   Precio unidad (€)
                 </label>
                 <input
@@ -170,11 +170,11 @@ export function ReviewForm({
                       unitPrice: e.target.value ? Number(e.target.value) : null,
                     })
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                  className="ui-field__input"
                 />
               </div>
               <div className="flex-1">
-                <label className="text-[15px] text-neutral-500">Importe (€)</label>
+                <label className="text-[15px] text-[var(--color-muted)]">Importe (€)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -187,14 +187,14 @@ export function ReviewForm({
                         : null,
                     })
                   }
-                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+                  className="ui-field__input"
                 />
               </div>
             </div>
             <button
               type="button"
               onClick={() => removeItem(index)}
-              className="self-end text-sm text-red-600 font-medium py-1"
+              className="self-end text-[15px] text-[var(--color-danger)] font-medium py-1"
             >
               Eliminar línea
             </button>
@@ -204,7 +204,7 @@ export function ReviewForm({
         <button
           type="button"
           onClick={addItem}
-          className="w-full rounded-xl border border-dashed border-neutral-300 py-3 text-sm font-medium text-teal-700"
+          className="w-full rounded-xl border border-dashed border-neutral-300 py-3 text-[15px] font-medium text-[var(--color-primary)]"
         >
           + Añadir producto
         </button>
@@ -213,7 +213,7 @@ export function ReviewForm({
       <input type="hidden" name="items_json" value={JSON.stringify(items)} />
 
       {state?.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
           {state.error}
         </p>
       )}
@@ -221,7 +221,7 @@ export function ReviewForm({
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-xl bg-teal-700 text-white py-3.5 font-medium active:scale-[0.98] transition-transform disabled:opacity-60"
+        className="w-full rounded-xl bg-[var(--color-primary)] text-white py-3.5 font-medium active:scale-[0.98] transition-transform disabled:opacity-60"
       >
         {pending ? "Guardando..." : "Guardar compra"}
       </button>

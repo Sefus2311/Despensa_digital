@@ -41,23 +41,23 @@ export default async function AdminAuditPage() {
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-semibold font-display">Auditoría</h1>
-        <p className="text-sm text-neutral-500">
+        <p className="text-[15px] text-[var(--color-muted)]">
           Actividad administrativa reciente. No incluye datos privados de Casas.
         </p>
       </header>
 
       <Card className="divide-y divide-neutral-100">
-        {error && <p className="text-sm text-red-600">No se pudo cargar el registro.</p>}
-        {!error && rows.length === 0 && <p className="text-sm text-neutral-500">Sin actividad todavía.</p>}
+        {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudo cargar el registro.</p>}
+        {!error && rows.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin actividad todavía.</p>}
         {rows.map((entry) => (
           <div key={entry.id} className="py-3 flex flex-col gap-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-sm">{ACTION_LABELS[entry.action] ?? entry.action}</span>
-              <span className="text-[15px] text-neutral-400">
+              <span className="font-medium text-[15px]">{ACTION_LABELS[entry.action] ?? entry.action}</span>
+              <span className="text-[15px] text-[var(--color-muted)]">
                 {new Date(entry.created_at).toLocaleString("es-ES")}
               </span>
             </div>
-            <p className="text-[15px] text-neutral-500">
+            <p className="text-[15px] text-[var(--color-muted)]">
               {entry.actor_user_id ? actorMap.get(entry.actor_user_id) ?? entry.actor_user_id : "—"}
               {entry.target_type && ` · ${entry.target_type}`}
             </p>

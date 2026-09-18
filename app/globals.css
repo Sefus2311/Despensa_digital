@@ -2,28 +2,19 @@
 @import "../styles/tokens.css";
 @import "../styles/components.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Nada de --background/--foreground duplicados: el fondo y el texto de la
+   app tienen un único origen, los tokens --color-background/--color-text
+   de tokens.css, consumidos directamente por la regla `body` de abajo.
+   (No hay utilidades Tailwind bg-background/text-foreground en uso, así
+   que no hace falta puentearlas aquí — solo tipografía). */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-ui);
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-text);
   font-family: var(--font-ui);
 }
 

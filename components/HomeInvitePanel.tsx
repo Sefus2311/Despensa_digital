@@ -61,7 +61,7 @@ export function HomeInvitePanel({
           </button>
         </div>
         {state?.error && (
-          <p role="alert" className="text-[15px] text-red-600">
+          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
             {state.error}
           </p>
         )}
@@ -72,14 +72,14 @@ export function HomeInvitePanel({
           {pendingInvitations.map((inv) => (
             <li
               key={inv.id}
-              className="flex items-center justify-between gap-2 text-sm text-neutral-500"
+              className="flex items-center justify-between gap-2 text-[15px] text-[var(--color-muted)]"
             >
               <span className="truncate">{inv.invited_email} · pendiente</span>
               <button
                 type="button"
                 disabled={isCancelling && cancellingId === inv.id}
                 onClick={() => handleCancel(inv.id)}
-                className="text-[15px] text-red-600 underline shrink-0"
+                className="text-[15px] text-[var(--color-danger)] underline shrink-0"
               >
                 Cancelar
               </button>

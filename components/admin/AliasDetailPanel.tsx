@@ -64,8 +64,8 @@ function formatDateTime(iso: string | null): string {
 function Field({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
   return (
     <div>
-      <dt className="text-[15px] text-neutral-400">{label}</dt>
-      <dd className={mono ? "font-mono text-sm" : "text-sm"}>{value || "—"}</dd>
+      <dt className="text-[15px] text-[var(--color-muted)]">{label}</dt>
+      <dd className={mono ? "font-mono text-[15px]" : "text-[15px]"}>{value || "—"}</dd>
     </div>
   );
 }
@@ -121,7 +121,7 @@ export function AliasDetailPanel({
 
   return (
     <Modal open onClose={onClose} title={title}>
-      {loading && <p className="text-sm text-neutral-500">Cargando…</p>}
+      {loading && <p className="text-[15px] text-[var(--color-muted)]">Cargando…</p>}
       {loadError && (
         <p role="alert" className="ui-field__error">
           {loadError}
@@ -208,13 +208,13 @@ function AliasViewSection({
       )}
 
       <div>
-        <h3 className="text-sm font-semibold mb-2">Historial</h3>
-        {history.length === 0 && <p className="text-sm text-neutral-500">Sin cambios registrados.</p>}
+        <h3 className="text-[15px] font-semibold mb-2">Historial</h3>
+        {history.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin cambios registrados.</p>}
         <ul className="flex flex-col gap-2">
           {history.map((h) => {
             const diffs = diffHistoryEntry(h);
             return (
-              <li key={h.id} className="text-[15px] text-neutral-600 border-l-2 border-[var(--color-border)] pl-2">
+              <li key={h.id} className="text-[15px] text-[var(--color-muted)] border-l-2 border-[var(--color-border)] pl-2">
                 <p>
                   <span className="font-medium">{CHANGE_LABELS[h.change_type]}</span>
                   {" · "}
@@ -392,11 +392,11 @@ function AliasDeleteConfirm({
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <input type="hidden" name="alias_id" value={detail.alias.id} />
-      <p className="text-sm">
+      <p className="text-[15px]">
         ¿Seguro que quieres eliminar este registro del Intérprete? Dejará de usarse para interpretar
         tickets nuevos, pero se conserva en la base de datos y puede restaurarse.
       </p>
-      <p className="text-sm font-medium">
+      <p className="text-[15px] font-medium">
         {detail.alias.raw_name} → {detail.canonical_product.canonical_name}
       </p>
       {state?.error && (

@@ -32,7 +32,7 @@ export default function NewTicketPage() {
     <div className="flex flex-col gap-5">
       <header>
         <h1 className="text-2xl font-semibold font-display">Escanear ticket</h1>
-        <p className="text-sm text-neutral-500 mt-1">
+        <p className="text-[15px] text-[var(--color-muted)] mt-1">
           Haz una foto o elige una imagen de tu ticket de compra.
         </p>
       </header>
@@ -40,7 +40,7 @@ export default function NewTicketPage() {
       <form action={formAction} className="flex flex-col gap-4">
         <label
           htmlFor="file"
-          className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-neutral-300 bg-white py-10 px-4 text-center active:bg-neutral-50"
+          className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface)] py-10 px-4 text-center active:bg-neutral-50"
         >
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -54,10 +54,10 @@ export default function NewTicketPage() {
               <span className="text-4xl" aria-hidden>
                 🧾
               </span>
-              <span className="font-medium text-teal-700">
+              <span className="font-medium text-[var(--color-primary)]">
                 {fileName ?? "Toca para fotografiar o subir"}
               </span>
-              <span className="text-[15px] text-neutral-400">
+              <span className="text-[15px] text-[var(--color-muted)]">
                 JPEG, PNG, WEBP o PDF · máx. 15 MB
               </span>
             </>
@@ -77,7 +77,7 @@ export default function NewTicketPage() {
         />
 
         {state?.error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
             {state.error}
           </p>
         )}
@@ -85,7 +85,7 @@ export default function NewTicketPage() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-teal-700 text-white py-3.5 font-medium active:scale-[0.98] transition-transform disabled:opacity-60"
+          className="w-full rounded-xl bg-[var(--color-primary)] text-white py-3.5 font-medium active:scale-[0.98] transition-transform disabled:opacity-60"
         >
           {pending ? "Subiendo..." : "Guardar y revisar"}
         </button>

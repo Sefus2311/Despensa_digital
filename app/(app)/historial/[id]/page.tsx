@@ -39,12 +39,12 @@ export default async function ReceiptDetailPage({
     <div className="flex flex-col gap-4">
       <header>
         <div className="flex items-center justify-between">
-          <Link href="/historial" className="text-sm text-teal-700">
+          <Link href="/historial" className="text-[15px] text-[var(--color-primary)]">
             ← Historial
           </Link>
           <Link
             href={`/tickets/${receipt.id}/review`}
-            className="flex items-center gap-1 text-sm font-medium text-teal-700"
+            className="flex items-center gap-1 text-[15px] font-medium text-[var(--color-primary)]"
           >
             <Icon name="editar" size={16} />
             Editar
@@ -53,7 +53,7 @@ export default async function ReceiptDetailPage({
         <h1 className="text-2xl font-semibold font-display mt-1">
           {receipt.store_name || "Ticket"}
         </h1>
-        <p className="text-sm text-neutral-500">
+        <p className="text-[15px] text-[var(--color-muted)]">
           {receipt.purchase_date
             ? new Date(receipt.purchase_date).toLocaleDateString("es-ES")
             : "Sin fecha"}{" "}
@@ -68,12 +68,12 @@ export default async function ReceiptDetailPage({
         {(items ?? []).map((item) => (
           <Card key={item.id} className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-sm">{item.raw_name}</p>
-              <p className="text-[15px] text-neutral-500">
+              <p className="font-medium text-[15px]">{item.raw_name}</p>
+              <p className="text-[15px] text-[var(--color-muted)]">
                 {Number(item.quantity)} {item.unit ?? ""}
               </p>
             </div>
-            <span className="text-sm font-medium">
+            <span className="text-[15px] font-medium">
               {item.total_price != null ? formatCurrency(item.total_price) : "—"}
             </span>
           </Card>

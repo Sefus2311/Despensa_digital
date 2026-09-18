@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Card } from "@/components/Card";
 import { Icon } from "@/components/icons/Icon";
 
 export function ReceiptImage({ src, isPdf }: { src: string; isPdf: boolean }) {
@@ -12,7 +13,7 @@ export function ReceiptImage({ src, isPdf }: { src: string; isPdf: boolean }) {
         href={src}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 rounded-2xl bg-white border border-neutral-100 p-4 text-sm font-medium text-teal-700"
+        className="flex items-center gap-2 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-4 text-[15px] font-medium text-[var(--color-primary)]"
       >
         <Icon name="documentos" size={22} />
         Ver PDF del ticket
@@ -22,10 +23,13 @@ export function ReceiptImage({ src, isPdf }: { src: string; isPdf: boolean }) {
 
   if (failed) {
     return (
-      <div className="h-40 w-full flex flex-col items-center justify-center gap-2 rounded-2xl bg-white border border-neutral-100 text-neutral-400">
+      <Card
+        elevation="none"
+        className="h-40 w-full flex flex-col items-center justify-center gap-2 text-[var(--color-muted)]"
+      >
         <Icon name="vacio" size={28} />
         <span className="text-[15px]">No se pudo cargar la imagen del ticket</span>
-      </div>
+      </Card>
     );
   }
 
@@ -34,7 +38,7 @@ export function ReceiptImage({ src, isPdf }: { src: string; isPdf: boolean }) {
     <img
       src={src}
       alt="Ticket"
-      className="max-h-56 w-full object-contain rounded-2xl bg-white border border-neutral-100"
+      className="max-h-56 w-full object-contain rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]"
       onError={() => setFailed(true)}
     />
   );

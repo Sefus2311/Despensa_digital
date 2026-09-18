@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
+import { Badge } from "@/components/ui/Badge";
 import { StoreFilterSelect } from "@/components/StoreFilterSelect";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { formatCurrency } from "@/lib/format";
@@ -30,7 +31,7 @@ interface SpendingSummaryRow {
 }
 
 const ARROW_BASE = "w-11 h-11 flex items-center justify-center text-lg leading-none rounded-md";
-const ARROW_ENABLED = `${ARROW_BASE} text-teal-700 hover:bg-neutral-50`;
+const ARROW_ENABLED = `${ARROW_BASE} text-[var(--color-primary)] hover:bg-neutral-50`;
 const ARROW_DISABLED = `${ARROW_BASE} text-neutral-300`;
 
 function SpendingStat({
@@ -56,7 +57,7 @@ function SpendingStat({
             ‹
           </span>
         )}
-        <span className="text-[15px] text-neutral-500 text-center flex-1 px-1">{label}</span>
+        <span className="text-[15px] text-[var(--color-muted)] text-center flex-1 px-1">{label}</span>
         {nextHref ? (
           <Link href={nextHref} aria-label="Periodo siguiente" className={ARROW_ENABLED}>
             ›
@@ -192,7 +193,7 @@ export default async function HistorialPage({
 
       {!receipts || receipts.length === 0 ? (
         <Card>
-          <p className="text-sm text-neutral-500">
+          <p className="text-[15px] text-[var(--color-muted)]">
             {storeKeyFilter !== null
               ? "No hay compras registradas en este lugar."
               : 'Todavía no has guardado ningún ticket. Pulsa "Escanear" para añadir el primero.'}
@@ -214,13 +215,9 @@ export default async function HistorialPage({
                     <span className="font-medium">
                       {r.store_name || "Ticket sin nombre"}
                     </span>
-                    {r.status !== "reviewed" && (
-                      <span className="text-[15px] rounded-full bg-amber-100 text-amber-700 px-2 py-0.5">
-                        Pendiente
-                      </span>
-                    )}
+                    {r.status !== "reviewed" && <Badge tone="warning">Pendiente</Badge>}
                   </div>
-                  <div className="text-sm text-neutral-500 mt-1 flex justify-between">
+                  <div className="text-[15px] text-[var(--color-muted)] mt-1 flex justify-between">
                     <span>
                       {r.purchase_date
                         ? new Date(r.purchase_date).toLocaleDateString("es-ES")
@@ -228,7 +225,7 @@ export default async function HistorialPage({
                     </span>
                     <span>{r.total_amount != null ? formatCurrency(r.total_amount) : "—"}</span>
                   </div>
-                  <div className="text-[15px] text-neutral-400 mt-1">
+                  <div className="text-[15px] text-[var(--color-muted)] mt-1">
                     {countByReceipt.get(r.id) ?? 0} productos
                   </div>
                 </Card>

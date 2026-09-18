@@ -20,7 +20,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#0f766e",
+  themeColor: "#5f7f3a",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${montserrat.variable} ${inter.variable}`}>
-      <body className="antialiased bg-neutral-50 text-neutral-900 min-h-dvh">
+      <body className="antialiased min-h-dvh">
         {children}
       </body>
     </html>

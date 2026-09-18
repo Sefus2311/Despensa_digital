@@ -29,7 +29,7 @@ export function HomeSwitcher({
                 type="button"
                 disabled={home.id === currentHomeId || isPending}
                 onClick={() => startTransition(() => switchHome(home.id))}
-                className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-sm text-left hover:bg-neutral-50 disabled:cursor-default disabled:font-medium"
+                className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-[15px] text-left hover:bg-neutral-50 disabled:cursor-default disabled:font-medium"
               >
                 <span className="w-4 text-[var(--color-primary)]">
                   {home.id === currentHomeId ? "✓" : ""}
@@ -43,7 +43,7 @@ export function HomeSwitcher({
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-sm text-left text-[var(--color-primary)] hover:bg-neutral-50"
+            className="w-full flex items-center gap-2 rounded-md px-2 py-2 text-[15px] text-left text-[var(--color-primary)] hover:bg-neutral-50"
           >
             <Icon name="anadir" size={16} />
             Añadir otra casa
@@ -93,7 +93,7 @@ function CreateHomeModal({
           />
         </div>
         {state?.error && (
-          <p role="alert" className="text-sm text-red-600">
+          <p role="alert" className="text-[15px] text-[var(--color-danger)]">
             {state.error}
           </p>
         )}

@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { Card } from "@/components/Card";
+import { Badge } from "@/components/ui/Badge";
 import {
   approveProposalAction,
   rejectProposalAction,
@@ -36,27 +37,23 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
   return (
     <Card className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[15px] font-medium text-neutral-500">{proposal.retailer}</span>
-        {proposal.status === "conflict" && (
-          <span className="text-[15px] rounded-full bg-amber-100 text-amber-800 px-2 py-0.5">
-            Conflicto
-          </span>
-        )}
+        <span className="text-[15px] font-medium text-[var(--color-muted)]">{proposal.retailer}</span>
+        {proposal.status === "conflict" && <Badge tone="warning">Conflicto</Badge>}
       </div>
 
       <div>
-        <p className="text-[15px] text-neutral-400">Texto original del ticket</p>
-        <p className="font-mono text-sm">{proposal.raw_name}</p>
+        <p className="text-[15px] text-[var(--color-muted)]">Texto original del ticket</p>
+        <p className="font-mono text-[15px]">{proposal.raw_name}</p>
       </div>
 
       {mode !== "edit" ? (
         <div>
-          <p className="text-[15px] text-neutral-400">Propuesta interpretada</p>
+          <p className="text-[15px] text-[var(--color-muted)]">Propuesta interpretada</p>
           <p className="font-medium">{proposal.proposed_canonical_name}</p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-[15px] text-[var(--color-muted)]">
             {[proposal.proposed_brand, proposal.proposed_category].filter(Boolean).join(" · ") || "—"}
           </p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-[15px] text-[var(--color-muted)]">
             {proposal.proposed_quantity ?? "—"} {proposal.proposed_unit ?? ""}
           </p>
         </div>
@@ -67,7 +64,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
           onSubmit={() => setMode("view")}
         >
           <input type="hidden" name="proposal_id" value={proposal.id} />
-          <label className="text-[15px] text-neutral-500">
+          <label className="text-[15px] text-[var(--color-muted)]">
             Producto normalizado
             <input
               name="canonical_name"
@@ -76,11 +73,11 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
               className="ui-field__input mt-1"
             />
           </label>
-          <label className="text-[15px] text-neutral-500">
+          <label className="text-[15px] text-[var(--color-muted)]">
             Marca
             <input name="brand" defaultValue={proposal.proposed_brand ?? ""} className="ui-field__input mt-1" />
           </label>
-          <label className="text-[15px] text-neutral-500">
+          <label className="text-[15px] text-[var(--color-muted)]">
             Categoría
             <input
               name="category"
@@ -89,7 +86,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
             />
           </label>
           <div className="flex gap-2">
-            <label className="text-[15px] text-neutral-500 flex-1">
+            <label className="text-[15px] text-[var(--color-muted)] flex-1">
               Cantidad
               <input
                 name="quantity"
@@ -99,7 +96,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
                 className="ui-field__input mt-1"
               />
             </label>
-            <label className="text-[15px] text-neutral-500 flex-1">
+            <label className="text-[15px] text-[var(--color-muted)] flex-1">
               Unidad
               <input
                 name="unit"
@@ -112,14 +109,14 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
             <button
               type="submit"
               disabled={approvePending}
-              className="flex-1 rounded-lg bg-[var(--color-primary)] text-white py-2 text-sm font-medium disabled:opacity-60"
+              className="flex-1 rounded-lg bg-[var(--color-primary)] text-white py-2 text-[15px] font-medium disabled:opacity-60"
             >
               Guardar y aprobar
             </button>
             <button
               type="button"
               onClick={() => setMode("view")}
-              className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm"
+              className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-[15px]"
             >
               Cancelar
             </button>
@@ -127,7 +124,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
         </form>
       )}
 
-      <div className="flex gap-3 text-[15px] text-neutral-500">
+      <div className="flex gap-3 text-[15px] text-[var(--color-muted)]">
         {confidencePct !== null && <span>{confidencePct}% confianza IA</span>}
         <span>{proposal.user_confirmations} confirmaciones</span>
         {proposal.user_conflicts > 0 && <span>{proposal.user_conflicts} conflictos</span>}
@@ -140,7 +137,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
             <button
               type="submit"
               disabled={approvePending}
-              className="w-full rounded-lg bg-[var(--color-primary)] text-white py-2 text-sm font-medium disabled:opacity-60"
+              className="w-full rounded-lg bg-[var(--color-primary)] text-white py-2 text-[15px] font-medium disabled:opacity-60"
             >
               Aprobar
             </button>
@@ -148,14 +145,14 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
           <button
             type="button"
             onClick={() => setMode("edit")}
-            className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm"
+            className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-[15px]"
           >
             Editar
           </button>
           <button
             type="button"
             onClick={() => setMode("reject")}
-            className="rounded-lg border border-red-200 text-red-600 px-3 py-2 text-sm"
+            className="rounded-lg border border-[var(--color-danger)] text-[var(--color-danger)] px-3 py-2 text-[15px]"
           >
             Rechazar
           </button>
@@ -183,14 +180,14 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
             <button
               type="submit"
               disabled={rejectPending}
-              className="flex-1 rounded-lg bg-red-600 text-white py-2 text-sm font-medium disabled:opacity-60"
+              className="flex-1 rounded-lg bg-[var(--color-danger)] text-white py-2 text-[15px] font-medium disabled:opacity-60"
             >
               Confirmar rechazo
             </button>
             <button
               type="button"
               onClick={() => setMode("view")}
-              className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm"
+              className="rounded-lg border border-[var(--color-border)] px-3 py-2 text-[15px]"
             >
               Cancelar
             </button>
@@ -199,12 +196,12 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
       )}
 
       {approveState?.error && (
-        <p role="alert" className="text-[15px] text-red-600">
+        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
           {approveState.error}
         </p>
       )}
       {rejectState?.error && (
-        <p role="alert" className="text-[15px] text-red-600">
+        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
           {rejectState.error}
         </p>
       )}

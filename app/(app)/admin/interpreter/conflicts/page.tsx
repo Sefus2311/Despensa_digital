@@ -30,21 +30,21 @@ export default async function AdminInterpreterConflictsPage() {
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-semibold font-display">Conflictos</h1>
-        <p className="text-sm text-neutral-500">
+        <p className="text-[15px] text-[var(--color-muted)]">
           Mismo texto de ticket, interpretaciones incompatibles. Elige la correcta.
         </p>
       </header>
 
-      {error && <p className="text-sm text-red-600">No se pudieron cargar los conflictos.</p>}
-      {!error && groups.size === 0 && <p className="text-sm text-neutral-500">Sin conflictos abiertos.</p>}
+      {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudieron cargar los conflictos.</p>}
+      {!error && groups.size === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin conflictos abiertos.</p>}
 
       <div className="flex flex-col gap-4">
         {Array.from(groups.entries()).map(([key, group]) => (
           <div key={key} className="flex flex-col gap-2">
-            <Card className="bg-amber-50">
-              <p className="text-[15px] text-neutral-500">{group[0].retailer}</p>
-              <p className="font-mono text-sm">{group[0].raw_name}</p>
-              <p className="text-[15px] text-neutral-500">{group.length} interpretaciones en conflicto</p>
+            <Card className="ui-card--warning-tint">
+              <p className="text-[15px] text-[var(--color-muted)]">{group[0].retailer}</p>
+              <p className="font-mono text-[15px]">{group[0].raw_name}</p>
+              <p className="text-[15px] text-[var(--color-muted)]">{group.length} interpretaciones en conflicto</p>
             </Card>
             {group.map((p) => (
               <ProposalCard key={p.id} proposal={p} />

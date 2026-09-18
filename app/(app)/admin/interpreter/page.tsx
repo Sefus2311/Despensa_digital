@@ -78,7 +78,7 @@ export default async function AdminInterpreterPage({
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-semibold font-display">Gestión del intérprete</h1>
-        <p className="text-sm text-neutral-500">Diccionario global aprobado (product_aliases).</p>
+        <p className="text-[15px] text-[var(--color-muted)]">Diccionario global aprobado (product_aliases).</p>
       </header>
 
       <Card>
@@ -123,8 +123,8 @@ export default async function AdminInterpreterPage({
       </Card>
 
       <Card className="divide-y divide-neutral-100">
-        {error && <p className="text-sm text-red-600">No se pudo cargar el diccionario.</p>}
-        {!error && aliases.length === 0 && <p className="text-sm text-neutral-500">Sin resultados.</p>}
+        {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudo cargar el diccionario.</p>}
+        {!error && aliases.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>}
         {aliases.map((a) => (
           <AliasRow
             key={a.id}

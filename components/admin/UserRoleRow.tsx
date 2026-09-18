@@ -27,11 +27,11 @@ export function UserRoleRow({
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="font-medium truncate">{displayName || email}</p>
-          <p className="text-[15px] text-neutral-500 truncate">{email}</p>
+          <p className="text-[15px] text-[var(--color-muted)] truncate">{email}</p>
         </div>
         <span className="text-[15px] rounded-full bg-neutral-100 px-2 py-1 shrink-0">{role}</span>
       </div>
-      <p className="text-[15px] text-neutral-400">
+      <p className="text-[15px] text-[var(--color-muted)]">
         Alta: {new Date(createdAt).toLocaleDateString("es-ES")}
       </p>
 
@@ -57,14 +57,14 @@ export function UserRoleRow({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-[var(--color-primary)] text-white px-3 py-2 text-sm font-medium disabled:opacity-60"
+          className="rounded-lg bg-[var(--color-primary)] text-white px-3 py-2 text-[15px] font-medium disabled:opacity-60"
         >
           Guardar
         </button>
       </form>
 
       {state?.error && (
-        <p role="alert" className="text-[15px] text-red-600">
+        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
           {state.error}
         </p>
       )}

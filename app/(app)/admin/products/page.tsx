@@ -51,7 +51,7 @@ export default async function AdminProductsPage({
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-semibold font-display">Productos</h1>
-        <p className="text-sm text-neutral-500">Canónicos y de tienda del intérprete global.</p>
+        <p className="text-[15px] text-[var(--color-muted)]">Canónicos y de tienda del intérprete global.</p>
       </header>
 
       <Card>
@@ -70,7 +70,7 @@ export default async function AdminProductsPage({
       </Card>
 
       <Card>
-        <p className="text-sm font-medium mb-2">Detectar posibles duplicados</p>
+        <p className="text-[15px] font-medium mb-2">Detectar posibles duplicados</p>
         <form method="GET" className="flex gap-2">
           <input
             type="search"
@@ -85,11 +85,11 @@ export default async function AdminProductsPage({
         </form>
         {dup && (
           <div className="mt-3 flex flex-col divide-y divide-neutral-100">
-            {similar.length === 0 && <p className="text-sm text-neutral-500">Sin coincidencias similares.</p>}
+            {similar.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin coincidencias similares.</p>}
             {similar.map((s) => (
               <div key={s.id} className="py-2 flex items-center justify-between">
-                <span className="text-sm">{s.canonical_name}</span>
-                <span className="text-[15px] text-neutral-500">{Math.round(s.similarity * 100)}%</span>
+                <span className="text-[15px]">{s.canonical_name}</span>
+                <span className="text-[15px] text-[var(--color-muted)]">{Math.round(s.similarity * 100)}%</span>
               </div>
             ))}
           </div>
@@ -97,11 +97,11 @@ export default async function AdminProductsPage({
       </Card>
 
       <div>
-        <h2 className="text-sm font-semibold mb-2">Productos canónicos</h2>
+        <h2 className="text-[15px] font-semibold mb-2">Productos canónicos</h2>
         <Card className="divide-y divide-neutral-100">
-          {canonicalError && <p className="text-sm text-red-600">No se pudieron cargar.</p>}
+          {canonicalError && <p className="text-[15px] text-[var(--color-danger)]">No se pudieron cargar.</p>}
           {!canonicalError && (canonicalProducts ?? []).length === 0 && (
-            <p className="text-sm text-neutral-500">Sin resultados.</p>
+            <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>
           )}
           {(canonicalProducts as Pick<CanonicalProduct, "id" | "canonical_name" | "category" | "default_unit">[] | null)?.map(
             (p) => (
@@ -118,11 +118,11 @@ export default async function AdminProductsPage({
       </div>
 
       <div>
-        <h2 className="text-sm font-semibold mb-2">Productos de tienda</h2>
+        <h2 className="text-[15px] font-semibold mb-2">Productos de tienda</h2>
         <Card className="divide-y divide-neutral-100">
-          {retailerError && <p className="text-sm text-red-600">No se pudieron cargar.</p>}
+          {retailerError && <p className="text-[15px] text-[var(--color-danger)]">No se pudieron cargar.</p>}
           {!retailerError && (retailerProducts ?? []).length === 0 && (
-            <p className="text-sm text-neutral-500">Sin resultados.</p>
+            <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>
           )}
           {retailerProducts?.map((p) => (
             <RetailerProductRow

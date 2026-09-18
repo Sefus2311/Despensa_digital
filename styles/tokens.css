@@ -1,15 +1,17 @@
 /*
  * Design tokens — Despensa Digital / Mayordomo Digital.
  *
- * Estructura (escalas de espaciado/radio/elevación) adaptada del design
- * system de RealMargin, con identidad de color propia: no reutiliza la
- * paleta de marca de RealMargin. Tipografía (familias Montserrat/Inter y
- * el criterio de uso: Inter en cuerpo/componentes, Montserrat solo en
- * contextos protagonistas) sí replica RealMargin 1:1 (decisión 2026-09-18,
- * ver DESIGN_SYSTEM.md §3 de ese proyecto). Los componentes de
- * /components/ui y /components/icons consumen estos tokens en vez de
- * valores sueltos, para poder cambiar la identidad visual sin tocar cada
- * componente.
+ * Estructura (escalas de espaciado/radio) adaptada del design system de
+ * RealMargin. Tipografía (familias Montserrat/Inter y el criterio de uso:
+ * Inter en cuerpo/componentes, Montserrat solo en contextos protagonistas)
+ * también replica RealMargin 1:1 (decisión 2026-09-18).
+ *
+ * Paleta de color e elevación: identidad propia "verde de despensa"
+ * (decisión 2026-09-18, ver DESIGN_SYSTEM.md §"Paleta de colores") — ya no
+ * reutiliza el verde-azulado (teal) ni la fórmula de sombra de RealMargin.
+ * Los componentes de /components/ui y /components/icons consumen estos
+ * tokens en vez de valores sueltos, para poder cambiar la identidad visual
+ * sin tocar cada componente.
  */
 
 :root {
@@ -19,21 +21,39 @@
   --font-display: var(--font-montserrat), "Montserrat", "Arial Black", "Segoe UI", sans-serif;
   --font-ui: var(--font-inter), "Inter", "Segoe UI", Arial, sans-serif;
 
-  /* Color */
-  --color-primary: #0f766e;
-  --color-primary-hover: #115e59;
-  --color-secondary: #64748b;
-  --color-background: #fafaf9;
+  /* Color — superficies */
+  --color-background: #f8faf7;
   --color-surface: #ffffff;
-  --color-text: #171717;
-  --color-muted: #737373;
-  --color-border: #e5e7eb;
-  --color-focus: #0f766e;
+  --color-header: #eef2ea;
+  --color-footer: var(--color-header);
+  --color-border: #dde3d8;
 
-  /* Estado (avisos de caducidad, confirmaciones, errores de formulario) */
-  --color-success: #15803d;
+  /* Color — texto (nunca negro puro) */
+  --color-text: #20251f;
+  --color-muted: #6b7268;
+
+  /* Color — verde principal: CTA, navegación activa, iconos destacados,
+     enlaces principales. Hover/active son variantes más oscuras del mismo
+     tono, no un color distinto. */
+  --color-primary: #5f7f3a;
+  --color-primary-hover: #4c662e;
+  --color-primary-active: #3e5326;
+
+  /* Verde de acento — uso puntual y moderado (badges, highlights,
+     indicadores pequeños). Nunca como fondo dominante de áreas grandes. */
+  --color-primary-accent: #a8d94e;
+
+  --color-focus: var(--color-primary);
+
+  /* Estado (avisos de caducidad, confirmaciones, errores de formulario).
+     --color-success reutiliza el verde principal a propósito: un solo
+     verde en toda la app, en vez de dos tonos de verde compitiendo. */
+  --color-success: var(--color-primary);
   --color-warning: #a16207;
-  --color-danger: #dc2626;
+  /* #d66a4a (terracota original de la paleta) da 3.49:1 sobre blanco, por
+     debajo del 4.5:1 de AA para texto normal. Se oscurece un 15% de
+     brillo manteniendo el mismo matiz -> 4.64:1 (decisión 2026-09-18). */
+  --color-danger: #b65a3f;
 
   /* Radios */
   --radius-sm: 8px;
@@ -48,17 +68,20 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
 
-  /* Elevación — misma fórmula que RealMargin: sombra sombreada con el
-     propio color de texto (no negro puro), difuminado y opacidad 1:1. */
+  /* Elevación — sombras suaves y discretas, tintadas con el propio
+     --color-text (no negro puro). Blur/opacidad bajos a propósito: nada de
+     efectos exagerados (decisión 2026-09-18, sustituye la fórmula anterior
+     copiada de RealMargin, más marcada). */
   --shadow-none: none;
-  --shadow-raised: 0 8px 24px rgba(23, 23, 23, 0.12);
-  --shadow-overlay: 0 20px 50px rgba(23, 23, 23, 0.22);
+  --shadow-raised: 0 4px 12px rgba(32, 37, 31, 0.06);
+  --shadow-overlay: 0 12px 32px rgba(32, 37, 31, 0.14);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: #0a0a0a;
     --color-surface: #171717;
+    --color-header: #171717;
     --color-text: #ededed;
     --color-muted: #a3a3a3;
     --color-border: #262626;

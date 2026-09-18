@@ -40,7 +40,7 @@ export default async function AdminUsersPage({
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-semibold font-display">Usuarios</h1>
-        <p className="text-sm text-neutral-500">
+        <p className="text-[15px] text-[var(--color-muted)]">
           Rol de sistema por usuario. No da acceso a datos de sus Casas.
         </p>
       </header>
@@ -72,8 +72,8 @@ export default async function AdminUsersPage({
       </Card>
 
       <Card className="divide-y divide-neutral-100">
-        {error && <p className="text-sm text-red-600">No se pudo cargar la lista de usuarios.</p>}
-        {!error && rows.length === 0 && <p className="text-sm text-neutral-500">Sin resultados.</p>}
+        {error && <p className="text-[15px] text-[var(--color-danger)]">No se pudo cargar la lista de usuarios.</p>}
+        {!error && rows.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>}
         {rows.map((u) => (
           <UserRoleRow
             key={u.id}
@@ -89,7 +89,7 @@ export default async function AdminUsersPage({
       {rows.length === PAGE_SIZE && (
         <a
           href={`/admin/users?${nextParams.toString()}`}
-          className="text-center text-sm text-[var(--color-primary)] font-medium py-2"
+          className="text-center text-[15px] text-[var(--color-primary)] font-medium py-2"
         >
           Cargar más
         </a>

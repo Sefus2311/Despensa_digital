@@ -42,13 +42,13 @@ export function CanonicalProductRow({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-[var(--color-primary)] text-white px-3 text-sm font-medium disabled:opacity-60"
+          className="rounded-lg bg-[var(--color-primary)] text-white px-3 text-[15px] font-medium disabled:opacity-60"
         >
           Guardar
         </button>
       </div>
       {state?.error && (
-        <p role="alert" className="text-[15px] text-red-600">
+        <p role="alert" className="text-[15px] text-[var(--color-danger)]">
           {state.error}
         </p>
       )}

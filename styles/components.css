@@ -5,7 +5,9 @@
  * de tokens.css, no valores sueltos, y no dependen de hover para funciones
  * críticas (mobile first). Tamaños/pesos de texto replican RealMargin 1:1,
  * incluido su mínimo funcional de 15px por accesibilidad (WCAG 2.2 AA,
- * DESIGN_SYSTEM.md §11 de ese proyecto).
+ * DESIGN_SYSTEM.md §11 de ese proyecto). Fondos tintados de badge/alert
+ * usan color-mix() sobre el token semántico correspondiente en vez de hex
+ * sueltos, para que sigan la paleta de tokens.css sin duplicarla.
  */
 
 /* --- Button --- */
@@ -40,6 +42,10 @@
 .ui-button--primary:hover:not(:disabled) {
   background: var(--color-primary-hover);
   border-color: var(--color-primary-hover);
+}
+.ui-button--primary:active:not(:disabled) {
+  background: var(--color-primary-active);
+  border-color: var(--color-primary-active);
 }
 
 .ui-button--secondary {
@@ -142,6 +148,11 @@
   color: var(--color-danger);
   margin: 0;
 }
+.ui-field__input::placeholder,
+.ui-field__textarea::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
 .ui-field__textarea {
   min-block-size: 96px;
   padding-block: var(--spacing-sm);
@@ -188,19 +199,21 @@
 }
 .ui-badge--success {
   color: var(--color-success);
-  background: #f0fdf4;
+  background: color-mix(in srgb, var(--color-success) 12%, white);
 }
 .ui-badge--warning {
   color: var(--color-warning);
-  background: #fff7ed;
+  background: color-mix(in srgb, var(--color-warning) 12%, white);
 }
 .ui-badge--danger {
   color: var(--color-danger);
-  background: #fef2f2;
+  background: color-mix(in srgb, var(--color-danger) 12%, white);
 }
 .ui-badge--primary {
+  /* Verde de acento con moderación: solo el tinte de fondo de una etiqueta
+     pequeña, nunca como color dominante (ver tokens.css). */
   color: var(--color-primary);
-  background: #f0fdfa;
+  background: color-mix(in srgb, var(--color-primary-accent) 35%, white);
 }
 
 /* --- Card --- */
@@ -219,12 +232,18 @@
   border-color: transparent;
   box-shadow: var(--shadow-overlay);
 }
+/* Tinte de aviso para una Card puntual (p. ej. grupo de conflictos del
+   intérprete) — misma receta color-mix() que .ui-badge--warning/.ui-alert--warning,
+   para no reintroducir un hex ámbar suelto. */
+.ui-card--warning-tint {
+  background: color-mix(in srgb, var(--color-warning) 12%, white);
+}
 
 /* --- Modal / Dialog --- */
 .ui-modal-scrim {
   position: fixed;
   inset: 0;
-  background: rgba(23, 23, 23, 0.5);
+  background: rgba(32, 37, 31, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -328,18 +347,18 @@
   color: var(--color-text);
 }
 .ui-alert--warning {
-  background: #fff7ed;
-  border-color: #fed7aa;
+  background: color-mix(in srgb, var(--color-warning) 12%, white);
+  border-color: color-mix(in srgb, var(--color-warning) 35%, white);
   color: var(--color-warning);
 }
 .ui-alert--danger {
-  background: #fef2f2;
-  border-color: #fecaca;
+  background: color-mix(in srgb, var(--color-danger) 12%, white);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, white);
   color: var(--color-danger);
 }
 .ui-alert--success {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
+  background: color-mix(in srgb, var(--color-success) 12%, white);
+  border-color: color-mix(in srgb, var(--color-success) 35%, white);
   color: var(--color-success);
 }
 

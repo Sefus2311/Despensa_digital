@@ -30,14 +30,14 @@ export default async function InicioPage() {
 
       <Card>
         <h2 className="font-medium mb-1">Próximamente necesitarás</h2>
-        <p className="text-sm text-neutral-500">
+        <p className="text-[15px] text-[var(--color-muted)]">
           Todavía necesitamos más compras para aprender tu consumo.
         </p>
       </Card>
 
       <Card>
         <h2 className="font-medium mb-1">¿Qué puedo cocinar?</h2>
-        <p className="text-sm text-neutral-500">
+        <p className="text-[15px] text-[var(--color-muted)]">
           Cuando conozcamos mejor tu despensa podremos proponerte comidas.
         </p>
       </Card>
@@ -45,7 +45,7 @@ export default async function InicioPage() {
       <Link href="/despensa">
         <Card>
           <h2 className="font-medium mb-1">Mi despensa</h2>
-          <p className="text-sm text-neutral-500">
+          <p className="text-[15px] text-[var(--color-muted)]">
             {productCount ?? 0} producto{productCount === 1 ? "" : "s"}{" "}
             registrado{productCount === 1 ? "" : "s"}.
           </p>

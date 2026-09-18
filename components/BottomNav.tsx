@@ -27,7 +27,7 @@ export function BottomNav() {
       </Link>
 
       <nav
-        className="fixed bottom-0 inset-x-0 z-10 bg-white border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 inset-x-0 z-10 bg-[var(--color-footer)] border-t border-[var(--color-border)] pb-[env(safe-area-inset-bottom)]"
         aria-label="Navegación principal"
       >
         <ul className="flex justify-around">

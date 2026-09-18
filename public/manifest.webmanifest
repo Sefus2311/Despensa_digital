@@ -4,7 +4,7 @@
   "description": "Fotografía tus tickets y controla tu despensa.",
   "start_url": "/inicio",
   "display": "standalone",
-  "background_color": "#f9fafb",
-  "theme_color": "#0f766e",
+  "background_color": "#f8faf7",
+  "theme_color": "#5f7f3a",
   "icons": []
 }

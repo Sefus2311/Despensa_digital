@@ -31,15 +31,15 @@ export default async function PerfilPage() {
 
       <Card className="flex flex-col gap-3 divide-y divide-neutral-100">
         <div className="pb-3">
-          <p className="text-[15px] text-neutral-500">Nombre</p>
+          <p className="text-[15px] text-[var(--color-muted)]">Nombre</p>
           <p className="font-medium">{profile?.display_name || "—"}</p>
         </div>
         <div className="pt-3 pb-3">
-          <p className="text-[15px] text-neutral-500">Email</p>
+          <p className="text-[15px] text-[var(--color-muted)]">Email</p>
           <p className="font-medium">{user.email}</p>
         </div>
         <div className="pt-3">
-          <p className="text-[15px] text-neutral-500">Casa</p>
+          <p className="text-[15px] text-[var(--color-muted)]">Casa</p>
           <RenameHomeForm homeId={homeId} homeName={homeName} />
         </div>
       </Card>
@@ -64,7 +64,7 @@ export default async function PerfilPage() {
       <form action={logout}>
         <button
           type="submit"
-          className="w-full rounded-xl border border-red-200 text-red-600 py-3.5 font-medium active:scale-[0.98] transition-transform"
+          className="w-full rounded-xl border border-[var(--color-danger)] text-[var(--color-danger)] py-3.5 font-medium active:scale-[0.98] transition-transform"
         >
           Cerrar sesión
         </button>

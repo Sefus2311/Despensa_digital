@@ -13,13 +13,13 @@ export default function RecuperarPage() {
   return (
     <main className="min-h-dvh flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
       <h1 className="text-2xl font-semibold font-display mb-1">Recuperar contraseña</h1>
-      <p className="text-neutral-500 mb-8">
+      <p className="text-[var(--color-muted)] mb-8">
         Te enviamos un enlace para restablecerla.
       </p>
 
       <form action={formAction} className="flex flex-col gap-4">
         <div>
-          <label htmlFor="email" className="text-sm font-medium">
+          <label htmlFor="email" className="ui-field__label">
             Email
           </label>
           <input
@@ -33,7 +33,7 @@ export default function RecuperarPage() {
         </div>
 
         {state?.error && (
-          <p role="status" className="text-sm text-neutral-700">
+          <p role="status" className="text-[15px] text-[var(--color-muted)]">
             {state.error}
           </p>
         )}
@@ -41,14 +41,14 @@ export default function RecuperarPage() {
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 w-full rounded-xl bg-teal-700 text-white py-3.5 font-medium active:scale-[0.98] transition-transform disabled:opacity-60"
+          className="mt-2 w-full rounded-xl bg-[var(--color-primary)] text-white py-3.5 font-medium active:scale-[0.98] transition-transform disabled:opacity-60"
         >
           {pending ? "Enviando..." : "Enviar enlace"}
         </button>
       </form>
 
-      <div className="mt-6 text-sm text-center">
-        <Link href="/login" className="text-teal-700 font-medium">
+      <div className="mt-6 text-[15px] text-center">
+        <Link href="/login" className="text-[var(--color-primary)] font-medium">
           Volver a entrar
         </Link>
       </div>
