@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getCurrentUserAndHome } from "@/lib/home";
+import { DEFAULT_PRODUCT_CATEGORY } from "@/lib/constants/product-categories";
 import { getReceiptImageUrl } from "../../actions";
 import { ReviewForm } from "./ReviewForm";
 
@@ -49,6 +50,11 @@ export default async function ReviewTicketPage({
           unit: i.unit,
           unitPrice: i.unit_price !== null ? Number(i.unit_price) : null,
           totalPrice: i.total_price !== null ? Number(i.total_price) : null,
+          // receipt_items no guarda categoría/marca -- no hay dato previo que
+          // recuperar aquí, así que se parte del mismo fallback que usa el
+          // intérprete cuando no puede determinar la categoría.
+          category: DEFAULT_PRODUCT_CATEGORY,
+          brand: null,
         }))
       }
     />

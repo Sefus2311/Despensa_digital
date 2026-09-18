@@ -1,6 +1,8 @@
 // Tipos mínimos alineados con supabase/migrations/*.sql
 // (no generados automáticamente todavía; en V0.2 se recomienda `supabase gen types typescript`)
 
+import type { ProductCategory } from "@/lib/constants/product-categories";
+
 export type ReceiptStatus = "uploaded" | "processing" | "reviewed" | "error";
 
 // Rol de sistema del usuario (ortogonal a la pertenencia a una Casa, ver
@@ -118,7 +120,8 @@ export interface CanonicalProduct {
   id: string;
   canonical_name: string;
   normalized_name: string;
-  category: string | null;
+  /** NOT NULL DEFAULT 'VARIOS' desde 0013_product_categories.sql -- siempre válida, nunca null. */
+  category: ProductCategory;
   default_unit: string | null;
   created_at: string;
   updated_at: string;
@@ -179,7 +182,8 @@ export interface InterpreterProposal {
   normalized_raw_name: string;
   proposed_canonical_name: string;
   proposed_brand: string | null;
-  proposed_category: string | null;
+  /** null = todavía sin categoría propuesta (distinto de "VARIOS" explícito). */
+  proposed_category: ProductCategory | null;
   proposed_quantity: number | null;
   proposed_unit: string | null;
   proposed_retailer_product_id: string | null;

@@ -3,6 +3,8 @@
 import { useActionState, useState } from "react";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { AliasDetailPanel } from "@/components/admin/AliasDetailPanel";
+import { formatCategoryBrandLine } from "@/lib/pantry";
+import type { ProductCategory } from "@/lib/constants/product-categories";
 import {
   restoreAliasAction,
   updateAliasAction,
@@ -28,7 +30,7 @@ export function AliasRow({
   rawName: string;
   canonicalName: string;
   brand: string | null;
-  category: string | null;
+  category: ProductCategory;
   confidenceScore: number | null;
   timesConfirmed: number;
   active: boolean;
@@ -55,7 +57,7 @@ export function AliasRow({
             <span className="text-[15px] text-[var(--color-muted)]">{retailer}</span>
             <p className="font-mono text-[15px] text-[var(--color-muted)] truncate">{rawName}</p>
             <p className="font-medium">→ {canonicalName}</p>
-            <p className="text-[15px] text-[var(--color-muted)]">{[brand, category].filter(Boolean).join(" · ") || "—"}</p>
+            <p className="text-[15px] text-[var(--color-muted)]">{formatCategoryBrandLine(category, brand)}</p>
           </div>
 
           <Dropdown label="⋮" align="right">

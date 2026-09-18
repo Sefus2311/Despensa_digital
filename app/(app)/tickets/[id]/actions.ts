@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUserAndHome } from "@/lib/home";
+import { isProductCategory } from "@/lib/constants/product-categories";
 
 export type SaveReviewState = { error?: string } | null;
 
@@ -12,6 +13,8 @@ interface ItemInput {
   unit: string | null;
   unitPrice: number | null;
   totalPrice: number | null;
+  category: string;
+  brand: string | null;
 }
 
 /**
@@ -44,6 +47,13 @@ export async function saveReceiptReview(
 
   if (validItems.length === 0) {
     return { error: "Añade al menos un producto antes de guardar." };
+  }
+
+  // Respaldo del <select required> del cliente -- la regla de negocio en sí
+  // (qué categorías existen, fallback a VARIOS) vive solo en
+  // normalize_product_category (SQL), no se duplica aquí.
+  if (validItems.some((i) => !isProductCategory(i.category))) {
+    return { error: "Selecciona una categoría válida para cada producto." };
   }
 
   const { data: receipt } = await supabase
@@ -102,6 +112,8 @@ export async function saveReceiptReview(
           p_retailer: storeName,
           p_raw_name: item.rawName.trim(),
           p_proposed_canonical_name: item.rawName.trim(),
+          p_proposed_brand: item.brand?.trim() || null,
+          p_proposed_category: item.category,
           p_proposed_quantity: item.quantity || null,
           p_proposed_unit: item.unit,
         })

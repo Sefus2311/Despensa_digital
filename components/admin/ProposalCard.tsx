@@ -3,6 +3,8 @@
 import { useActionState, useState } from "react";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/ui/Badge";
+import { PRODUCT_CATEGORIES } from "@/lib/constants/product-categories";
+import { formatCategoryBrandLine } from "@/lib/pantry";
 import {
   approveProposalAction,
   rejectProposalAction,
@@ -51,7 +53,9 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
           <p className="text-[15px] text-[var(--color-muted)]">Propuesta interpretada</p>
           <p className="font-medium">{proposal.proposed_canonical_name}</p>
           <p className="text-[15px] text-[var(--color-muted)]">
-            {[proposal.proposed_brand, proposal.proposed_category].filter(Boolean).join(" · ") || "—"}
+            {proposal.proposed_category
+              ? formatCategoryBrandLine(proposal.proposed_category, proposal.proposed_brand)
+              : proposal.proposed_brand?.toUpperCase() || "—"}
           </p>
           <p className="text-[15px] text-[var(--color-muted)]">
             {proposal.proposed_quantity ?? "—"} {proposal.proposed_unit ?? ""}
@@ -74,16 +78,23 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
             />
           </label>
           <label className="text-[15px] text-[var(--color-muted)]">
-            Marca
+            Marca (del fabricante, no el supermercado de compra)
             <input name="brand" defaultValue={proposal.proposed_brand ?? ""} className="ui-field__input mt-1" />
           </label>
           <label className="text-[15px] text-[var(--color-muted)]">
             Categoría
-            <input
+            <select
               name="category"
               defaultValue={proposal.proposed_category ?? ""}
               className="ui-field__input mt-1"
-            />
+            >
+              <option value="">Sin determinar (VARIOS)</option>
+              {PRODUCT_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
           </label>
           <div className="flex gap-2">
             <label className="text-[15px] text-[var(--color-muted)] flex-1">

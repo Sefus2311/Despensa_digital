@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { PRODUCT_CATEGORIES, type ProductCategory } from "@/lib/constants/product-categories";
 import {
   updateCanonicalProductAction,
   type ProductActionState,
@@ -14,7 +15,7 @@ export function CanonicalProductRow({
 }: {
   id: string;
   canonicalName: string;
-  category: string | null;
+  category: ProductCategory;
   defaultUnit: string | null;
 }) {
   const [state, formAction, pending] = useActionState<ProductActionState, FormData>(
@@ -27,12 +28,13 @@ export function CanonicalProductRow({
       <input type="hidden" name="id" value={id} />
       <input name="canonical_name" defaultValue={canonicalName} required className="ui-field__input" />
       <div className="flex gap-2">
-        <input
-          name="category"
-          defaultValue={category ?? ""}
-          placeholder="Categoría"
-          className="ui-field__input flex-1"
-        />
+        <select name="category" defaultValue={category} required className="ui-field__input flex-1">
+          {PRODUCT_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
         <input
           name="default_unit"
           defaultValue={defaultUnit ?? ""}

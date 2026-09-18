@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { Card } from "@/components/Card";
 import { ReceiptImage } from "@/components/ReceiptImage";
+import { PRODUCT_CATEGORIES, type ProductCategory } from "@/lib/constants/product-categories";
 import { saveReceiptReview, type SaveReviewState } from "../actions";
 
 interface ItemDraft {
@@ -11,6 +12,11 @@ interface ItemDraft {
   unit: string | null;
   unitPrice: number | null;
   totalPrice: number | null;
+  // "" mientras el usuario no ha elegido -- el <select required> bloquea el
+  // envío nativo hasta que valga una ProductCategory real (ver saveReceiptReview
+  // para la validación de respaldo en el servidor).
+  category: ProductCategory | "";
+  brand: string | null;
 }
 
 export function ReviewForm({
@@ -41,7 +47,17 @@ export function ReviewForm({
   const [items, setItems] = useState<ItemDraft[]>(
     initialItems.length > 0
       ? initialItems
-      : [{ rawName: "", quantity: 1, unit: null, unitPrice: null, totalPrice: null }]
+      : [
+          {
+            rawName: "",
+            quantity: 1,
+            unit: null,
+            unitPrice: null,
+            totalPrice: null,
+            category: "",
+            brand: null,
+          },
+        ]
   );
 
   function updateItem(index: number, patch: Partial<ItemDraft>) {
@@ -57,7 +73,15 @@ export function ReviewForm({
   function addItem() {
     setItems((prev) => [
       ...prev,
-      { rawName: "", quantity: 1, unit: null, unitPrice: null, totalPrice: null },
+      {
+        rawName: "",
+        quantity: 1,
+        unit: null,
+        unitPrice: null,
+        totalPrice: null,
+        category: "",
+        brand: null,
+      },
     ]);
   }
 
@@ -151,6 +175,39 @@ export function ReviewForm({
                     updateItem(index, { unit: e.target.value || null })
                   }
                   placeholder="uds, kg..."
+                  className="ui-field__input"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label className="text-[15px] text-[var(--color-muted)]">Categoría</label>
+                <select
+                  required
+                  value={item.category}
+                  onChange={(e) =>
+                    updateItem(index, { category: e.target.value as ProductCategory })
+                  }
+                  className="ui-field__input"
+                >
+                  <option value="" disabled>
+                    Selecciona categoría
+                  </option>
+                  {PRODUCT_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="text-[15px] text-[var(--color-muted)]">
+                  Nombre comercial
+                </label>
+                <input
+                  value={item.brand ?? ""}
+                  onChange={(e) => updateItem(index, { brand: e.target.value || null })}
+                  placeholder="Opcional, ej. Nestlé"
                   className="ui-field__input"
                 />
               </div>

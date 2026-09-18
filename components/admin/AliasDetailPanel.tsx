@@ -8,6 +8,7 @@ import {
   updateAliasFullAction,
   type AliasActionState,
 } from "@/app/(app)/admin/interpreter/actions";
+import { PRODUCT_CATEGORIES } from "@/lib/constants/product-categories";
 import type { AliasDetailData } from "@/lib/interpreter/types";
 import type { InterpreterHistoryEntry } from "@/lib/types/database";
 
@@ -286,12 +287,19 @@ function AliasEditForm({
         <label className="ui-field__label" htmlFor="category">
           Categoría
         </label>
-        <input
+        <select
           id="category"
           name="category"
-          defaultValue={detail.canonical_product.category ?? ""}
+          required
+          defaultValue={detail.canonical_product.category}
           className="ui-field__input"
-        />
+        >
+          {PRODUCT_CATEGORIES.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="ui-field">
         <label className="ui-field__label" htmlFor="default_unit">
@@ -314,6 +322,7 @@ function AliasEditForm({
           defaultValue={detail.retailer_product.brand ?? ""}
           className="ui-field__input"
         />
+        <p className="ui-field__help">Marca del fabricante (p.ej. Nestlé), no el supermercado de compra.</p>
       </div>
       <div className="ui-field">
         <label className="ui-field__label" htmlFor="commercial_name">

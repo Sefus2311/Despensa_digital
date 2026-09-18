@@ -1,13 +1,16 @@
 import { Card } from "@/components/Card";
 import { Alert } from "@/components/ui/Alert";
 import { getCurrentUserAndHome } from "@/lib/home";
+import { computeStockQuantity, formatCategoryBrandLine } from "@/lib/pantry";
+import type { ProductCategory } from "@/lib/constants/product-categories";
 
 interface PantryRow {
   canonical_product_id: string;
   canonical_name: string;
-  category: string | null;
+  category: ProductCategory;
   brand: string | null;
   quantity: number;
+  package_quantity: number | null;
   unit: string | null;
   purchase_date: string | null;
   raw_name: string;
@@ -31,7 +34,7 @@ export default async function DespensaPage() {
       <header>
         <h1 className="text-2xl font-semibold font-display">Mi despensa</h1>
         <p className="text-[15px] text-[var(--color-muted)] mt-1">
-          Productos ya interpretados de tus tickets. Todavía no calculamos stock real.
+          Productos ya interpretados de tus tickets.
         </p>
       </header>
 
@@ -53,29 +56,33 @@ export default async function DespensaPage() {
         </Card>
       ) : (
         <ul className="flex flex-col gap-3">
-          {products.map((p) => (
-            <li key={p.canonical_product_id}>
-              <Card>
-                <p className="font-medium">{p.canonical_name}</p>
-                {(p.brand || p.category) && (
-                  <p className="text-[15px] text-[var(--color-muted)]">
-                    {[p.brand, p.category].filter(Boolean).join(" · ")}
+          {products.map((p) => {
+            const stock = computeStockQuantity(p.quantity, p.package_quantity);
+            return (
+              <li key={p.canonical_product_id}>
+                <Card>
+                  <p className="font-semibold">{p.canonical_name}</p>
+                  <p className="text-[15px] text-[var(--color-muted)] mt-0.5">
+                    {formatCategoryBrandLine(p.category, p.brand)}
                   </p>
-                )}
-                <div className="text-[15px] text-[var(--color-muted)] mt-1 flex justify-between">
-                  <span>
-                    Última compra:{" "}
-                    {p.purchase_date
-                      ? new Date(p.purchase_date).toLocaleDateString("es-ES")
-                      : "—"}
-                  </span>
-                  <span>
-                    Cantidad: {p.quantity} {p.unit ?? ""}
-                  </span>
-                </div>
-              </Card>
-            </li>
-          ))}
+                  <div className="text-[15px] text-[var(--color-muted)] mt-1 flex justify-between items-baseline">
+                    <span>
+                      Comprado:{" "}
+                      {p.purchase_date
+                        ? new Date(p.purchase_date).toLocaleDateString("es-ES")
+                        : "—"}
+                    </span>
+                    <span
+                      className="text-[var(--color-text)] font-semibold"
+                      aria-label={`Stock: ${stock} ${p.unit ?? "unidades"}`}
+                    >
+                      {stock}
+                    </span>
+                  </div>
+                </Card>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

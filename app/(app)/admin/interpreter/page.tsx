@@ -1,6 +1,7 @@
 import { Card } from "@/components/Card";
 import { AliasRow } from "@/components/admin/AliasRow";
 import { createClient } from "@/lib/supabase/server";
+import { DEFAULT_PRODUCT_CATEGORY, type ProductCategory } from "@/lib/constants/product-categories";
 
 // El acceso mínimo (delegate/admin) ya lo exige app/(app)/admin/layout.tsx.
 // Diccionario global: consulta y corrección de conocimiento ya aprobado
@@ -20,7 +21,7 @@ type AliasRowShape = {
   deleted_at: string | null;
   retailer_products: {
     brand: string | null;
-    canonical_products: { canonical_name: string; category: string | null } | null;
+    canonical_products: { canonical_name: string; category: ProductCategory } | null;
   } | null;
 };
 
@@ -133,7 +134,7 @@ export default async function AdminInterpreterPage({
             rawName={a.raw_name}
             canonicalName={a.retailer_products?.canonical_products?.canonical_name ?? "—"}
             brand={a.retailer_products?.brand ?? null}
-            category={a.retailer_products?.canonical_products?.category ?? null}
+            category={a.retailer_products?.canonical_products?.category ?? DEFAULT_PRODUCT_CATEGORY}
             confidenceScore={a.confidence_score}
             timesConfirmed={a.times_confirmed}
             active={a.active}
