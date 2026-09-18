@@ -50,7 +50,7 @@ export default async function ReceiptDetailPage({
             Editar
           </Link>
         </div>
-        <h1 className="text-2xl font-semibold mt-1">
+        <h1 className="text-2xl font-semibold font-display mt-1">
           {receipt.store_name || "Ticket"}
         </h1>
         <p className="text-sm text-neutral-500">
@@ -69,7 +69,7 @@ export default async function ReceiptDetailPage({
           <Card key={item.id} className="flex items-center justify-between">
             <div>
               <p className="font-medium text-sm">{item.raw_name}</p>
-              <p className="text-xs text-neutral-500">
+              <p className="text-[15px] text-neutral-500">
                 {Number(item.quantity)} {item.unit ?? ""}
               </p>
             </div>

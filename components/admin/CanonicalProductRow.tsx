@@ -48,11 +48,11 @@ export function CanonicalProductRow({
         </button>
       </div>
       {state?.error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-[15px] text-red-600">
           {state.error}
         </p>
       )}
-      {state?.success && <p className="text-xs text-green-700">{state.success}</p>}
+      {state?.success && <p className="text-[15px] text-green-700">{state.success}</p>}
     </form>
   );
 }

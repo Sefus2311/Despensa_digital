@@ -61,7 +61,7 @@ export function HomeInvitePanel({
           </button>
         </div>
         {state?.error && (
-          <p role="alert" className="text-xs text-red-600">
+          <p role="alert" className="text-[15px] text-red-600">
             {state.error}
           </p>
         )}
@@ -79,7 +79,7 @@ export function HomeInvitePanel({
                 type="button"
                 disabled={isCancelling && cancellingId === inv.id}
                 onClick={() => handleCancel(inv.id)}
-                className="text-xs text-red-600 underline shrink-0"
+                className="text-[15px] text-red-600 underline shrink-0"
               >
                 Cancelar
               </button>

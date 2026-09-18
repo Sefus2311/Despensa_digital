@@ -6,7 +6,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   elevation?: CardElevation;
 }
 
-export function Card({ elevation = "none", className, ...props }: CardProps) {
+export function Card({ elevation = "raised", className, ...props }: CardProps) {
   const classes = ["ui-card", elevation !== "none" && `ui-card--${elevation}`, className]
     .filter(Boolean)
     .join(" ");

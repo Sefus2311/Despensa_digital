@@ -21,7 +21,7 @@ export default async function InicioPage() {
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Inicio</h1>
+        <h1 className="text-2xl font-semibold font-display">Inicio</h1>
       </header>
 
       <PendingInvitations

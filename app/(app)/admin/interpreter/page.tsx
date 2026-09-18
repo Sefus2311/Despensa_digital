@@ -77,7 +77,7 @@ export default async function AdminInterpreterPage({
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Gestión del intérprete</h1>
+        <h1 className="text-2xl font-semibold font-display">Gestión del intérprete</h1>
         <p className="text-sm text-neutral-500">Diccionario global aprobado (product_aliases).</p>
       </header>
 

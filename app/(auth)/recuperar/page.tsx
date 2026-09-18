@@ -12,7 +12,7 @@ export default function RecuperarPage() {
 
   return (
     <main className="min-h-dvh flex flex-col justify-center px-6 py-10 max-w-sm mx-auto">
-      <h1 className="text-2xl font-semibold mb-1">Recuperar contraseña</h1>
+      <h1 className="text-2xl font-semibold font-display mb-1">Recuperar contraseña</h1>
       <p className="text-neutral-500 mb-8">
         Te enviamos un enlace para restablecerla.
       </p>

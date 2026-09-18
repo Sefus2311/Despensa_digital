@@ -64,7 +64,7 @@ function formatDateTime(iso: string | null): string {
 function Field({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
   return (
     <div>
-      <dt className="text-xs text-neutral-400">{label}</dt>
+      <dt className="text-[15px] text-neutral-400">{label}</dt>
       <dd className={mono ? "font-mono text-sm" : "text-sm"}>{value || "—"}</dd>
     </div>
   );
@@ -214,7 +214,7 @@ function AliasViewSection({
           {history.map((h) => {
             const diffs = diffHistoryEntry(h);
             return (
-              <li key={h.id} className="text-xs text-neutral-600 border-l-2 border-[var(--color-border)] pl-2">
+              <li key={h.id} className="text-[15px] text-neutral-600 border-l-2 border-[var(--color-border)] pl-2">
                 <p>
                   <span className="font-medium">{CHANGE_LABELS[h.change_type]}</span>
                   {" · "}

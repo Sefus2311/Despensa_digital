@@ -29,7 +29,7 @@ export default async function AdminInterpreterConflictsPage() {
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Conflictos</h1>
+        <h1 className="text-2xl font-semibold font-display">Conflictos</h1>
         <p className="text-sm text-neutral-500">
           Mismo texto de ticket, interpretaciones incompatibles. Elige la correcta.
         </p>
@@ -42,9 +42,9 @@ export default async function AdminInterpreterConflictsPage() {
         {Array.from(groups.entries()).map(([key, group]) => (
           <div key={key} className="flex flex-col gap-2">
             <Card className="bg-amber-50">
-              <p className="text-xs text-neutral-500">{group[0].retailer}</p>
+              <p className="text-[15px] text-neutral-500">{group[0].retailer}</p>
               <p className="font-mono text-sm">{group[0].raw_name}</p>
-              <p className="text-xs text-neutral-500">{group.length} interpretaciones en conflicto</p>
+              <p className="text-[15px] text-neutral-500">{group.length} interpretaciones en conflicto</p>
             </Card>
             {group.map((p) => (
               <ProposalCard key={p.id} proposal={p} />

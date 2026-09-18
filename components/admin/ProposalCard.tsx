@@ -36,22 +36,22 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
   return (
     <Card className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-medium text-neutral-500">{proposal.retailer}</span>
+        <span className="text-[15px] font-medium text-neutral-500">{proposal.retailer}</span>
         {proposal.status === "conflict" && (
-          <span className="text-xs rounded-full bg-amber-100 text-amber-800 px-2 py-0.5">
+          <span className="text-[15px] rounded-full bg-amber-100 text-amber-800 px-2 py-0.5">
             Conflicto
           </span>
         )}
       </div>
 
       <div>
-        <p className="text-xs text-neutral-400">Texto original del ticket</p>
+        <p className="text-[15px] text-neutral-400">Texto original del ticket</p>
         <p className="font-mono text-sm">{proposal.raw_name}</p>
       </div>
 
       {mode !== "edit" ? (
         <div>
-          <p className="text-xs text-neutral-400">Propuesta interpretada</p>
+          <p className="text-[15px] text-neutral-400">Propuesta interpretada</p>
           <p className="font-medium">{proposal.proposed_canonical_name}</p>
           <p className="text-sm text-neutral-600">
             {[proposal.proposed_brand, proposal.proposed_category].filter(Boolean).join(" · ") || "—"}
@@ -67,7 +67,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
           onSubmit={() => setMode("view")}
         >
           <input type="hidden" name="proposal_id" value={proposal.id} />
-          <label className="text-xs text-neutral-500">
+          <label className="text-[15px] text-neutral-500">
             Producto normalizado
             <input
               name="canonical_name"
@@ -76,11 +76,11 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
               className="ui-field__input mt-1"
             />
           </label>
-          <label className="text-xs text-neutral-500">
+          <label className="text-[15px] text-neutral-500">
             Marca
             <input name="brand" defaultValue={proposal.proposed_brand ?? ""} className="ui-field__input mt-1" />
           </label>
-          <label className="text-xs text-neutral-500">
+          <label className="text-[15px] text-neutral-500">
             Categoría
             <input
               name="category"
@@ -89,7 +89,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
             />
           </label>
           <div className="flex gap-2">
-            <label className="text-xs text-neutral-500 flex-1">
+            <label className="text-[15px] text-neutral-500 flex-1">
               Cantidad
               <input
                 name="quantity"
@@ -99,7 +99,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
                 className="ui-field__input mt-1"
               />
             </label>
-            <label className="text-xs text-neutral-500 flex-1">
+            <label className="text-[15px] text-neutral-500 flex-1">
               Unidad
               <input
                 name="unit"
@@ -127,7 +127,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
         </form>
       )}
 
-      <div className="flex gap-3 text-xs text-neutral-500">
+      <div className="flex gap-3 text-[15px] text-neutral-500">
         {confidencePct !== null && <span>{confidencePct}% confianza IA</span>}
         <span>{proposal.user_confirmations} confirmaciones</span>
         {proposal.user_conflicts > 0 && <span>{proposal.user_conflicts} conflictos</span>}
@@ -199,12 +199,12 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
       )}
 
       {approveState?.error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-[15px] text-red-600">
           {approveState.error}
         </p>
       )}
       {rejectState?.error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-[15px] text-red-600">
           {rejectState.error}
         </p>
       )}

@@ -70,7 +70,7 @@ export function RenameHomeForm({
         </button>
       </div>
       {state?.error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-[15px] text-red-600">
           {state.error}
         </p>
       )}

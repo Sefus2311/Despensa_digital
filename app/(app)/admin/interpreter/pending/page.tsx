@@ -26,7 +26,7 @@ export default async function AdminInterpreterPendingPage() {
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Propuestas pendientes</h1>
+        <h1 className="text-2xl font-semibold font-display">Propuestas pendientes</h1>
         <p className="text-sm text-neutral-500">
           Ordenadas por conflictos, confirmaciones, confianza IA y antigüedad.
         </p>

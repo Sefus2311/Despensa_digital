@@ -31,7 +31,7 @@ export default function NewTicketPage() {
   return (
     <div className="flex flex-col gap-5">
       <header>
-        <h1 className="text-2xl font-semibold">Escanear ticket</h1>
+        <h1 className="text-2xl font-semibold font-display">Escanear ticket</h1>
         <p className="text-sm text-neutral-500 mt-1">
           Haz una foto o elige una imagen de tu ticket de compra.
         </p>
@@ -57,7 +57,7 @@ export default function NewTicketPage() {
               <span className="font-medium text-teal-700">
                 {fileName ?? "Toca para fotografiar o subir"}
               </span>
-              <span className="text-xs text-neutral-400">
+              <span className="text-[15px] text-neutral-400">
                 JPEG, PNG, WEBP o PDF · máx. 15 MB
               </span>
             </>

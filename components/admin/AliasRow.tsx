@@ -52,10 +52,10 @@ export function AliasRow({
       <div className={`flex flex-col gap-1 py-3 ${active && !deleted ? "" : "opacity-50"}`}>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <span className="text-xs text-neutral-400">{retailer}</span>
-            <p className="font-mono text-xs text-neutral-500 truncate">{rawName}</p>
+            <span className="text-[15px] text-neutral-400">{retailer}</span>
+            <p className="font-mono text-[15px] text-neutral-500 truncate">{rawName}</p>
             <p className="font-medium">→ {canonicalName}</p>
-            <p className="text-xs text-neutral-500">{[brand, category].filter(Boolean).join(" · ") || "—"}</p>
+            <p className="text-[15px] text-neutral-500">{[brand, category].filter(Boolean).join(" · ") || "—"}</p>
           </div>
 
           <Dropdown label="⋮" align="right">
@@ -110,14 +110,14 @@ export function AliasRow({
         </div>
 
         <div className="flex items-center justify-between gap-2 mt-1">
-          <div className="flex gap-3 text-xs text-neutral-500">
+          <div className="flex gap-3 text-[15px] text-neutral-500">
             {confidenceScore != null && <span>{Math.round(confidenceScore * 100)}% confianza</span>}
             <span>{timesConfirmed} confirmaciones</span>
             {deleted && <span className="text-red-600">Eliminado</span>}
           </div>
           <form action={activeFormAction} onChange={(e) => e.currentTarget.requestSubmit()}>
             <input type="hidden" name="alias_id" value={aliasId} />
-            <label className="flex items-center gap-1 text-xs text-neutral-500">
+            <label className="flex items-center gap-1 text-[15px] text-neutral-500">
               <input type="checkbox" name="active" defaultChecked={active} disabled={activePending || deleted} />
               Activo
             </label>
@@ -125,12 +125,12 @@ export function AliasRow({
         </div>
 
         {activeState?.error && (
-          <p role="alert" className="text-xs text-red-600">
+          <p role="alert" className="text-[15px] text-red-600">
             {activeState.error}
           </p>
         )}
         {restoreState?.error && (
-          <p role="alert" className="text-xs text-red-600">
+          <p role="alert" className="text-[15px] text-red-600">
             {restoreState.error}
           </p>
         )}

@@ -27,11 +27,11 @@ export function UserRoleRow({
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="font-medium truncate">{displayName || email}</p>
-          <p className="text-xs text-neutral-500 truncate">{email}</p>
+          <p className="text-[15px] text-neutral-500 truncate">{email}</p>
         </div>
-        <span className="text-xs rounded-full bg-neutral-100 px-2 py-1 shrink-0">{role}</span>
+        <span className="text-[15px] rounded-full bg-neutral-100 px-2 py-1 shrink-0">{role}</span>
       </div>
-      <p className="text-xs text-neutral-400">
+      <p className="text-[15px] text-neutral-400">
         Alta: {new Date(createdAt).toLocaleDateString("es-ES")}
       </p>
 
@@ -64,11 +64,11 @@ export function UserRoleRow({
       </form>
 
       {state?.error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-[15px] text-red-600">
           {state.error}
         </p>
       )}
-      {state?.success && <p className="text-xs text-green-700">{state.success}</p>}
+      {state?.success && <p className="text-[15px] text-green-700">{state.success}</p>}
     </div>
   );
 }

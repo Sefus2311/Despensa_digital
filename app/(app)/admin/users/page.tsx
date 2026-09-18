@@ -39,7 +39,7 @@ export default async function AdminUsersPage({
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Usuarios</h1>
+        <h1 className="text-2xl font-semibold font-display">Usuarios</h1>
         <p className="text-sm text-neutral-500">
           Rol de sistema por usuario. No da acceso a datos de sus Casas.
         </p>

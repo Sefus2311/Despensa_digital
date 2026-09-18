@@ -56,7 +56,7 @@ function SpendingStat({
             ‹
           </span>
         )}
-        <span className="text-xs text-neutral-500 text-center flex-1 px-1">{label}</span>
+        <span className="text-[15px] text-neutral-500 text-center flex-1 px-1">{label}</span>
         {nextHref ? (
           <Link href={nextHref} aria-label="Periodo siguiente" className={ARROW_ENABLED}>
             ›
@@ -170,7 +170,7 @@ export default async function HistorialPage({
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Historial</h1>
+        <h1 className="text-2xl font-semibold font-display">Historial</h1>
       </header>
 
       <Card className="grid grid-cols-2 gap-4">
@@ -215,7 +215,7 @@ export default async function HistorialPage({
                       {r.store_name || "Ticket sin nombre"}
                     </span>
                     {r.status !== "reviewed" && (
-                      <span className="text-xs rounded-full bg-amber-100 text-amber-700 px-2 py-0.5">
+                      <span className="text-[15px] rounded-full bg-amber-100 text-amber-700 px-2 py-0.5">
                         Pendiente
                       </span>
                     )}
@@ -228,7 +228,7 @@ export default async function HistorialPage({
                     </span>
                     <span>{r.total_amount != null ? formatCurrency(r.total_amount) : "—"}</span>
                   </div>
-                  <div className="text-xs text-neutral-400 mt-1">
+                  <div className="text-[15px] text-neutral-400 mt-1">
                     {countByReceipt.get(r.id) ?? 0} productos
                   </div>
                 </Card>

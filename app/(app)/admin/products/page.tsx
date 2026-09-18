@@ -50,7 +50,7 @@ export default async function AdminProductsPage({
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Productos</h1>
+        <h1 className="text-2xl font-semibold font-display">Productos</h1>
         <p className="text-sm text-neutral-500">Canónicos y de tienda del intérprete global.</p>
       </header>
 
@@ -89,7 +89,7 @@ export default async function AdminProductsPage({
             {similar.map((s) => (
               <div key={s.id} className="py-2 flex items-center justify-between">
                 <span className="text-sm">{s.canonical_name}</span>
-                <span className="text-xs text-neutral-500">{Math.round(s.similarity * 100)}%</span>
+                <span className="text-[15px] text-neutral-500">{Math.round(s.similarity * 100)}%</span>
               </div>
             ))}
           </div>

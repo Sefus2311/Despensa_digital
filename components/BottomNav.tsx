@@ -39,7 +39,7 @@ export function BottomNav() {
                 <Link
                   href={tab.href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex flex-col items-center justify-center gap-1 py-3 text-xs font-medium ${
+                  className={`flex flex-col items-center justify-center gap-1 py-3 text-[15px] font-medium ${
                     active ? "text-[var(--color-primary)]" : "text-[var(--color-muted)]"
                   }`}
                 >

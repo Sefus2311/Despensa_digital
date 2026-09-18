@@ -18,7 +18,7 @@ function Metric({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex flex-col">
       <span className="text-xl font-semibold">{value}</span>
-      <span className="text-xs text-neutral-500">{label}</span>
+      <span className="text-[15px] text-neutral-500">{label}</span>
     </div>
   );
 }
@@ -36,7 +36,7 @@ export default async function AdminPage() {
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Administración</h1>
+        <h1 className="text-2xl font-semibold font-display">Administración</h1>
         <p className="text-sm text-neutral-500">Tu rol: {role}</p>
       </header>
 
@@ -65,7 +65,7 @@ export default async function AdminPage() {
           <Link key={section.href} href={section.href}>
             <Card className="flex flex-col active:scale-[0.99] transition-transform">
               <span className="font-medium">{section.label}</span>
-              <span className="text-xs text-neutral-500">{section.description}</span>
+              <span className="text-[15px] text-neutral-500">{section.description}</span>
             </Card>
           </Link>
         ))}

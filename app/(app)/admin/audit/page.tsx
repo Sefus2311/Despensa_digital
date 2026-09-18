@@ -40,7 +40,7 @@ export default async function AdminAuditPage() {
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Auditoría</h1>
+        <h1 className="text-2xl font-semibold font-display">Auditoría</h1>
         <p className="text-sm text-neutral-500">
           Actividad administrativa reciente. No incluye datos privados de Casas.
         </p>
@@ -53,11 +53,11 @@ export default async function AdminAuditPage() {
           <div key={entry.id} className="py-3 flex flex-col gap-1">
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium text-sm">{ACTION_LABELS[entry.action] ?? entry.action}</span>
-              <span className="text-xs text-neutral-400">
+              <span className="text-[15px] text-neutral-400">
                 {new Date(entry.created_at).toLocaleString("es-ES")}
               </span>
             </div>
-            <p className="text-xs text-neutral-500">
+            <p className="text-[15px] text-neutral-500">
               {entry.actor_user_id ? actorMap.get(entry.actor_user_id) ?? entry.actor_user_id : "—"}
               {entry.target_type && ` · ${entry.target_type}`}
             </p>

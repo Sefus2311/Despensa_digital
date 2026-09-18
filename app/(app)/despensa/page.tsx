@@ -28,7 +28,7 @@ export default async function DespensaPage() {
   return (
     <div className="flex flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold">Mi despensa</h1>
+        <h1 className="text-2xl font-semibold font-display">Mi despensa</h1>
         <p className="text-sm text-neutral-500 mt-1">
           Productos ya interpretados de tus tickets. Todavía no calculamos stock real.
         </p>
@@ -59,7 +59,7 @@ export default async function DespensaPage() {
               <Card>
                 <p className="font-medium">{p.canonical_name}</p>
                 {(p.brand || p.category) && (
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-[15px] text-neutral-400">
                     {[p.brand, p.category].filter(Boolean).join(" · ")}
                   </p>
                 )}

@@ -3,7 +3,9 @@
  * RealMargin (componentes 100% genéricos: Button, Input/Select/Textarea,
  * Checkbox, Badge, Card, Modal, Dropdown, Alert, Table). Usan los tokens
  * de tokens.css, no valores sueltos, y no dependen de hover para funciones
- * críticas (mobile first).
+ * críticas (mobile first). Tamaños/pesos de texto replican RealMargin 1:1,
+ * incluido su mínimo funcional de 15px por accesibilidad (WCAG 2.2 AA,
+ * DESIGN_SYSTEM.md §11 de ese proyecto).
  */
 
 /* --- Button --- */
@@ -17,7 +19,7 @@
   padding-inline: var(--spacing-lg);
   border-radius: var(--radius-sm);
   border: 2px solid transparent;
-  font: 700 15px/1.2 inherit;
+  font: 800 15px/1.2 var(--font-ui);
   cursor: pointer;
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
@@ -100,7 +102,7 @@
   gap: var(--spacing-xs);
 }
 .ui-field__label {
-  font: 600 15px/1.35 inherit;
+  font: 600 15px/1.35 var(--font-ui);
   color: var(--color-text);
 }
 .ui-field__required {
@@ -113,7 +115,7 @@
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   padding-inline: var(--spacing-sm);
-  font: 400 16px/1.4 inherit;
+  font: 400 16px/1.4 var(--font-ui);
   color: var(--color-text);
   background: var(--color-surface);
 }
@@ -131,12 +133,12 @@
   cursor: not-allowed;
 }
 .ui-field__help {
-  font: 400 14px/1.4 inherit;
+  font: 400 15px/1.4 var(--font-ui);
   color: var(--color-muted);
   margin: 0;
 }
 .ui-field__error {
-  font: 600 14px/1.4 inherit;
+  font: 600 15px/1.4 var(--font-ui);
   color: var(--color-danger);
   margin: 0;
 }
@@ -165,7 +167,7 @@
   outline-offset: 2px;
 }
 .ui-checkbox__label {
-  font: 400 16px/1.4 inherit;
+  font: 400 16px/1.4 var(--font-ui);
   color: var(--color-text);
 }
 
@@ -177,7 +179,7 @@
   border-radius: var(--radius-pill);
   border: 1px solid currentColor;
   padding: 2px var(--spacing-sm);
-  font: 700 13px/1.3 inherit;
+  font: 700 15px/1.3 var(--font-ui);
   white-space: nowrap;
 }
 .ui-badge--neutral {
@@ -247,7 +249,7 @@
   border-bottom: 1px solid var(--color-border);
 }
 .ui-modal__title {
-  font: 700 20px/1.2 inherit;
+  font: 700 20px/1.2 var(--font-display);
   color: var(--color-text);
   margin: 0;
 }
@@ -287,7 +289,7 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
-  font: 700 15px/1.2 inherit;
+  font: 700 15px/1.2 var(--font-ui);
   cursor: pointer;
 }
 .ui-dropdown__trigger:focus-visible {
@@ -318,7 +320,7 @@
   padding: var(--spacing-md);
   border-radius: var(--radius-sm);
   border: 1px solid;
-  font: 400 15px/1.5 inherit;
+  font: 400 15px/1.5 var(--font-ui);
 }
 .ui-alert--info {
   background: var(--color-background);
@@ -350,12 +352,12 @@
 .ui-table {
   width: 100%;
   border-collapse: collapse;
-  font: 400 15px/1.4 inherit;
+  font: 400 15px/1.4 var(--font-ui);
 }
 .ui-table__caption {
   text-align: left;
   padding: var(--spacing-md);
-  font: 700 15px/1.3 inherit;
+  font: 700 15px/1.3 var(--font-ui);
   color: var(--color-text);
 }
 .ui-table th,

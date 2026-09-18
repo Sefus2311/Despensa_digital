@@ -24,7 +24,7 @@ export function ReceiptImage({ src, isPdf }: { src: string; isPdf: boolean }) {
     return (
       <div className="h-40 w-full flex flex-col items-center justify-center gap-2 rounded-2xl bg-white border border-neutral-100 text-neutral-400">
         <Icon name="vacio" size={28} />
-        <span className="text-xs">No se pudo cargar la imagen del ticket</span>
+        <span className="text-[15px]">No se pudo cargar la imagen del ticket</span>
       </div>
     );
   }

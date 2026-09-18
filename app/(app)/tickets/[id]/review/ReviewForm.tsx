@@ -64,7 +64,7 @@ export function ReviewForm({
   return (
     <form action={formAction} className="flex flex-col gap-5">
       <header>
-        <h1 className="text-2xl font-semibold">
+        <h1 className="text-2xl font-semibold font-display">
           {isEditing ? "Editar ticket" : "Revisar ticket"}
         </h1>
         <p className="text-sm text-neutral-500 mt-1">
@@ -131,7 +131,7 @@ export function ReviewForm({
             />
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-xs text-neutral-500">Cantidad</label>
+                <label className="text-[15px] text-neutral-500">Cantidad</label>
                 <input
                   type="number"
                   step="0.01"
@@ -144,7 +144,7 @@ export function ReviewForm({
                 />
               </div>
               <div className="flex-1">
-                <label className="text-xs text-neutral-500">Unidad</label>
+                <label className="text-[15px] text-neutral-500">Unidad</label>
                 <input
                   value={item.unit ?? ""}
                   onChange={(e) =>
@@ -157,7 +157,7 @@ export function ReviewForm({
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-xs text-neutral-500">
+                <label className="text-[15px] text-neutral-500">
                   Precio unidad (€)
                 </label>
                 <input
@@ -174,7 +174,7 @@ export function ReviewForm({
                 />
               </div>
               <div className="flex-1">
-                <label className="text-xs text-neutral-500">Importe (€)</label>
+                <label className="text-[15px] text-neutral-500">Importe (€)</label>
                 <input
                   type="number"
                   step="0.01"

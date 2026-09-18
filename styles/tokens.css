@@ -3,12 +3,22 @@
  *
  * Estructura (escalas de espaciado/radio/elevación) adaptada del design
  * system de RealMargin, con identidad de color propia: no reutiliza la
- * paleta de marca de RealMargin. Los componentes de /components/ui y
- * /components/icons consumen estos tokens en vez de valores sueltos, para
- * poder cambiar la identidad visual sin tocar cada componente.
+ * paleta de marca de RealMargin. Tipografía (familias Montserrat/Inter y
+ * el criterio de uso: Inter en cuerpo/componentes, Montserrat solo en
+ * contextos protagonistas) sí replica RealMargin 1:1 (decisión 2026-09-18,
+ * ver DESIGN_SYSTEM.md §3 de ese proyecto). Los componentes de
+ * /components/ui y /components/icons consumen estos tokens en vez de
+ * valores sueltos, para poder cambiar la identidad visual sin tocar cada
+ * componente.
  */
 
 :root {
+  /* Tipografía — var(--font-montserrat)/var(--font-inter) las inyecta
+     next/font/google en app/layout.tsx sobre <html>; los literales quedan
+     como fallback si algún consumidor no hereda esas variables. */
+  --font-display: var(--font-montserrat), "Montserrat", "Arial Black", "Segoe UI", sans-serif;
+  --font-ui: var(--font-inter), "Inter", "Segoe UI", Arial, sans-serif;
+
   /* Color */
   --color-primary: #0f766e;
   --color-primary-hover: #115e59;
@@ -38,10 +48,11 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
 
-  /* Elevación */
+  /* Elevación — misma fórmula que RealMargin: sombra sombreada con el
+     propio color de texto (no negro puro), difuminado y opacidad 1:1. */
   --shadow-none: none;
-  --shadow-raised: 0 8px 24px rgba(23, 23, 23, 0.1);
-  --shadow-overlay: 0 20px 50px rgba(23, 23, 23, 0.2);
+  --shadow-raised: 0 8px 24px rgba(23, 23, 23, 0.12);
+  --shadow-overlay: 0 20px 50px rgba(23, 23, 23, 0.22);
 }
 
 @media (prefers-color-scheme: dark) {

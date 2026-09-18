@@ -29,7 +29,7 @@ export function PendingInvitations({ invitations }: { invitations: Invitation[] 
   return (
     <div className="flex flex-col gap-3">
       {invitations.map((inv) => (
-        <Card key={inv.id} className="border-[var(--color-primary)]">
+        <Card key={inv.id} elevation="none" className="border-[var(--color-primary)]">
           <p className="text-sm">
             Te han invitado a unirte a <strong>{inv.homeName}</strong>.
           </p>
@@ -52,7 +52,7 @@ export function PendingInvitations({ invitations }: { invitations: Invitation[] 
             </button>
           </div>
           {errorFor?.id === inv.id && (
-            <p role="alert" className="text-xs text-red-600 mt-2">
+            <p role="alert" className="text-[15px] text-red-600 mt-2">
               {errorFor.message}
             </p>
           )}

@@ -31,7 +31,7 @@ export function RetailerProductRow({
   return (
     <form action={formAction} className="flex flex-col gap-2 py-3">
       <input type="hidden" name="id" value={id} />
-      <p className="text-xs text-neutral-400">
+      <p className="text-[15px] text-neutral-400">
         {retailer} · producto normalizado: {canonicalName}
       </p>
       <input name="commercial_name" defaultValue={commercialName} className="ui-field__input" />
@@ -60,11 +60,11 @@ export function RetailerProductRow({
         </button>
       </div>
       {state?.error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-[15px] text-red-600">
           {state.error}
         </p>
       )}
-      {state?.success && <p className="text-xs text-green-700">{state.success}</p>}
+      {state?.success && <p className="text-[15px] text-green-700">{state.success}</p>}
     </form>
   );
 }
