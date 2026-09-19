@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentUserAndHome } from "@/lib/home";
+import { canonicalizeUnit } from "@/lib/units";
 
 export type ListaCompraState = { error?: string } | null;
 
@@ -14,7 +15,7 @@ export async function addManualItem(
   const productoId = String(formData.get("producto_id") ?? "").trim() || null;
   const nombreMostrado = String(formData.get("nombre_mostrado") ?? "").trim();
   const cantidadRaw = String(formData.get("cantidad") ?? "").trim();
-  const unidad = String(formData.get("unidad") ?? "").trim() || null;
+  const unidad = canonicalizeUnit(String(formData.get("unidad") ?? ""));
 
   if (!nombreMostrado) {
     return { error: "Escribe qué producto quieres añadir." };

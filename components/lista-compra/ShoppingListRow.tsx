@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { removeItem, toggleChecked } from "@/app/(app)/lista-compra/actions";
 import type { ShoppingListItem } from "@/lib/types/database";
+import { canonicalizeUnit } from "@/lib/units";
 
 export function ShoppingListRow({ item }: { item: ShoppingListItem }) {
   const [, startTransition] = useTransition();
@@ -20,7 +21,7 @@ export function ShoppingListRow({ item }: { item: ShoppingListItem }) {
         className={`text-[15px] flex-1 ${item.is_checked ? "line-through text-[var(--color-muted)]" : ""}`}
       >
         {item.quantity != null && `${item.quantity} `}
-        {item.unit && `${item.unit} `}
+        {item.unit && `${canonicalizeUnit(item.unit)} `}
         {item.display_name}
         {item.source === "receta" && (
           <span className="text-[var(--color-muted)]"> · de una receta</span>

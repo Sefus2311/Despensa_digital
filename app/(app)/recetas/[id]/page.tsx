@@ -5,6 +5,7 @@ import { DeleteRecetaButton } from "@/components/recetas/DeleteRecetaButton";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { computeStockQuantity } from "@/lib/pantry";
 import { classifyIngredient, type PantryStockRow } from "@/lib/recipes";
+import { canonicalizeUnit } from "@/lib/units";
 import type { Receta, RecetaIngrediente, RecetaPaso } from "@/lib/types/database";
 import { deleteReceta } from "../actions";
 
@@ -79,7 +80,7 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
                 <span className={`font-semibold ${markColor}`}>{mark}</span>
                 <span className="text-[15px] flex-1">
                   {ing.cantidad != null && <span className="text-[var(--color-muted)]">{ing.cantidad} </span>}
-                  {ing.unidad && <span className="text-[var(--color-muted)]">{ing.unidad} </span>}
+                  {ing.unidad && <span className="text-[var(--color-muted)]">{canonicalizeUnit(ing.unidad)} </span>}
                   {ing.nombre_mostrado}
                   {ing.opcional && <span className="text-[var(--color-muted)]"> (opcional)</span>}
                   {!ing.producto_id && (

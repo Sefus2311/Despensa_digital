@@ -1,4 +1,5 @@
 import type { RecetaIngrediente } from "@/lib/types/database";
+import { isPurchasableUnit, sameUnit, toBaseUnit } from "@/lib/units";
 
 export type IngredientAvailability = "disponible" | "parcial" | "faltante";
 
@@ -51,7 +52,7 @@ export function classifyIngredient(
   }
 
   const comparableQuantities =
-    ingredient.cantidad != null && ingredient.unidad != null && ingredient.unidad === pantryRow.unit;
+    ingredient.cantidad != null && ingredient.unidad != null && sameUnit(ingredient.unidad, pantryRow.unit);
 
   if (!comparableQuantities) {
     return { ingredient, availability: "disponible", missingQuantity: null, linked: true };
@@ -86,4 +87,49 @@ export function summarizeAvailability(
   const missingRequired = missing.filter((c) => !c.ingredient.opcional);
   const missingOptional = missing.filter((c) => c.ingredient.opcional);
   return { checks, missingRequired, missingOptional, canCook: missingRequired.length === 0 };
+}
+
+/**
+ * Escalado por raciones: cantidadNecesaria = cantidadReceta × racionesDeseadas / racionesBaseReceta.
+ * Función pura, un ingrediente cada vez (no comparte estado entre llamadas).
+ * Sin cantidad -> null. Redondea a 2 decimales para evitar ruido de coma flotante.
+ */
+export function scaleQuantity(
+  cantidad: number | null,
+  racionesBase: number,
+  racionesDeseadas: number
+): number | null {
+  if (cantidad == null) return null;
+  if (!(racionesBase > 0) || !(racionesDeseadas > 0)) return cantidad;
+  return Math.round(((cantidad * racionesDeseadas) / racionesBase) * 100) / 100;
+}
+
+/** Devuelve copias de los ingredientes con la cantidad escalada; no muta los originales. */
+export function scaleIngredients(
+  ingredients: RecetaIngrediente[],
+  racionesBase: number,
+  racionesDeseadas: number
+): RecetaIngrediente[] {
+  return ingredients.map((ing) => ({
+    ...ing,
+    cantidad: scaleQuantity(ing.cantidad, racionesBase, racionesDeseadas),
+  }));
+}
+
+/** Copias con kg -> gr. y l -> ml. aplicados (ver toBaseUnit); no muta los originales. */
+export function toBaseUnits(ingredients: RecetaIngrediente[]): RecetaIngrediente[] {
+  return ingredients.map((ing) => {
+    const { cantidad, unidad } = toBaseUnit(ing.cantidad, ing.unidad);
+    return { ...ing, cantidad, unidad };
+  });
+}
+
+/**
+ * Regla única de qué ingrediente puede generar una línea en la lista de la
+ * compra: solo si su unidad es ud., gr. o ml. (cualquier variante). Las
+ * unidades culinarias (cucharada, pellizco, al gusto...) o la ausencia de
+ * unidad no generan línea. Solo afecta a la lista: la receta no se modifica.
+ */
+export function isShoppableIngredient(ingredient: Pick<RecetaIngrediente, "unidad">): boolean {
+  return isPurchasableUnit(ingredient.unidad);
 }

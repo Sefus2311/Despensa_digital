@@ -44,7 +44,7 @@ export function AddItemForm() {
       />
       <div className="flex gap-2">
         <input name="cantidad" type="number" step="0.01" min={0} placeholder="Cantidad" className="ui-field__input flex-1" />
-        <input name="unidad" placeholder="Unidad" className="ui-field__input flex-1" />
+        <input name="unidad" placeholder="Unidad (ud., gr., ml.)" className="ui-field__input flex-1" />
       </div>
       {state?.error && (
         <p role="alert" className="text-[15px] text-[var(--color-danger-text)]">

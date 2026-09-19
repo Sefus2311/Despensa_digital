@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { canonicalizeUnit } from "@/lib/units";
 
 export type RecetaFormState = { error?: string } | null;
 
@@ -60,7 +61,9 @@ async function replaceIngredientesYPasos(
         producto_id: ing.productoId,
         nombre_mostrado: ing.nombreMostrado.trim(),
         cantidad: ing.cantidad,
-        unidad: ing.unidad,
+        // ud./gr./ml. se guardan siempre en su forma estándar; las culinarias
+        // (cucharada, al gusto...) se conservan tal cual.
+        unidad: canonicalizeUnit(ing.unidad),
         opcional: ing.opcional,
         control_stock: ing.controlStock,
         orden: index,

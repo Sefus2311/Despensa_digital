@@ -257,7 +257,7 @@ export function RecipeForm({
               <input
                 value={ing.unidad ?? ""}
                 onChange={(e) => updateIngrediente(index, { unidad: e.target.value || null })}
-                placeholder="Unidad (g, ud, al gusto...)"
+                placeholder="Unidad (ud., gr., ml., cucharada, al gusto...)"
                 className="ui-field__input flex-1"
               />
             </div>

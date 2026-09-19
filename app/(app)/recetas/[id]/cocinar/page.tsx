@@ -5,7 +5,14 @@ import { Icon } from "@/components/icons/Icon";
 import { CocinarPanel, type MissingItem } from "@/components/recetas/CocinarPanel";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { computeStockQuantity } from "@/lib/pantry";
-import { summarizeAvailability, type PantryStockRow } from "@/lib/recipes";
+import {
+  isShoppableIngredient,
+  scaleIngredients,
+  toBaseUnits,
+  summarizeAvailability,
+  type PantryStockRow,
+} from "@/lib/recipes";
+import { canonicalizeUnit, toBaseUnit } from "@/lib/units";
 import type { Receta, RecetaIngrediente, RecetaPaso } from "@/lib/types/database";
 import { addMissingToShoppingList } from "./actions";
 
@@ -16,8 +23,24 @@ interface PantryRow {
   unit: string | null;
 }
 
-export default async function CocinarPage({ params }: { params: Promise<{ id: string }> }) {
+const MAX_RACIONES = 100;
+
+// Raciones deseadas: entero 1..100 desde ?raciones=; si falta o es inválido,
+// las de la receta (factor ×1, mismas cantidades que la receta original).
+function parseRaciones(value: string | undefined, fallback: number): number {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 1 && n <= MAX_RACIONES ? n : fallback;
+}
+
+export default async function CocinarPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ raciones?: string }>;
+}) {
   const { id } = await params;
+  const { raciones: racionesParam } = await searchParams;
   const { supabase, homeId } = await getCurrentUserAndHome();
 
   const { data: recetaData } = await supabase.from("recetas").select("*").eq("id", id).maybeSingle();
@@ -30,13 +53,19 @@ export default async function CocinarPage({ params }: { params: Promise<{ id: st
     supabase.rpc("get_home_pantry", { p_home_id: homeId }),
   ]);
 
-  const ingredientes = (ingredientesData ?? []) as RecetaIngrediente[];
+  const racionesDeseadas = parseRaciones(racionesParam, receta.raciones);
+  // cantidadNecesaria = cantidadReceta × racionesDeseadas / racionesBaseReceta,
+  // calculada por ingrediente sobre copias (scaleIngredients no muta ni
+  // comparte estado entre ingredientes).
+  // Después kg -> gr. y l -> ml., para comparar con la despensa y para la lista.
+  const ingredientes = toBaseUnits(
+    scaleIngredients((ingredientesData ?? []) as RecetaIngrediente[], receta.raciones, racionesDeseadas)
+  );
   const pasos = (pasosData ?? []) as RecetaPaso[];
-  const pantry: PantryStockRow[] = ((pantryData ?? []) as PantryRow[]).map((p) => ({
-    canonical_product_id: p.canonical_product_id,
-    stock: computeStockQuantity(p.quantity, p.package_quantity),
-    unit: p.unit,
-  }));
+  const pantry: PantryStockRow[] = ((pantryData ?? []) as PantryRow[]).map((p) => {
+    const base = toBaseUnit(computeStockQuantity(p.quantity, p.package_quantity), p.unit);
+    return { canonical_product_id: p.canonical_product_id, stock: base.cantidad ?? 0, unit: base.unidad };
+  });
 
   const summary = summarizeAvailability(ingredientes, pantry);
 
@@ -45,9 +74,18 @@ export default async function CocinarPage({ params }: { params: Promise<{ id: st
       productoId: check.ingredient.producto_id,
       nombreMostrado: check.ingredient.nombre_mostrado,
       cantidad: check.missingQuantity ?? check.ingredient.cantidad,
-      unidad: check.ingredient.unidad,
+      unidad: canonicalizeUnit(check.ingredient.unidad),
     };
   }
+
+  // Filtro de la lista de la compra: solo pasan los ingredientes con unidad
+  // ud./gr./ml. Los demás (cucharadas, al gusto...) siguen en la receta pero
+  // no generan línea.
+  const requeridosComprables = summary.missingRequired.filter((c) => isShoppableIngredient(c.ingredient));
+  const opcionalesComprables = summary.missingOptional.filter((c) => isShoppableIngredient(c.ingredient));
+  const noComprables = [...summary.missingRequired, ...summary.missingOptional]
+    .filter((c) => !isShoppableIngredient(c.ingredient))
+    .map((c) => c.ingredient.nombre_mostrado);
 
   return (
     <div className="flex flex-col gap-4">
@@ -62,6 +100,29 @@ export default async function CocinarPage({ params }: { params: Promise<{ id: st
         <h1 className="text-2xl font-semibold font-display">A cocinar</h1>
       </header>
 
+      <Card>
+        <form method="GET" className="flex items-end gap-2">
+          <div className="ui-field flex-1">
+            <label className="ui-field__label" htmlFor="raciones">
+              Raciones a cocinar (la receta es para {receta.raciones})
+            </label>
+            <input
+              id="raciones"
+              name="raciones"
+              type="number"
+              min={1}
+              max={MAX_RACIONES}
+              step={1}
+              defaultValue={racionesDeseadas}
+              className="ui-field__input"
+            />
+          </div>
+          <button type="submit" className="ui-button ui-button--secondary">
+            Recalcular
+          </button>
+        </form>
+      </Card>
+
       {summary.canCook ? (
         <Card>
           <p className="text-[15px] font-medium text-[var(--color-primary-text)]">
@@ -70,8 +131,9 @@ export default async function CocinarPage({ params }: { params: Promise<{ id: st
         </Card>
       ) : (
         <CocinarPanel
-          requeridos={summary.missingRequired.map(toMissingItem)}
-          opcionales={summary.missingOptional.map(toMissingItem)}
+          requeridos={requeridosComprables.map(toMissingItem)}
+          opcionales={opcionalesComprables.map(toMissingItem)}
+          noComprables={noComprables}
           action={addMissingToShoppingList.bind(null, id)}
         />
       )}

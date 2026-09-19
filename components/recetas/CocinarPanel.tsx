@@ -19,16 +19,19 @@ function formatCantidad(item: MissingItem) {
 export function CocinarPanel({
   requeridos,
   opcionales,
+  noComprables,
   action,
 }: {
   requeridos: MissingItem[];
   opcionales: MissingItem[];
+  /** Faltantes con unidad culinaria (al gusto, cucharada...): no van a la lista. */
+  noComprables: string[];
   action: (prevState: CocinarState, formData: FormData) => Promise<CocinarState>;
 }) {
   const [state, formAction, pending] = useActionState<CocinarState, FormData>(action, null);
   const [selectedOptional, setSelectedOptional] = useState<Set<number>>(new Set());
 
-  if (requeridos.length === 0 && opcionales.length === 0) {
+  if (requeridos.length === 0 && opcionales.length === 0 && noComprables.length === 0) {
     return null;
   }
 
@@ -79,6 +82,12 @@ export function CocinarPanel({
             ))}
           </ul>
         </div>
+      )}
+
+      {noComprables.length > 0 && (
+        <p className="text-[15px] text-[var(--color-muted)]">
+          No se añaden a la lista (unidad no comprable): {noComprables.join(", ")}.
+        </p>
       )}
 
       <form action={formAction}>
