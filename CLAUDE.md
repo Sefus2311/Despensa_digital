@@ -151,6 +151,16 @@ See `docs/ROLES_AND_PERMISSIONS.md` for the full model/permission matrix/first-a
 (transactional, also resolves conflicts), rejection, and editing already-approved knowledge. See
 `docs/RECIPES_ARCHITECTURE.md` for the recipes module (Recipes flow above).
 
+### Supermercados y categorías (normalización)
+- Los nombres de supermercado se guardan **siempre en MAYÚSCULAS**. Única regla en TS:
+  `normalizeSupermarketName` / `normalizeOptionalSupermarketName` / `buildSupermarketOptions`
+  (`lib/supermarkets.ts`) — úsalas antes de cualquier INSERT/UPDATE/RPC que reciba un supermercado
+  (`receipts.store_name`, `retailer` del intérprete). En BD, `0017_supermarkets_uppercase.sql` añade
+  `normalize_supermarket_name()` + triggers como red de seguridad y `list_supermarkets()` (fuente del
+  selector SUPERMERCADO de `/admin/interpreter`).
+- Las 7 categorías oficiales viven solo en `lib/constants/product-categories.ts` (`PRODUCT_CATEGORIES`);
+  no las repitas en otros archivos.
+
 ### Conventions
 - Server Actions return a `{ error?: string } | null` state shape and are driven by forms using
   React's `useActionState`; follow this pattern for new mutations rather than route handlers.

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { isProductCategory } from "@/lib/constants/product-categories";
+import { normalizeOptionalSupermarketName } from "@/lib/supermarkets";
 
 export type SaveReviewState = { error?: string } | null;
 
@@ -30,7 +31,9 @@ export async function saveReceiptReview(
 ): Promise<SaveReviewState> {
   const { supabase, homeId } = await getCurrentUserAndHome();
 
-  const storeName = String(formData.get("store_name") ?? "").trim() || null;
+  // El supermercado se guarda siempre en MAYÚSCULAS (dato real, no CSS); este
+  // mismo valor es el que se envía después al intérprete como `retailer`.
+  const storeName = normalizeOptionalSupermarketName(String(formData.get("store_name") ?? ""));
   const purchaseDate = String(formData.get("purchase_date") ?? "") || null;
   const totalAmountRaw = formData.get("total_amount");
   const totalAmount = totalAmountRaw ? Number(totalAmountRaw) : null;

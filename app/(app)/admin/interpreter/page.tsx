@@ -4,7 +4,13 @@ import { ProposalCard } from "@/components/admin/ProposalCard";
 import { InterpreterEstadoSelect } from "@/components/admin/InterpreterEstadoSelect";
 import { createClient } from "@/lib/supabase/server";
 import { sortPendingProposals } from "@/lib/interpreter/proposals";
-import { DEFAULT_PRODUCT_CATEGORY, type ProductCategory } from "@/lib/constants/product-categories";
+import { Select } from "@/components/ui";
+import {
+  DEFAULT_PRODUCT_CATEGORY,
+  PRODUCT_CATEGORIES,
+  type ProductCategory,
+} from "@/lib/constants/product-categories";
+import { buildSupermarketOptions, normalizeSupermarketName } from "@/lib/supermarkets";
 import type { InterpreterProposal } from "@/lib/types/database";
 
 // El acceso mínimo (delegate/admin) ya lo exige app/(app)/admin/layout.tsx.
@@ -42,7 +48,8 @@ export default async function AdminInterpreterPage({
 }) {
   const params = await searchParams;
   const q = params.q?.trim().toLowerCase() ?? "";
-  const retailer = params.retailer?.trim().toLowerCase() ?? "";
+  // Se compara ya normalizado (MAYÚSCULAS): "Mercadona"/"mercadona" = "MERCADONA".
+  const retailer = params.retailer ? normalizeSupermarketName(params.retailer) : "";
   const category = params.category?.trim().toLowerCase() ?? "";
   const minConfidence = Number(params.min_confidence) || 0;
   const estado =
@@ -76,7 +83,7 @@ export default async function AdminInterpreterPage({
       ) {
         return false;
       }
-      if (retailer && p.retailer.toLowerCase() !== retailer) return false;
+      if (retailer && normalizeSupermarketName(p.retailer) !== retailer) return false;
       if (category && (p.proposed_category ?? "").toLowerCase() !== category) return false;
       if ((p.ai_confidence ?? 0) < minConfidence) return false;
       return true;
@@ -108,12 +115,21 @@ export default async function AdminInterpreterPage({
       ) {
         return false;
       }
-      if (retailer && a.retailer.toLowerCase() !== retailer) return false;
+      if (retailer && normalizeSupermarketName(a.retailer) !== retailer) return false;
       if (category && aliasCategory.toLowerCase() !== category) return false;
       if ((a.confidence_score ?? 0) < minConfidence) return false;
       return true;
     });
   }
+
+  // Lista real de supermercados existentes en BD (list_supermarkets, migración
+  // 0017), sin duplicados y ordenada. Si el RPC aún no existe, se cae a los
+  // supermercados de las filas ya cargadas para que la página siga funcionando.
+  const { data: supermarketRows, error: supermarketsError } = await supabase.rpc("list_supermarkets");
+  const supermarketNames: string[] = supermarketsError
+    ? [...proposals.map((p) => p.retailer), ...aliases.map((a) => a.retailer)]
+    : ((supermarketRows ?? []) as string[]);
+  const supermarketOptions = buildSupermarketOptions(supermarketNames);
 
   return (
     <div className="flex flex-col gap-4">
@@ -136,18 +152,30 @@ export default async function AdminInterpreterPage({
             className="ui-field__input"
           />
           <div className="flex gap-2">
-            <input
-              name="retailer"
-              defaultValue={retailer}
-              placeholder="Supermercado"
-              className="ui-field__input flex-1"
-            />
-            <input
-              name="category"
-              defaultValue={category}
-              placeholder="Categoría"
-              className="ui-field__input flex-1"
-            />
+            <div className="flex-1">
+              <Select label="SUPERMERCADO" name="retailer" defaultValue={retailer}>
+                <option value="">TODOS</option>
+                {supermarketOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="flex-1">
+              <Select
+                label="CATEGORÍA"
+                name="category"
+                defaultValue={PRODUCT_CATEGORIES.find((c) => c.toLowerCase() === category) ?? ""}
+              >
+                <option value="">TODAS</option>
+                {PRODUCT_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </div>
           <div className="flex gap-2">
             <select name="min_confidence" defaultValue={params.min_confidence ?? ""} className="ui-field__input flex-1">
