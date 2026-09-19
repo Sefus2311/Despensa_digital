@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
+import { ImportJsonButton } from "@/components/tickets/ImportJsonButton";
 import { uploadReceipt, type UploadReceiptState } from "../actions";
 
 export default function NewTicketPage() {
@@ -90,6 +91,14 @@ export default function NewTicketPage() {
           {pending ? "Subiendo..." : "Guardar y revisar"}
         </button>
       </form>
+
+      <div className="flex items-center gap-3 text-[15px] text-[var(--color-muted)]" aria-hidden="true">
+        <span className="flex-1 border-t border-[var(--color-border)]" />
+        o
+        <span className="flex-1 border-t border-[var(--color-border)]" />
+      </div>
+
+      <ImportJsonButton />
     </div>
   );
 }

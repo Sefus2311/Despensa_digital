@@ -3,7 +3,8 @@
 
 import type { ProductCategory } from "@/lib/constants/product-categories";
 
-export type ReceiptStatus = "uploaded" | "processing" | "reviewed" | "error";
+// "pending_review" = PENDIENTE_REVISION: ticket importado por JSON, aún sin confirmar (0019).
+export type ReceiptStatus = "uploaded" | "processing" | "pending_review" | "reviewed" | "error";
 
 // Rol de sistema del usuario (ortogonal a la pertenencia a una Casa, ver
 // home_members / getCurrentUserAndHome()). Controla capacidades globales de
@@ -52,8 +53,15 @@ export interface Receipt {
   store_key: string | null;
   purchase_date: string | null;
   total_amount: number | null;
-  image_path: string;
+  /** Null en tickets importados por JSON (no tienen imagen), desde 0019. */
+  image_path: string | null;
   status: ReceiptStatus;
+  receipt_number: string | null;
+  source_provider: string | null;
+  source_message_id: string | null;
+  source_document_hash: string | null;
+  /** Datos secundarios de la importación (impuestos, descuentos, avisos...). */
+  import_data: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -77,6 +85,19 @@ export interface ReceiptItem {
   unit: string | null;
   unit_price: number | null;
   total_price: number | null;
+  // Campos de la interpretación (0019); null en líneas escritas a mano.
+  line_number: number | null;
+  /** Producto interpretado, en minúsculas. raw_name sigue siendo el texto del ticket. */
+  product_name: string | null;
+  category: ProductCategory | null;
+  brand: string | null;
+  commercial_name: string | null;
+  units_per_pack: number | null;
+  inventory_quantity: number | null;
+  confidence: number | null;
+  review_required: boolean;
+  notes: string | null;
+  is_inventory_item: boolean;
   created_at: string;
 }
 

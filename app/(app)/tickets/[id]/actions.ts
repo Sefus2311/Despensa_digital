@@ -16,6 +16,20 @@ interface ItemInput {
   totalPrice: number | null;
   category: string;
   brand: string | null;
+  // Interpretación (importación JSON, 0019). Ausentes/null en líneas manuales.
+  productName?: string | null;
+  commercialName?: string | null;
+  unitsPerPack?: number | null;
+  inventoryQuantity?: number | null;
+  confidence?: number | null;
+  reviewRequired?: boolean;
+  notes?: string | null;
+  isInventoryItem?: boolean;
+}
+
+// Los números opcionales llegan del cliente: se descartan si no son válidos.
+function nonNegativeOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
 }
 
 /**
@@ -87,14 +101,29 @@ export async function saveReceiptReview(
   await supabase.from("receipt_items").delete().eq("receipt_id", receiptId);
 
   const { error: itemsError } = await supabase.from("receipt_items").insert(
-    validItems.map((item) => ({
-      receipt_id: receiptId,
-      raw_name: item.rawName.trim(),
-      quantity: item.quantity || 1,
-      unit: item.unit,
-      unit_price: item.unitPrice,
-      total_price: item.totalPrice,
-    }))
+    validItems.map((item, index) => {
+      const confidence = nonNegativeOrNull(item.confidence);
+      return {
+        receipt_id: receiptId,
+        raw_name: item.rawName.trim(),
+        quantity: item.quantity || 1,
+        unit: item.unit,
+        unit_price: item.unitPrice,
+        total_price: item.totalPrice,
+        line_number: index + 1,
+        // El producto interpretado se guarda siempre en minúsculas.
+        product_name: item.productName?.trim().toLowerCase() || null,
+        category: item.category,
+        brand: item.brand?.trim() || null,
+        commercial_name: item.commercialName?.trim() || null,
+        units_per_pack: nonNegativeOrNull(item.unitsPerPack),
+        inventory_quantity: nonNegativeOrNull(item.inventoryQuantity),
+        confidence: confidence !== null && confidence <= 1 ? confidence : null,
+        review_required: item.reviewRequired === true,
+        notes: item.notes?.trim() || null,
+        is_inventory_item: item.isInventoryItem !== false,
+      };
+    })
   );
 
   if (itemsError) {
@@ -114,7 +143,7 @@ export async function saveReceiptReview(
         supabase.rpc("submit_interpreter_proposal", {
           p_retailer: storeName,
           p_raw_name: item.rawName.trim(),
-          p_proposed_canonical_name: item.rawName.trim(),
+          p_proposed_canonical_name: item.productName?.trim().toLowerCase() || item.rawName.trim(),
           p_proposed_brand: item.brand?.trim() || null,
           p_proposed_category: item.category,
           p_proposed_quantity: item.quantity || null,

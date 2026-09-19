@@ -28,12 +28,13 @@ export default async function ReceiptDetailPage({
 
   const { data: items } = await supabase
     .from("receipt_items")
-    .select("id, raw_name, quantity, unit, unit_price, total_price")
+    .select("id, raw_name, product_name, quantity, unit, unit_price, total_price")
     .eq("receipt_id", id)
     .order("created_at", { ascending: true });
 
-  const imageUrl = await getReceiptImageUrl(receipt.image_path);
-  const isPdf = receipt.image_path.toLowerCase().endsWith(".pdf");
+  // Los tickets importados por JSON no tienen imagen (image_path null).
+  const imageUrl = receipt.image_path ? await getReceiptImageUrl(receipt.image_path) : null;
+  const isPdf = receipt.image_path?.toLowerCase().endsWith(".pdf") ?? false;
 
   return (
     <div className="flex flex-col gap-4">
@@ -68,7 +69,10 @@ export default async function ReceiptDetailPage({
         {(items ?? []).map((item) => (
           <Card key={item.id} className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-[15px]">{item.raw_name}</p>
+              <p className="font-medium text-[15px]">{item.product_name ?? item.raw_name}</p>
+              {item.product_name && (
+                <p className="text-[13px] text-[var(--color-muted)] font-mono">{item.raw_name}</p>
+              )}
               <p className="text-[15px] text-[var(--color-muted)]">
                 {Number(item.quantity)} {item.unit ?? ""}
               </p>

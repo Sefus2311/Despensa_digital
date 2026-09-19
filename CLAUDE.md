@@ -118,6 +118,23 @@ sync manually, or regenerate with `supabase gen types typescript` (noted in the 
    and keeping the most recent purchase — there's no real stock/quantity tracking yet; that's what
    `inventory_events` is reserved for in a later version.
 
+### Importación de tickets por JSON (`receipt_interpretation_v1`)
+Botón **Importar JSON** en `/tickets/new` (`components/tickets/ImportJsonButton.tsx`): lee el fichero en el
+navegador, lo valida y envía el texto a `importReceiptJson` (`app/(app)/tickets/actions.ts`), que **vuelve a
+validar en servidor** y llama al RPC `import_receipt_json` (`0019_receipt_json_import.sql`): cabecera +
+líneas en una sola transacción, `SECURITY INVOKER` (RLS), comprobación de pertenencia a la casa y detección
+de duplicados (id de mensaje, hash del documento, supermercado + nº de ticket). Código en
+`lib/receipt-import/` (`validate.ts` contrato → `adapter.ts` modelo interno → `persist.ts` RPC). La casa sale
+siempre de `getCurrentUserAndHome()`, nunca del JSON (un `home_id` en el fichero se rechaza), y el estado se
+fuerza a `pending_review` (`lib/receipt-status.ts`). **Un ticket `pending_review` no alimenta la despensa**:
+`get_home_pantry`/`count_home_pending_interpretation` solo cuentan tickets `reviewed` y líneas de inventario;
+la despensa se actualiza al pulsar «Confirmar compra» (`saveReceiptReview`, que pone `reviewed`). El flujo pide
+el PDF del ticket (obligatorio, en dos pasos: JSON y luego PDF): la Server Action lo valida (`lib/receipt-import/pdf.ts`),
+lo sube a `{homeId}/{uuid}.pdf` del bucket `receipts` y `import_receipt_json` (0020, ruta obligatoriamente
+dentro de la carpeta de la casa) lo guarda en `receipts.image_path`; si el ticket no llega a crearse, se
+borra el PDF. Su SHA-256 se guarda como `source_document_hash` si el JSON no trae hash. `image_path` es
+nullable (0019) por si algún día se importa sin PDF. Ejemplo: `docs/examples/`.
+
 ### Recipes flow (Fase 1)
 `recetas` / `receta_ingredientes` / `receta_pasos` / `shopping_list_items`
 (`supabase/migrations/0015_recetas.sql`) — see `docs/RECIPES_ARCHITECTURE.md` for the full model. Key
