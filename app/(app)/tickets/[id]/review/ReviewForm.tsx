@@ -85,8 +85,18 @@ export function ReviewForm({
     ]);
   }
 
+  // Evita el envío implícito del formulario al pulsar Intro/Aceptar en el
+  // teclado numérico (Cantidad, Precio unidad, Importe...) -- sin esto, el
+  // único botón de envío ("Guardar compra") se dispara igualmente y guarda
+  // el ticket a medio rellenar en cuanto el usuario cierra el teclado.
+  function preventEnterSubmit(e: React.KeyboardEvent<HTMLFormElement>) {
+    if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+      e.preventDefault();
+    }
+  }
+
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form action={formAction} onKeyDown={preventEnterSubmit} className="flex flex-col gap-5">
       <header>
         <h1 className="text-2xl font-semibold font-display">
           {isEditing ? "Editar ticket" : "Revisar ticket"}
