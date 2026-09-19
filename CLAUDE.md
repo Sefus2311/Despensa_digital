@@ -38,8 +38,9 @@ Next.js 16 (App Router, Server Components + Server Actions), React 19, Tailwind 
 - `app/(app)/` — `/inicio`, `/despensa`, `/historial`, `/perfil`, `/tickets/*`, `/recetas/*`,
   `/lista-compra`. Private, wrapped in a shared layout (`app/(app)/layout.tsx`) with a header
   (`components/AppHeader.tsx`, home switcher) and a bottom tab bar (`components/BottomNav.tsx`).
-  `/recetas` and `/lista-compra` are reachable only via the "¿Qué puedo cocinar?" card on `/inicio` and
-  from within the recipe flow — not in `BottomNav` (no free slot after the floating camera button).
+  `/recetas` and `/lista-compra` each have their own card on `/inicio` ("¿Qué puedo cocinar?" and "Lista
+  de la compra") plus links from within the recipe flow — neither is in `BottomNav` (no free slot after
+  the floating camera button).
 - Route names are in Spanish (e.g. `despensa` = pantry, `historial` = history, `perfil` = profile,
   `recuperar` = recover). Follow this convention for new routes.
 

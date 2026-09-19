@@ -11,6 +11,14 @@ export default async function InicioPage() {
   const { data: pantryData } = await supabase.rpc("get_home_pantry", { p_home_id: homeId });
   const productCount = pantryData?.length ?? 0;
 
+  // Solo el recuento -- head: true no trae filas, igual que el resto de
+  // consultas de Inicio, pensadas para ser ligeras.
+  const { count: shoppingListPendingCount } = await supabase
+    .from("shopping_list_items")
+    .select("id", { count: "exact", head: true })
+    .eq("home_id", homeId)
+    .eq("is_checked", false);
+
   const { data: invitations } = await supabase
     .from("home_invitations")
     .select("id, home_name")
@@ -50,6 +58,16 @@ export default async function InicioPage() {
           <p className="text-[15px] text-[var(--color-muted)]">
             {productCount ?? 0} producto{productCount === 1 ? "" : "s"}{" "}
             registrado{productCount === 1 ? "" : "s"}.
+          </p>
+        </Card>
+      </Link>
+
+      <Link href="/lista-compra">
+        <Card>
+          <h2 className="font-medium mb-1">Lista de la compra</h2>
+          <p className="text-[15px] text-[var(--color-muted)]">
+            {shoppingListPendingCount ?? 0} producto{shoppingListPendingCount === 1 ? "" : "s"}{" "}
+            por comprar.
           </p>
         </Card>
       </Link>
