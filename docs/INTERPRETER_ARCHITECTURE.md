@@ -236,6 +236,16 @@ datos, sin perder lo ya construido en 0006.
   **dentro** de cada función `SECURITY DEFINER`, nunca a partir de un
   parámetro que envíe el cliente — no se puede falsear llamando a la RPC con
   otro valor.
+- **Nota (`0016_fix_log_interpreter_history_cast.sql`)**: `approve_interpreter_proposal`
+  llamaba a `log_interpreter_history()` pasando `case when ... then 'update'
+  else 'create' end` como tipo de cambio, sin cast. Un `case` con solo
+  literales de texto se resuelve como `text` (no como literal "unknown", que
+  sí castea implícito a cualquier tipo), y `text` no tiene cast implícito al
+  enum `interpreter_change_type` — Postgres no encontraba sobrecarga y
+  aprobar cualquier propuesta fallaba con "function
+  public.log_interpreter_history(...) does not exist". 0016 redefine la
+  función con un cast explícito (`::public.interpreter_change_type`) en esas
+  tres llamadas; el resto del cuerpo es idéntico al de 0013.
 - **`interpreter_history`**: tabla genérica (`entry_type`, `entry_id`,
   `change_type` — `create`/`update`/`delete`/`restore` —, `previous_data`/
   `new_data` en JSONB, `changed_by`, `changed_at`) que registra cada alta,

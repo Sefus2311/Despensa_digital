@@ -1,6 +1,7 @@
 import { Card } from "@/components/Card";
 import { AliasRow } from "@/components/admin/AliasRow";
 import { ProposalCard } from "@/components/admin/ProposalCard";
+import { InterpreterEstadoSelect } from "@/components/admin/InterpreterEstadoSelect";
 import { createClient } from "@/lib/supabase/server";
 import { sortPendingProposals } from "@/lib/interpreter/proposals";
 import { DEFAULT_PRODUCT_CATEGORY, type ProductCategory } from "@/lib/constants/product-categories";
@@ -155,11 +156,7 @@ export default async function AdminInterpreterPage({
               <option value="0.8">80%+</option>
               <option value="0.95">95%+</option>
             </select>
-            <select name="estado" defaultValue={estado} className="ui-field__input flex-1">
-              <option value="activos">Activos</option>
-              <option value="eliminados">Eliminados</option>
-              <option value="validar">Validar</option>
-            </select>
+            <InterpreterEstadoSelect defaultValue={estado} />
           </div>
           <button type="submit" className="rounded-xl border border-[var(--color-border)] py-2 font-medium">
             Buscar
