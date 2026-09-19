@@ -1,7 +1,10 @@
 import { Card } from "@/components/Card";
 import { AliasRow } from "@/components/admin/AliasRow";
+import { ProposalCard } from "@/components/admin/ProposalCard";
 import { createClient } from "@/lib/supabase/server";
+import { sortPendingProposals } from "@/lib/interpreter/proposals";
 import { DEFAULT_PRODUCT_CATEGORY, type ProductCategory } from "@/lib/constants/product-categories";
+import type { InterpreterProposal } from "@/lib/types/database";
 
 // El acceso mínimo (delegate/admin) ya lo exige app/(app)/admin/layout.tsx.
 // Diccionario global: consulta y corrección de conocimiento ya aprobado
@@ -41,45 +44,85 @@ export default async function AdminInterpreterPage({
   const retailer = params.retailer?.trim().toLowerCase() ?? "";
   const category = params.category?.trim().toLowerCase() ?? "";
   const minConfidence = Number(params.min_confidence) || 0;
-  const estado = params.estado === "eliminados" ? "eliminados" : "activos";
+  const estado =
+    params.estado === "eliminados" ? "eliminados" : params.estado === "validar" ? "validar" : "activos";
 
   const supabase = await createClient();
-  let query = supabase
-    .from("product_aliases")
-    .select(
-      "id, retailer, raw_name, confidence_score, times_confirmed, active, deleted_at, retailer_products(brand, canonical_products(canonical_name, category))"
-    );
-  query = estado === "eliminados" ? query.not("deleted_at", "is", null) : query.is("deleted_at", null);
 
-  const { data, error } = await query
-    .order("updated_at", { ascending: false })
-    .limit(100)
-    .overrideTypes<AliasRowShape[]>();
+  // "Validar" reutiliza la misma tabla/orden que /admin/interpreter/pending
+  // (interpreter_proposals con status pending/conflict) -- no es un tercer
+  // valor de product_aliases, es conocimiento todavía sin aprobar, por eso
+  // usa otra fuente de datos y otra tarjeta (ProposalCard) dentro de la misma
+  // página, en vez de forzarlo al modelo de AliasRow.
+  let proposals: InterpreterProposal[] = [];
+  let aliases: AliasRowShape[] = [];
+  let error: { message: string } | null = null;
 
-  const aliases = (data ?? []).filter((a) => {
-    const canonicalName = a.retailer_products?.canonical_products?.canonical_name ?? "";
-    const brand = a.retailer_products?.brand ?? "";
-    const aliasCategory = a.retailer_products?.canonical_products?.category ?? "";
+  if (estado === "validar") {
+    const { data, error: queryError } = await supabase
+      .from("interpreter_proposals")
+      .select("*")
+      .in("status", ["pending", "conflict"])
+      .limit(100);
+    error = queryError;
 
-    if (
-      q &&
-      !a.raw_name.toLowerCase().includes(q) &&
-      !canonicalName.toLowerCase().includes(q) &&
-      !brand.toLowerCase().includes(q)
-    ) {
-      return false;
-    }
-    if (retailer && a.retailer.toLowerCase() !== retailer) return false;
-    if (category && aliasCategory.toLowerCase() !== category) return false;
-    if ((a.confidence_score ?? 0) < minConfidence) return false;
-    return true;
-  });
+    proposals = sortPendingProposals((data ?? []) as InterpreterProposal[]).filter((p) => {
+      if (
+        q &&
+        !p.raw_name.toLowerCase().includes(q) &&
+        !p.proposed_canonical_name.toLowerCase().includes(q) &&
+        !(p.proposed_brand ?? "").toLowerCase().includes(q)
+      ) {
+        return false;
+      }
+      if (retailer && p.retailer.toLowerCase() !== retailer) return false;
+      if (category && (p.proposed_category ?? "").toLowerCase() !== category) return false;
+      if ((p.ai_confidence ?? 0) < minConfidence) return false;
+      return true;
+    });
+  } else {
+    let query = supabase
+      .from("product_aliases")
+      .select(
+        "id, retailer, raw_name, confidence_score, times_confirmed, active, deleted_at, retailer_products(brand, canonical_products(canonical_name, category))"
+      );
+    query = estado === "eliminados" ? query.not("deleted_at", "is", null) : query.is("deleted_at", null);
+
+    const { data, error: queryError } = await query
+      .order("updated_at", { ascending: false })
+      .limit(100)
+      .overrideTypes<AliasRowShape[]>();
+    error = queryError;
+
+    aliases = (data ?? []).filter((a) => {
+      const canonicalName = a.retailer_products?.canonical_products?.canonical_name ?? "";
+      const brand = a.retailer_products?.brand ?? "";
+      const aliasCategory = a.retailer_products?.canonical_products?.category ?? "";
+
+      if (
+        q &&
+        !a.raw_name.toLowerCase().includes(q) &&
+        !canonicalName.toLowerCase().includes(q) &&
+        !brand.toLowerCase().includes(q)
+      ) {
+        return false;
+      }
+      if (retailer && a.retailer.toLowerCase() !== retailer) return false;
+      if (category && aliasCategory.toLowerCase() !== category) return false;
+      if ((a.confidence_score ?? 0) < minConfidence) return false;
+      return true;
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <header>
         <h1 className="text-2xl font-semibold font-display">Gestión del intérprete</h1>
-        <p className="text-[15px] text-[var(--color-muted)]">Diccionario global aprobado (product_aliases).</p>
+        <p className="text-[15px] text-[var(--color-muted)]">
+          {estado === "validar"
+            ? "Propuestas pendientes de revisión (interpreter_proposals)."
+            : "Diccionario global aprobado (product_aliases)."}
+        </p>
       </header>
 
       <Card>
@@ -115,6 +158,7 @@ export default async function AdminInterpreterPage({
             <select name="estado" defaultValue={estado} className="ui-field__input flex-1">
               <option value="activos">Activos</option>
               <option value="eliminados">Eliminados</option>
+              <option value="validar">Validar</option>
             </select>
           </div>
           <button type="submit" className="rounded-xl border border-[var(--color-border)] py-2 font-medium">
@@ -123,25 +167,41 @@ export default async function AdminInterpreterPage({
         </form>
       </Card>
 
-      <Card className="divide-y divide-neutral-100">
-        {error && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudo cargar el diccionario.</p>}
-        {!error && aliases.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>}
-        {aliases.map((a) => (
-          <AliasRow
-            key={a.id}
-            aliasId={a.id}
-            retailer={a.retailer}
-            rawName={a.raw_name}
-            canonicalName={a.retailer_products?.canonical_products?.canonical_name ?? "—"}
-            brand={a.retailer_products?.brand ?? null}
-            category={a.retailer_products?.canonical_products?.category ?? DEFAULT_PRODUCT_CATEGORY}
-            confidenceScore={a.confidence_score}
-            timesConfirmed={a.times_confirmed}
-            active={a.active}
-            deleted={a.deleted_at != null}
-          />
-        ))}
-      </Card>
+      {estado === "validar" ? (
+        <div className="flex flex-col gap-3">
+          {error && (
+            <p className="text-[15px] text-[var(--color-danger-text)]">No se pudieron cargar las propuestas.</p>
+          )}
+          {!error && proposals.length === 0 && (
+            <Card>
+              <p className="text-[15px] text-[var(--color-muted)]">No hay propuestas pendientes.</p>
+            </Card>
+          )}
+          {proposals.map((p) => (
+            <ProposalCard key={p.id} proposal={p} />
+          ))}
+        </div>
+      ) : (
+        <Card className="divide-y divide-neutral-100">
+          {error && <p className="text-[15px] text-[var(--color-danger-text)]">No se pudo cargar el diccionario.</p>}
+          {!error && aliases.length === 0 && <p className="text-[15px] text-[var(--color-muted)]">Sin resultados.</p>}
+          {aliases.map((a) => (
+            <AliasRow
+              key={a.id}
+              aliasId={a.id}
+              retailer={a.retailer}
+              rawName={a.raw_name}
+              canonicalName={a.retailer_products?.canonical_products?.canonical_name ?? "—"}
+              brand={a.retailer_products?.brand ?? null}
+              category={a.retailer_products?.canonical_products?.category ?? DEFAULT_PRODUCT_CATEGORY}
+              confidenceScore={a.confidence_score}
+              timesConfirmed={a.times_confirmed}
+              active={a.active}
+              deleted={a.deleted_at != null}
+            />
+          ))}
+        </Card>
+      )}
     </div>
   );
 }

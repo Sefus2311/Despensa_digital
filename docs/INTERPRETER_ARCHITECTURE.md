@@ -165,6 +165,18 @@ candidatas una junto a otra. Aprobar cualquiera de ellas resuelve el grupo
 entero (ver punto 4 de la aprobación arriba) — no hay una función de
 "resolución de conflicto" separada, es la misma `approve_interpreter_proposal`.
 
+El selector "Activos/Eliminados/Validar" de `/admin/interpreter` tiene una
+tercera opción, "Validar", que no es un tercer valor de `product_aliases`
+(que solo tiene esos dos estados vía `deleted_at`): al seleccionarla, la
+página consulta `interpreter_proposals` con `status in ('pending','conflict')`
+— la misma fuente y el mismo orden que `/admin/interpreter/pending`
+(`lib/interpreter/proposals.ts`, `sortPendingProposals`, compartido por ambas
+páginas) — y renderiza `ProposalCard` en vez de `AliasRow`. Es un atajo para
+no salir de la página al revisar conocimiento aprobado y pendiente en la
+misma sesión; `/admin/interpreter/pending` y `/admin/interpreter/conflicts`
+se mantienen como páginas independientes (enlazadas desde el panel de admin)
+sobre la misma tabla.
+
 ## Seguridad
 
 - Lectura de `canonical_products`/`retailer_products`/`product_aliases`:
