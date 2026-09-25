@@ -29,9 +29,9 @@ describe("toImportPayload", () => {
     expect(payloadFrom(json).receipt.store_name).toBe("EL CORTE INGLÉS ÑANDÚ PLAÇA");
   });
 
-  it("guarda el producto interpretado en minúsculas y conserva raw_text tal cual", () => {
+  it("guarda el producto interpretado con la primera letra en mayúscula y conserva raw_text tal cual", () => {
     const payload = payloadFrom(validImportJson());
-    expect(payload.lines[0].product_name).toBe("atún claro en aceite de oliva");
+    expect(payload.lines[0].product_name).toBe("Atún claro en aceite de oliva");
     expect(payload.lines[0].raw_name).toBe("2 TONYINA CLARA OLIV 4,90 9,80");
     // las categorías oficiales siguen en mayúsculas
     expect(payload.lines[0].category).toBe("ALIMENTACIÓN");

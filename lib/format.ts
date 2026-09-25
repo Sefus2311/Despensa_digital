@@ -12,3 +12,16 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat("es-ES", {
 export function formatCurrency(amount: number | null | undefined): string {
   return CURRENCY_FORMATTER.format(amount ?? 0);
 }
+
+/**
+ * Nombre de producto interpretado: siempre con la primera letra en mayúscula,
+ * el resto en minúsculas -- sea cual sea cómo lo escriba el usuario o lo
+ * proponga una importación. `toUpperCase`/`toLowerCase` son Unicode-aware,
+ * así que conservan Á É Í Ó Ú Ñ Ç. Cadena vacía o solo espacios -> "".
+ * Equivalente en base de datos: capitalize_first_letter() en
+ * supabase/migrations/0021_capitalize_product_names.sql.
+ */
+export function capitalizeFirstLetter(text: string): string {
+  const lower = text.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}

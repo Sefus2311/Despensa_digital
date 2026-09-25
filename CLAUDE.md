@@ -133,7 +133,12 @@ el PDF del ticket (obligatorio, en dos pasos: JSON y luego PDF): la Server Actio
 lo sube a `{homeId}/{uuid}.pdf` del bucket `receipts` y `import_receipt_json` (0020, ruta obligatoriamente
 dentro de la carpeta de la casa) lo guarda en `receipts.image_path`; si el ticket no llega a crearse, se
 borra el PDF. Su SHA-256 se guarda como `source_document_hash` si el JSON no trae hash. `image_path` es
-nullable (0019) por si algún día se importa sin PDF. Ejemplo: `docs/examples/`.
+nullable (0019) por si algún día se importa sin PDF. Ejemplo: `docs/examples/`. El nombre de producto
+interpretado (`receipt_items.product_name`) se guarda siempre con la primera letra en mayúscula y el
+resto en minúsculas -- única regla en TS: `capitalizeFirstLetter` (`lib/format.ts`); en BD,
+`0021_capitalize_product_names.sql` añade `capitalize_first_letter()` + un trigger como red de
+seguridad. No se aplica a `canonical_products.canonical_name` (catálogo gestionado a mano por
+delegate/admin) ni a `raw_name`/`interpreter_proposals` (deliberado, ver esa migración).
 
 ### Recipes flow (Fase 1)
 `recetas` / `receta_ingredientes` / `receta_pasos` / `shopping_list_items`

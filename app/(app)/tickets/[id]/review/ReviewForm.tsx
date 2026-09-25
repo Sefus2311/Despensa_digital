@@ -6,6 +6,7 @@ import { ReceiptImage } from "@/components/ReceiptImage";
 import { Alert } from "@/components/ui/Alert";
 import { Badge } from "@/components/ui/Badge";
 import { PRODUCT_CATEGORIES, type ProductCategory } from "@/lib/constants/product-categories";
+import { capitalizeFirstLetter } from "@/lib/format";
 import { STANDARD_UNITS } from "@/lib/units";
 import { saveReceiptReview, type SaveReviewState } from "../actions";
 
@@ -191,7 +192,7 @@ export function ReviewForm({
                 <input
                   aria-label="Producto"
                   value={item.productName}
-                  onChange={(e) => updateItem(index, { productName: e.target.value.toLowerCase() })}
+                  onChange={(e) => updateItem(index, { productName: capitalizeFirstLetter(e.target.value) })}
                   placeholder="Producto interpretado"
                   className="ui-field__input font-medium"
                 />

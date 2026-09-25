@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { isProductCategory } from "@/lib/constants/product-categories";
 import { normalizeOptionalSupermarketName } from "@/lib/supermarkets";
+import { capitalizeFirstLetter } from "@/lib/format";
 
 export type SaveReviewState = { error?: string } | null;
 
@@ -111,8 +112,9 @@ export async function saveReceiptReview(
         unit_price: item.unitPrice,
         total_price: item.totalPrice,
         line_number: index + 1,
-        // El producto interpretado se guarda siempre en minúsculas.
-        product_name: item.productName?.trim().toLowerCase() || null,
+        // El producto interpretado se guarda siempre con la primera letra en
+        // mayúscula (el resto en minúsculas) -- ver capitalizeFirstLetter.
+        product_name: item.productName?.trim() ? capitalizeFirstLetter(item.productName.trim()) : null,
         category: item.category,
         brand: item.brand?.trim() || null,
         commercial_name: item.commercialName?.trim() || null,
@@ -143,7 +145,9 @@ export async function saveReceiptReview(
         supabase.rpc("submit_interpreter_proposal", {
           p_retailer: storeName,
           p_raw_name: item.rawName.trim(),
-          p_proposed_canonical_name: item.productName?.trim().toLowerCase() || item.rawName.trim(),
+          p_proposed_canonical_name: item.productName?.trim()
+            ? capitalizeFirstLetter(item.productName.trim())
+            : item.rawName.trim(),
           p_proposed_brand: item.brand?.trim() || null,
           p_proposed_category: item.category,
           p_proposed_quantity: item.quantity || null,

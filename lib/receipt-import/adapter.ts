@@ -4,6 +4,7 @@
 //  - el supermercado va en MAYÚSCULAS y el producto interpretado en minúsculas;
 //  - raw_text se conserva exactamente como llega;
 //  - la casa NO forma parte del payload: la aporta el servidor por separado.
+import { capitalizeFirstLetter } from "@/lib/format";
 import { normalizeSupermarketName } from "@/lib/supermarkets";
 import { RECEIPT_STATUS_PENDING_REVIEW } from "@/lib/receipt-status";
 import type { ReceiptImportV1 } from "./types";
@@ -97,7 +98,8 @@ export function toImportPayload(
     lines: data.lines.map((line) => ({
       line_number: line.line_number,
       raw_name: line.raw_text,
-      product_name: line.product_name.toLowerCase(),
+      // Primera letra en mayúscula, resto en minúsculas (capitalizeFirstLetter).
+      product_name: capitalizeFirstLetter(line.product_name),
       category: line.category,
       brand: line.brand,
       commercial_name: line.commercial_name,
