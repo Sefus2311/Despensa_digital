@@ -139,6 +139,10 @@ resto en minúsculas -- única regla en TS: `capitalizeFirstLetter` (`lib/format
 `0021_capitalize_product_names.sql` añade `capitalize_first_letter()` + un trigger como red de
 seguridad. No se aplica a `canonical_products.canonical_name` (catálogo gestionado a mano por
 delegate/admin) ni a `raw_name`/`interpreter_proposals` (deliberado, ver esa migración).
+`0022_capitalize_interpreter_names.sql` amplía la misma regla a
+`canonical_products.canonical_name` ("Mi despensa", diccionario aprobado) y a
+`interpreter_proposals.proposed_canonical_name` (pantallas de validar/conflictos,
+solo propuestas `pending`/`conflict`), cada una con su propio trigger.
 
 ### Recipes flow (Fase 1)
 `recetas` / `receta_ingredientes` / `receta_pasos` / `shopping_list_items`
