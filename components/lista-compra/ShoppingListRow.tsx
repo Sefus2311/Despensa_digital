@@ -26,6 +26,9 @@ export function ShoppingListRow({ item }: { item: ShoppingListItem }) {
         {item.source === "receta" && (
           <span className="text-[var(--color-muted)]"> · de una receta</span>
         )}
+        {item.canonical_product_id == null && (
+          <span className="text-[var(--color-warning)]"> · Pendiente de identificar</span>
+        )}
       </span>
       <button
         type="button"

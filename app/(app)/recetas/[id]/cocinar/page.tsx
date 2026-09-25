@@ -2,26 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/Card";
 import { Icon } from "@/components/icons/Icon";
-import { CocinarPanel, type MissingItem } from "@/components/recetas/CocinarPanel";
+import { CocinarPanel, type CocinarIngredient } from "@/components/recetas/CocinarPanel";
 import { getCurrentUserAndHome } from "@/lib/home";
-import { computeStockQuantity } from "@/lib/pantry";
-import {
-  isShoppableIngredient,
-  scaleIngredients,
-  toBaseUnits,
-  summarizeAvailability,
-  type PantryStockRow,
-} from "@/lib/recipes";
-import { canonicalizeUnit, toBaseUnit } from "@/lib/units";
+import { decidableIngredients, isShoppableIngredient, scaleIngredients, toBaseUnits } from "@/lib/recipes";
+import { canonicalizeUnit } from "@/lib/units";
 import type { Receta, RecetaIngrediente, RecetaPaso } from "@/lib/types/database";
 import { addMissingToShoppingList } from "./actions";
-
-interface PantryRow {
-  canonical_product_id: string;
-  quantity: number;
-  package_quantity: number | null;
-  unit: string | null;
-}
 
 const MAX_RACIONES = 100;
 
@@ -32,6 +18,11 @@ function parseRaciones(value: string | undefined, fallback: number): number {
   return Number.isInteger(n) && n >= 1 && n <= MAX_RACIONES ? n : fallback;
 }
 
+// "Quiero cocinar esto": muestra TODOS los ingredientes (sección 3 del
+// encargo) para que el usuario decida ingrediente a ingrediente si ya lo
+// tiene o necesita comprarlo -- deliberadamente sin cruzar con la despensa
+// (eso es "disponibilidad", no "normalización"; ver lib/recipes.ts). La
+// comparación automática queda para una fase futura sin rediseñar este flujo.
 export default async function CocinarPage({
   params,
   searchParams,
@@ -41,51 +32,36 @@ export default async function CocinarPage({
 }) {
   const { id } = await params;
   const { raciones: racionesParam } = await searchParams;
-  const { supabase, homeId } = await getCurrentUserAndHome();
+  const { supabase } = await getCurrentUserAndHome();
 
   const { data: recetaData } = await supabase.from("recetas").select("*").eq("id", id).maybeSingle();
   if (!recetaData) notFound();
   const receta = recetaData as Receta;
 
-  const [{ data: ingredientesData }, { data: pasosData }, { data: pantryData }] = await Promise.all([
+  const [{ data: ingredientesData }, { data: pasosData }] = await Promise.all([
     supabase.from("receta_ingredientes").select("*").eq("receta_id", id).order("orden", { ascending: true }),
     supabase.from("receta_pasos").select("*").eq("receta_id", id).order("numero", { ascending: true }),
-    supabase.rpc("get_home_pantry", { p_home_id: homeId }),
   ]);
 
   const racionesDeseadas = parseRaciones(racionesParam, receta.raciones);
   // cantidadNecesaria = cantidadReceta × racionesDeseadas / racionesBaseReceta,
   // calculada por ingrediente sobre copias (scaleIngredients no muta ni
-  // comparte estado entre ingredientes).
-  // Después kg -> gr. y l -> ml., para comparar con la despensa y para la lista.
+  // comparte estado entre ingredientes); después kg -> gr. y l -> ml.
   const ingredientes = toBaseUnits(
     scaleIngredients((ingredientesData ?? []) as RecetaIngrediente[], receta.raciones, racionesDeseadas)
   );
   const pasos = (pasosData ?? []) as RecetaPaso[];
-  const pantry: PantryStockRow[] = ((pantryData ?? []) as PantryRow[]).map((p) => {
-    const base = toBaseUnit(computeStockQuantity(p.quantity, p.package_quantity), p.unit);
-    return { canonical_product_id: p.canonical_product_id, stock: base.cantidad ?? 0, unit: base.unidad };
-  });
 
-  const summary = summarizeAvailability(ingredientes, pantry);
-
-  function toMissingItem(check: (typeof summary.checks)[number]): MissingItem {
-    return {
-      productoId: check.ingredient.producto_id,
-      nombreMostrado: check.ingredient.nombre_mostrado,
-      cantidad: check.missingQuantity ?? check.ingredient.cantidad,
-      unidad: canonicalizeUnit(check.ingredient.unidad),
-    };
-  }
-
-  // Filtro de la lista de la compra: solo pasan los ingredientes con unidad
-  // ud./gr./ml. Los demás (cucharadas, al gusto...) siguen en la receta pero
-  // no generan línea.
-  const requeridosComprables = summary.missingRequired.filter((c) => isShoppableIngredient(c.ingredient));
-  const opcionalesComprables = summary.missingOptional.filter((c) => isShoppableIngredient(c.ingredient));
-  const noComprables = [...summary.missingRequired, ...summary.missingOptional]
-    .filter((c) => !isShoppableIngredient(c.ingredient))
-    .map((c) => c.ingredient.nombre_mostrado);
+  // Solo los ingredientes con unidad ud./gr./ml. requieren una decisión --
+  // los demás (cucharadas, al gusto...) nunca van a la lista de la compra.
+  const decidibles: CocinarIngredient[] = decidableIngredients(ingredientes).map((ing) => ({
+    id: ing.id,
+    nombreMostrado: ing.nombre_mostrado,
+    cantidad: ing.cantidad,
+    unidad: canonicalizeUnit(ing.unidad),
+    productoId: ing.producto_id,
+  }));
+  const noComprables = ingredientes.filter((ing) => !isShoppableIngredient(ing)).map((ing) => ing.nombre_mostrado);
 
   return (
     <div className="flex flex-col gap-4">
@@ -123,20 +99,11 @@ export default async function CocinarPage({
         </form>
       </Card>
 
-      {summary.canCook ? (
-        <Card>
-          <p className="text-[15px] font-medium text-[var(--color-primary-text)]">
-            Puedes cocinarla — tienes todos los ingredientes necesarios.
-          </p>
-        </Card>
-      ) : (
-        <CocinarPanel
-          requeridos={requeridosComprables.map(toMissingItem)}
-          opcionales={opcionalesComprables.map(toMissingItem)}
-          noComprables={noComprables}
-          action={addMissingToShoppingList.bind(null, id)}
-        />
-      )}
+      <CocinarPanel
+        ingredientes={decidibles}
+        noComprables={noComprables}
+        action={addMissingToShoppingList.bind(null, id)}
+      />
 
       <div>
         <h2 className="font-medium mb-2">Pasos de preparación</h2>

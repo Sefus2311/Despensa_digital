@@ -149,14 +149,22 @@ solo propuestas `pending`/`conflict`), cada una con su propio trigger.
 (`supabase/migrations/0015_recetas.sql`) — see `docs/RECIPES_ARCHITECTURE.md` for the full model. Key
 points: `recetas` is scoped by `autor_id`, not `home_id` (see exception noted in Data model above);
 `receta_ingredientes.producto_id` references the same `canonical_products` catalog used by
-despensa/interpreter/receipts (nullable — an ingredient can be saved without a match; it's then always
-treated as missing and surfaced to admins on `/admin/products`); availability comparison
-(`lib/recipes.ts`: `classifyIngredient`/`summarizeAvailability`) always runs against the viewer's active
-Casa via `getCurrentUserAndHome()`. `shopping_list_items` (new — no shopping-list feature existed
-before this) is home-scoped like `receipts`; `add_to_shopping_list()` (SQL) is the single write path from
-both the recipe flow and the manual `/lista-compra` page, and merges into an existing unchecked line
-instead of duplicating. Visibility (`privada`/`amigos`/`publica`): `amigos` intentionally behaves like
-`privada` until a friends/relationships system exists — there is none today.
+despensa/interpreter/receipts (nullable — an ingredient can be saved without a match; surfaced to admins
+on `/admin/products`, never shown as a technical warning to a regular user reading a recipe). Linked-to-
+despensa **≠** linked-to-a-canonical-product — don't conflate the two: `lib/recipes.ts`'s
+`classifyIngredient`/`summarizeAvailability` (pantry-quantity comparison) only power the "Puedes
+cocinarla"/"Te faltan N ingredientes" badge on `/recetas` (`RecipeCard`); "Quiero cocinar esto"
+(`/recetas/[id]/cocinar`, `CocinarPanel`) does **not** use them — every purchasable-unit ingredient
+(ud./gr./ml., see `lib/units.ts`) gets an explicit, unprefilled TENGO/COMPRAR choice from the user
+(`findUndecidedIngredients`/`selectIngredientsToBuy` in `lib/recipes.ts`); only COMPRAR reaches the
+shopping list, TENGO never touches despensa/inventory. See `docs/RECIPES_ARCHITECTURE.md` ("Flujo de
+cocinar") for the full rationale and the future hook for pantry-based suggestions. `shopping_list_items`
+(new — no shopping-list feature existed before this) is home-scoped like `receipts`;
+`add_to_shopping_list()` (SQL) is the single write path from both the recipe flow and the manual
+`/lista-compra` page, and merges into an existing unchecked line instead of duplicating; a line without
+`canonical_product_id` shows as "Pendiente de identificar" there. Visibility (`privada`/`amigos`/
+`publica`): `amigos` intentionally behaves like `privada` until a friends/relationships system exists —
+there is none today.
 
 ### System roles (platform-level, separate from home membership)
 `profiles.system_role` (`user` default / `delegate` / `admin`, see `supabase/migrations/0005_system_roles.sql`)

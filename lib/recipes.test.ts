@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   classifyIngredient,
+  decidableIngredients,
+  findUndecidedIngredients,
   isShoppableIngredient,
   scaleIngredients,
   scaleQuantity,
+  selectIngredientsToBuy,
   toBaseUnits,
   summarizeAvailability,
+  type CookingDecision,
   type PantryStockRow,
 } from "./recipes";
 import { canonicalizeUnit } from "./units";
@@ -234,5 +238,66 @@ describe("kg/l convertidos a gr./ml. antes de comparar y de generar la lista", (
     const original = [ingredient({ cantidad: 2, unidad: "kg" })];
     toBaseUnits(original);
     expect(original[0]).toMatchObject({ cantidad: 2, unidad: "kg" });
+  });
+});
+
+describe("flujo de decisión TENGO/COMPRAR de 'Quiero cocinar esto'", () => {
+  const arroz = ingredient({ id: "arroz", producto_id: "prod-arroz", nombre_mostrado: "Arroz", cantidad: 300, unidad: "gr." });
+  const cebolla = ingredient({ id: "cebolla", producto_id: null, nombre_mostrado: "Cebolla", cantidad: 2, unidad: "ud." });
+  const sal = ingredient({ id: "sal", producto_id: "prod-sal", nombre_mostrado: "Sal", cantidad: null, unidad: "al gusto" });
+
+  describe("decidableIngredients", () => {
+    it("solo incluye ingredientes con unidad comprable (ud./gr./ml.), tengan o no producto normalizado", () => {
+      expect(decidableIngredients([arroz, cebolla, sal])).toEqual([arroz, cebolla]);
+    });
+  });
+
+  describe("findUndecidedIngredients", () => {
+    it("Caso F: devuelve los decidibles que todavía no tienen TENGO ni COMPRAR", () => {
+      expect(findUndecidedIngredients([arroz, cebolla, sal], {})).toEqual([arroz, cebolla]);
+      expect(findUndecidedIngredients([arroz, cebolla, sal], { arroz: "tengo" })).toEqual([cebolla]);
+      expect(findUndecidedIngredients([arroz, cebolla, sal], { arroz: "tengo", cebolla: "comprar" })).toEqual([]);
+    });
+
+    it("un ingrediente no comprable (sal, al gusto) nunca aparece como pendiente de decidir", () => {
+      expect(findUndecidedIngredients([sal], {})).toEqual([]);
+    });
+  });
+
+  describe("selectIngredientsToBuy", () => {
+    it("Caso A: normalizado + TENGO -> no se selecciona para comprar", () => {
+      expect(selectIngredientsToBuy([arroz], { arroz: "tengo" })).toEqual([]);
+    });
+
+    it("Caso B: normalizado + COMPRAR -> se selecciona con su cantidad y unidad", () => {
+      const seleccion = selectIngredientsToBuy([arroz], { arroz: "comprar" });
+      expect(seleccion).toEqual([arroz]);
+      expect(seleccion[0]).toMatchObject({ cantidad: 300, unidad: "gr.", producto_id: "prod-arroz" });
+    });
+
+    it("Caso C: sin producto normalizado + TENGO -> no bloquea la decisión y no se selecciona", () => {
+      expect(selectIngredientsToBuy([cebolla], { cebolla: "tengo" })).toEqual([]);
+    });
+
+    it("Caso D: sin producto normalizado + COMPRAR -> se selecciona igualmente (producto_id null se conserva)", () => {
+      const seleccion = selectIngredientsToBuy([cebolla], { cebolla: "comprar" });
+      expect(seleccion).toEqual([cebolla]);
+      expect(seleccion[0].producto_id).toBeNull();
+    });
+
+    it("Caso G: cambiar la decisión (COMPRAR -> TENGO) cambia el resultado", () => {
+      const decisiones: Partial<Record<string, CookingDecision>> = { arroz: "comprar" };
+      expect(selectIngredientsToBuy([arroz], decisiones)).toEqual([arroz]);
+      decisiones.arroz = "tengo";
+      expect(selectIngredientsToBuy([arroz], decisiones)).toEqual([]);
+    });
+
+    it("un ingrediente no comprable (sal, al gusto) nunca se envía a la lista aunque se le asigne una decisión", () => {
+      expect(selectIngredientsToBuy([sal], { sal: "comprar" })).toEqual([]);
+    });
+
+    it("sin ninguna decisión, no selecciona nada", () => {
+      expect(selectIngredientsToBuy([arroz, cebolla], {})).toEqual([]);
+    });
   });
 });

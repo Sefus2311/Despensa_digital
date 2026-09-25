@@ -133,3 +133,37 @@ export function toBaseUnits(ingredients: RecetaIngrediente[]): RecetaIngrediente
 export function isShoppableIngredient(ingredient: Pick<RecetaIngrediente, "unidad">): boolean {
   return isPurchasableUnit(ingredient.unidad);
 }
+
+// ----------------------------------------------------------------------------
+// Flujo de decisión de "Quiero cocinar esto" (TENGO / COMPRAR)
+// ----------------------------------------------------------------------------
+// Deliberadamente NO compara contra la despensa (esa es la diferencia entre
+// "normalización" -- identificar qué ingrediente es -- y "disponibilidad" --
+// si el usuario lo tiene ahora mismo -- que el encargo pide no confundir). El
+// usuario decide cada ingrediente a mano; classifyIngredient/
+// summarizeAvailability de arriba quedan listos para cuando en el futuro se
+// quiera sugerir la decisión comparando cantidadNecesaria vs. disponible en
+// despensa, sin que este flujo tenga que rediseñarse para ello.
+
+export type CookingDecision = "tengo" | "comprar";
+
+/** Solo los ingredientes con unidad ud./gr./ml. requieren una decisión -- el resto nunca va a la lista. */
+export function decidableIngredients(ingredients: RecetaIngrediente[]): RecetaIngrediente[] {
+  return ingredients.filter(isShoppableIngredient);
+}
+
+/** Ingredientes decidibles que todavía no tienen TENGO ni COMPRAR marcado. */
+export function findUndecidedIngredients(
+  ingredients: RecetaIngrediente[],
+  decisions: Partial<Record<string, CookingDecision>>
+): RecetaIngrediente[] {
+  return decidableIngredients(ingredients).filter((ing) => decisions[ing.id] == null);
+}
+
+/** Ingredientes marcados COMPRAR -- lo único que pasa a la lista de la compra. */
+export function selectIngredientsToBuy(
+  ingredients: RecetaIngrediente[],
+  decisions: Partial<Record<string, CookingDecision>>
+): RecetaIngrediente[] {
+  return decidableIngredients(ingredients).filter((ing) => decisions[ing.id] === "comprar");
+}

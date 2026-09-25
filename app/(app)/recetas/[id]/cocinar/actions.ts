@@ -13,9 +13,12 @@ interface MissingItemInput {
   unidad: string | null;
 }
 
-// Añade los faltantes elegidos a la lista de la compra de la Casa activa --
-// nunca crea otra lista independiente, usa add_to_shopping_list (0015),
-// que ya evita duplicados fusionando con una línea existente sin marcar.
+// Añade a la lista de la compra de la Casa activa los ingredientes que el
+// usuario marcó COMPRAR en la pantalla de decisión (CocinarPanel) -- TENGO
+// simplemente no se envía, nunca llega aquí. Nunca crea otra lista
+// independiente: usa add_to_shopping_list (0015/0018), que ya evita
+// duplicados fusionando con una línea existente sin marcar cuando el
+// producto/nombre y la unidad son compatibles.
 export async function addMissingToShoppingList(
   recetaId: string,
   _prevState: CocinarState,

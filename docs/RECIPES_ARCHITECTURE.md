@@ -5,10 +5,17 @@ Implementado en `supabase/migrations/0015_recetas.sql`. UI en `app/(app)/recetas
 
 ## Por qué existe
 
-Flujo objetivo: receta → comprobar ingredientes contra la despensa de la Casa activa → detectar
-faltantes → añadir a la lista de la compra → consultar pasos y cocinar. Antes de esta fase no existía
+Flujo objetivo: receta → "Quiero cocinar esto" → decidir ingrediente a ingrediente si ya se tiene o hay
+que comprarlo → añadir a la lista de la compra → consultar pasos y cocinar. Antes de esta fase no existía
 ningún sistema de lista de la compra en la app (verificado explícitamente antes de implementar nada) ni
 ningún sistema de relaciones/amigos entre usuarios.
+
+**"Normalización" y "disponibilidad en despensa" son conceptos distintos y no deben confundirse en la
+UI:** normalización es identificar qué producto es un ingrediente (`producto_id`); disponibilidad es si
+esa Casa lo tiene ahora mismo. Un ingrediente puede estar perfectamente normalizado sin que el usuario lo
+tenga en casa. Por eso la ficha de una receta (`app/(app)/recetas/[id]/page.tsx`) es deliberadamente
+"tonta": solo pinta `nombre_mostrado — cantidad unidad`, sin tocar `producto_id` ni la despensa — ver la
+sección "Flujo de cocinar" más abajo para dónde sí importa cada cosa.
 
 ## Modelo de datos
 
@@ -35,21 +42,26 @@ ningún sistema de relaciones/amigos entre usuarios.
 
 `components/recetas/ProductPicker.tsx` reutiliza `find_similar_canonical_products` (ya existente, usada
 también en `/admin/products` para detectar duplicados) — no hay ninguna RPC de búsqueda nueva. Si el
-usuario no elige ningún resultado, el ingrediente queda con `producto_id = null`, marcado en la UI con
-`--color-warning`.
+usuario no elige ningún resultado, el ingrediente queda con `producto_id = null` (marcado con
+`--color-warning` solo en el propio formulario de edición de la receta, donde sí es información útil para
+quien la escribe -- nunca en la ficha de lectura ni en "Quiero cocinar esto", ver más abajo).
 
 ### Ingrediente sin producto normalizado — decisión explícita
 
 No existe ninguna vía para que un usuario normal cree un `canonical_products` nuevo al vuelo (habría
 abierto una puerta de creación de catálogo global sin moderación). En su lugar:
 
-1. La receta se guarda igual, con ese ingrediente marcado visualmente y `producto_id = null`.
-2. Ese ingrediente se trata siempre como **faltante** al comprobar disponibilidad (no hay nada contra qué
-   comparar).
-3. Solo cuando el usuario pulsa "Quiero cocinar esto" → "Añadir a la lista de la compra" se añade a
-   `shopping_list_items` (con `canonical_product_id = null`, `display_name` = el texto del ingrediente) —
-   nunca al guardar la receta, para no llenar la lista de una Casa con cosas que quizá no se cocinen
-   nunca.
+1. La receta se guarda igual, con `producto_id = null` en ese ingrediente (marcado solo en el
+   formulario de edición, nunca en la ficha de lectura -- ver arriba).
+2. La falta de normalización no bloquea nada: en "Quiero cocinar esto" el ingrediente pide TENGO/COMPRAR
+   igual que cualquier otro (ver "Flujo de cocinar" más abajo). Solo `classifyIngredient` (uso futuro,
+   todavía no conectado a ningún flujo) lo trata como "faltante" por no haber nada contra qué comparar.
+3. Solo si el usuario marca COMPRAR y confirma se añade a `shopping_list_items` (con
+   `canonical_product_id = null`, `display_name` = el texto del ingrediente) — nunca al guardar la
+   receta, para no llenar la lista de una Casa con cosas que quizá no se cocinen nunca. Sin
+   `canonical_product_id`, la lista de la compra lo muestra como "Pendiente de identificar"
+   (`components/lista-compra/ShoppingListRow.tsx`) -- lenguaje de usuario, nunca "sin producto
+   normalizado" ni similar.
 4. `/admin/products` muestra una sección de solo lectura "Ingredientes de recetas sin producto
    normalizado" (agrupados por nombre) con un mini-formulario que llama a la nueva RPC
    `create_canonical_product_admin` (delegate/admin únicamente) — es la única vía de creación directa de
@@ -64,6 +76,36 @@ crear otra línea — pero solo si las unidades coinciden o falta alguna; si dif
 conversión y deja la línea existente igual (mismo criterio "robusto antes que preciso" que ya se aplicó
 en `lib/pantry.ts` para el stock de despensa). Es la única vía de escritura usada tanto por
 `addMissingToShoppingList` (desde una receta) como por el alta manual en `/lista-compra`.
+
+## Flujo de "Quiero cocinar esto" (TENGO / COMPRAR)
+
+`app/(app)/recetas/[id]/cocinar/page.tsx` + `components/recetas/CocinarPanel.tsx`. Al entrar, se
+escalan las cantidades por raciones (`scaleIngredients`) y se convierten kg/l a gr./ml. (`toBaseUnits`),
+y se separan los ingredientes en dos grupos con `decidableIngredients`/`isShoppableIngredient`
+(`lib/recipes.ts`):
+
+- **Decidibles** (unidad `ud.`/`gr.`/`ml.`): cada uno pide explícitamente **TENGO** o **COMPRAR**, sin
+  preselección — el usuario decide, nunca se infiere de la despensa. Puede cambiar de opinión antes de
+  confirmar. Al pulsar "Añadir a la lista de la compra", si queda alguno sin decidir, no se envía nada:
+  se marcan en rojo con un mensaje sencillo ("Decide si ya lo tienes o necesitas comprarlo"), nunca un
+  error técnico. `findUndecidedIngredients`/`selectIngredientsToBuy` (`lib/recipes.ts`) son las dos
+  funciones puras que deciden esto, compartidas entre la validación del panel y lo que se envía al
+  servidor.
+- **No decidibles** (cucharada, al gusto, pellizco...): se listan aparte, solo informativos — nunca piden
+  TENGO/COMPRAR ni pueden ir a la lista de la compra (regla de unidades sin cambios, ver
+  `lib/units.ts`).
+
+**TENGO** no escribe nada: solo excluye ese ingrediente de esta compra. No crea ni modifica
+`inventory_events` ni la despensa — la sección "decremento automático de despensa al cocinar" de más
+abajo sigue sin implementarse. **COMPRAR** manda el ingrediente (con su `producto_id`, cantidad y unidad
+ya escalados/convertidos) a `addMissingToShoppingList`, que llama a `add_to_shopping_list` una vez por
+ingrediente — la deduplicación de arriba se aplica igual, sin lógica nueva.
+
+**Gancho para el futuro** (sección "arquitectura futura" del encargo que introdujo este flujo):
+`classifyIngredient`/`summarizeAvailability` (comparación cantidad-necesaria-vs-despensa) siguen
+existiendo y probadas en `lib/recipes.test.ts`, simplemente no las llama ya esta pantalla. El día que se
+quiera preseleccionar TENGO/COMPRAR según la despensa, el punto de enganche es pasarle su resultado a
+`CocinarPanel` como valor inicial de `decisions` — no hace falta rediseñar el flujo.
 
 ## Modelo de visibilidad
 
@@ -105,7 +147,8 @@ visible para nadie salvo el autor, aunque esté marcada `publica` (hace falta `e
 
 Recetas públicas compartidas más allá de la visibilidad básica, recetas de amigos reales (bloqueado por
 la ausencia de un sistema de relaciones — ver arriba), búsqueda inteligente, recomendaciones según
-despensa, productos próximos a caducar, menús semanales, coste estimado, comparación entre
-supermercados, escalado real de raciones (el modelo no lo impide: `raciones` se guarda siempre, pero no
-hay UI para recalcular cantidades todavía), ratings/comentarios/seguidores, decremento automático de
-despensa al cocinar, categorías/orden de pasillo en la lista de la compra.
+despensa (más allá del "Puedes cocinarla"/"Te faltan N ingredientes" de `RecipeCard` en `/recetas`, que
+sí compara contra despensa a nivel de tarjeta), productos próximos a caducar, menús semanales, coste
+estimado, comparación entre supermercados, ratings/comentarios/seguidores, decremento automático de
+despensa al cocinar (TENGO/COMPRAR no tocan inventario, ver "Flujo de cocinar" arriba), categorías/orden
+de pasillo en la lista de la compra.
