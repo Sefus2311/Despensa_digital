@@ -164,7 +164,14 @@ cocinar") for the full rationale and the future hook for pantry-based suggestion
 `/lista-compra` page, and merges into an existing unchecked line instead of duplicating; a line without
 `canonical_product_id` shows as "Pendiente de identificar" there. Visibility (`privada`/`amigos`/
 `publica`): `amigos` intentionally behaves like `privada` until a friends/relationships system exists —
-there is none today.
+there is none today. Up to 3 photos per recipe (`receta_fotos`, `0023_receta_fotos.sql`, private Storage
+bucket `recetas` — separate from `receipts`, which is home-scoped, not author-scoped); the lowest `orden`
+is always the cover photo (no `is_principal` column, so deleting it just promotes the next one). Shown
+**only** on the read view (`RecipePhotoGallery`) — never on "Quiero cocinar esto", TENGO/COMPRAR, or the
+shopping list; the upload/delete UI (`RecipePhotosField`, `lib/receta-fotos.ts`) is a separate component
+used only in create/edit. See `docs/RECIPES_ARCHITECTURE.md` ("Fotos de receta") for the create-vs-edit
+upload mechanics (a client-generated draft id doubles as the recipe's real id so photos can upload before
+the recipe is first saved).
 
 ### System roles (platform-level, separate from home membership)
 `profiles.system_role` (`user` default / `delegate` / `admin`, see `supabase/migrations/0005_system_roles.sql`)

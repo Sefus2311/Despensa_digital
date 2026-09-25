@@ -131,6 +131,40 @@ tocar ningún otro punto del modelo (ni `receta_ingredientes`, que heredan la vi
 visible para nadie salvo el autor, aunque esté marcada `publica` (hace falta `estado = 'activa'` Y
 `visibilidad = 'publica'` a la vez).
 
+## Fotos de receta
+
+`receta_fotos` (`supabase/migrations/0023_receta_fotos.sql`), hasta 3 por receta. Sin columna
+`is_principal`: la principal es siempre la de `orden` más bajo, así que al borrarla la siguiente pasa a
+serlo sola, sin renumerar nada. Bucket privado propio `recetas` (no se reutiliza `receipts`, que está
+anclado a `home_id`; una receta es del autor) con ruta `{autor_id}/{receta_id}/{uuid}.{ext}`.
+
+**Las fotos solo se muestran en la ficha de lectura** (`components/recetas/RecipePhotoGallery.tsx`,
+usado únicamente en `app/(app)/recetas/[id]/page.tsx`) — nunca en "Quiero cocinar esto", TENGO/COMPRAR,
+Preparación ni la lista de la compra; ese componente no se importa desde ninguno de esos sitios a
+propósito. La sección "Fotos" de creación/edición es otro componente distinto,
+`components/recetas/RecipePhotosField.tsx`, con dos modos según haya o no `recetaId`:
+
+- **Receta nueva** (`recetaId = null`): `RecipeForm` genera un `draftId` (uuid) al montarse y lo reutiliza
+  como **id real** de la receta al guardarla (`createReceta` inserta con `id: draftId` en vez de dejar que
+  la BD lo genere). Las fotos se suben a Storage bajo ese `draftId` según se eligen, sin fila en
+  `receta_fotos` todavía (la receta no existe aún); al pulsar "Guardar receta", `createReceta` asocia las
+  rutas ya subidas en un solo `insert`. Si el usuario sube fotos y abandona el formulario sin guardar,
+  quedan huérfanas en Storage — limitación conocida y aceptada, igual de improbable que perder cualquier
+  otro borrador de formulario no guardado.
+- **Receta existente**: cada foto se sube y se asocia (o se borra) al instante con su propia Server
+  Action (`addRecetaFoto`/`removeRecetaFoto`), independiente del resto del formulario — igual que
+  `uploadReceipt` en el flujo de tickets.
+
+Antes de subir, el navegador redimensiona la foto a un máximo de 1600px de lado y la recodifica a JPEG
+(`Canvas`/`createImageBitmap`, sin dependencias nuevas) — no existe ninguna infraestructura de
+compresión en servidor todavía; si el redimensionado falla se sube el archivo original tal cual, nunca
+bloquea la subida. Validación (`lib/receta-fotos.ts`, cliente y servidor): tipo real por firma de bytes
+(JPEG/PNG/WebP, mismo criterio que `lib/receipt-import/pdf.ts` para el PDF de un ticket), tamaño máximo
+y el límite de 3 (con un trigger en BD como red de seguridad además de la comprobación en la Server
+Action). Borrar una receta (`deleteReceta`) lee las rutas de `receta_fotos` antes de borrar la fila
+(el `on delete cascade` se lleva las filas, pero no los archivos de Storage, que se limpian aparte y solo
+si el borrado de la receta tuvo éxito).
+
 ## Seguridad
 
 - `recetas`/`receta_ingredientes`/`receta_pasos`: RLS directa (no RPC) — mismo patrón que `receipts`, es
@@ -142,6 +176,12 @@ visible para nadie salvo el autor, aunque esté marcada `publica` (hace falta `e
 - `create_canonical_product_admin`: `security definer`, exige `delegate`/`admin` (mismo patrón de
   comprobación que el resto del intérprete). Es la única función nueva con privilegios elevados; todo lo
   demás de este módulo respeta la RLS del usuario que hace la petición.
+- `receta_fotos`: mismo patrón que `receta_ingredientes`/`receta_pasos` (select hereda de `recetas` vía
+  `exists()`, escritura solo si `autor_id = auth.uid()`). Bucket de Storage `recetas`: el select también
+  exige receta propia o pública+activa (para que las fotos de una receta compartida se vean); insert/
+  delete solo comprueban que el usuario escribe en su propio primer segmento de ruta (`auth.uid()`) —
+  deliberadamente SIN comprobar todavía que existe fila en `recetas`, porque las fotos de una receta
+  nueva se suben antes de guardarla (ver "Fotos de receta" arriba).
 
 ## Pendiente / fuera de alcance de esta fase
 

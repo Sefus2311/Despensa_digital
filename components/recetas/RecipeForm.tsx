@@ -3,8 +3,9 @@
 import { useActionState, useState } from "react";
 import { Card } from "@/components/Card";
 import { ProductPicker } from "@/components/recetas/ProductPicker";
+import { RecipePhotosField } from "@/components/recetas/RecipePhotosField";
 import type { RecetaEstado, RecetaVisibilidad } from "@/lib/types/database";
-import type { RecetaFormState } from "@/app/(app)/recetas/actions";
+import type { RecetaFormState, UploadedFoto } from "@/app/(app)/recetas/actions";
 
 export interface IngredientDraft {
   productoId: string | null;
@@ -30,6 +31,8 @@ export interface RecipeFormValues {
   estado: RecetaEstado;
   ingredientes: IngredientDraft[];
   pasos: StepDraft[];
+  /** Solo relevante en edición (RecipeForm genera su propio draftId al crear). */
+  fotos: UploadedFoto[];
 }
 
 function emptyIngredient(): IngredientDraft {
@@ -46,14 +49,23 @@ function emptyIngredient(): IngredientDraft {
 
 export function RecipeForm({
   action,
+  recetaId = null,
   initialValues,
   submitLabel,
 }: {
   action: (prevState: RecetaFormState, formData: FormData) => Promise<RecetaFormState>;
+  /** null = receta nueva todavía sin guardar (ver RecipePhotosField). */
+  recetaId?: string | null;
   initialValues?: RecipeFormValues;
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState<RecetaFormState, FormData>(action, null);
+  // Id reutilizado como id real de la receta al crearla (ver createReceta):
+  // así las fotos pueden subirse a Storage antes de que la receta exista.
+  // Se genera una sola vez, incluso si recetaId ya existe (edición), donde
+  // simplemente no se usa.
+  const [draftId] = useState(() => crypto.randomUUID());
+  const [fotoPaths, setFotoPaths] = useState<string[]>([]);
 
   const [titulo, setTitulo] = useState(initialValues?.titulo ?? "");
   const [descripcion, setDescripcion] = useState(initialValues?.descripcion ?? "");
@@ -211,6 +223,15 @@ export function RecipeForm({
             </select>
           </div>
         </div>
+      </Card>
+
+      <Card>
+        <RecipePhotosField
+          recetaId={recetaId}
+          draftId={draftId}
+          initialFotos={initialValues?.fotos ?? []}
+          onDraftPathsChange={recetaId ? undefined : setFotoPaths}
+        />
       </Card>
 
       <div className="flex flex-col gap-3">
@@ -384,6 +405,11 @@ export function RecipeForm({
           estado,
           ingredientes,
           pasos,
+          // Solo tiene efecto en createReceta (receta nueva): asocia a la
+          // receta las fotos ya subidas al borrador. updateReceta las ignora
+          // -- en edición se guardan al vuelo, ver RecipePhotosField.
+          draftId,
+          fotos: fotoPaths,
         })}
       />
 

@@ -258,6 +258,16 @@ export interface RecetaIngrediente {
   notas: string | null;
 }
 
+// Fotografías de receta (0023): la principal es siempre la de `orden` más
+// bajo -- no hay columna is_principal, ver comentario de la migración.
+export interface RecetaFoto {
+  id: string;
+  receta_id: string;
+  storage_path: string;
+  orden: number;
+  created_at: string;
+}
+
 export interface RecetaPaso {
   id: string;
   receta_id: string;

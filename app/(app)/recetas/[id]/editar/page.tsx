@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { RecipeForm, type RecipeFormValues } from "@/components/recetas/RecipeForm";
 import { createClient } from "@/lib/supabase/server";
-import type { Receta, RecetaIngrediente, RecetaPaso } from "@/lib/types/database";
+import type { Receta, RecetaFoto, RecetaIngrediente, RecetaPaso } from "@/lib/types/database";
 import { updateReceta } from "../../actions";
 
 export default async function EditarRecetaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,14 +19,26 @@ export default async function EditarRecetaPage({ params }: { params: Promise<{ i
     redirect(`/recetas/${id}`);
   }
 
-  const [{ data: ingredientesData }, { data: pasosData }] = await Promise.all([
+  const [{ data: ingredientesData }, { data: pasosData }, { data: fotosData }] = await Promise.all([
     supabase
       .from("receta_ingredientes")
       .select("*, canonical_products(canonical_name)")
       .eq("receta_id", id)
       .order("orden", { ascending: true }),
     supabase.from("receta_pasos").select("*").eq("receta_id", id).order("numero", { ascending: true }),
+    supabase.from("receta_fotos").select("*").eq("receta_id", id).order("orden", { ascending: true }),
   ]);
+
+  const fotoRows = (fotosData ?? []) as RecetaFoto[];
+  const { data: signedFotos } =
+    fotoRows.length > 0
+      ? await supabase.storage.from("recetas").createSignedUrls(
+          fotoRows.map((f) => f.storage_path),
+          60 * 60
+        )
+      : { data: [] as { path?: string; signedUrl: string }[] };
+  const urlByPath = new Map((signedFotos ?? []).map((s) => [s.path, s.signedUrl]));
+  const fotos = fotoRows.map((f) => ({ id: f.id, path: f.storage_path, url: urlByPath.get(f.storage_path) ?? "" }));
 
   const ingredientes = (
     (ingredientesData ?? []) as (RecetaIngrediente & { canonical_products: { canonical_name: string } | null })[]
@@ -52,6 +64,7 @@ export default async function EditarRecetaPage({ params }: { params: Promise<{ i
     estado: (receta as Receta).estado,
     ingredientes,
     pasos,
+    fotos,
   };
 
   return (
@@ -61,6 +74,7 @@ export default async function EditarRecetaPage({ params }: { params: Promise<{ i
       </header>
       <RecipeForm
         action={updateReceta.bind(null, id)}
+        recetaId={id}
         initialValues={initialValues}
         submitLabel="Guardar cambios"
       />

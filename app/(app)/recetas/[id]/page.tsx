@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/Card";
 import { DeleteRecetaButton } from "@/components/recetas/DeleteRecetaButton";
+import { RecipePhotoGallery } from "@/components/recetas/RecipePhotoGallery";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { canonicalizeUnit } from "@/lib/units";
-import type { Receta, RecetaIngrediente, RecetaPaso } from "@/lib/types/database";
+import type { Receta, RecetaFoto, RecetaIngrediente, RecetaPaso } from "@/lib/types/database";
 import { deleteReceta } from "../actions";
 
 // Ficha de la receta: pantalla orientada a cocinar, no a normalización. No
@@ -21,13 +22,27 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
   if (!recetaData) notFound();
   const receta = recetaData as Receta;
 
-  const [{ data: ingredientesData }, { data: pasosData }] = await Promise.all([
+  const [{ data: ingredientesData }, { data: pasosData }, { data: fotosData }] = await Promise.all([
     supabase.from("receta_ingredientes").select("*").eq("receta_id", id).order("orden", { ascending: true }),
     supabase.from("receta_pasos").select("*").eq("receta_id", id).order("numero", { ascending: true }),
+    supabase.from("receta_fotos").select("*").eq("receta_id", id).order("orden", { ascending: true }),
   ]);
 
   const ingredientes = (ingredientesData ?? []) as RecetaIngrediente[];
   const pasos = (pasosData ?? []) as RecetaPaso[];
+
+  const fotoRows = (fotosData ?? []) as RecetaFoto[];
+  const { data: signedFotos } =
+    fotoRows.length > 0
+      ? await supabase.storage.from("recetas").createSignedUrls(
+          fotoRows.map((f) => f.storage_path),
+          60 * 60
+        )
+      : { data: [] as { path?: string; signedUrl: string }[] };
+  const urlByPath = new Map((signedFotos ?? []).map((s) => [s.path, s.signedUrl]));
+  // Solo las que realmente obtuvieron signed URL -- una fila sin URL (fallo
+  // puntual de Storage) no debe romper la ficha, simplemente no se muestra.
+  const fotos = fotoRows.map((f) => ({ url: urlByPath.get(f.storage_path) ?? "" })).filter((f) => f.url);
 
   const isAuthor = receta.autor_id === user.id;
   const tiempoTotal = (receta.tiempo_preparacion_min ?? 0) + (receta.tiempo_coccion_min ?? 0);
@@ -41,6 +56,8 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
           {tiempoTotal > 0 ? ` · ${tiempoTotal} min` : ""}
         </p>
       </header>
+
+      <RecipePhotoGallery fotos={fotos} />
 
       {receta.descripcion && (
         <Card>
