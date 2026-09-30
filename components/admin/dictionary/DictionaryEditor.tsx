@@ -341,7 +341,18 @@ export function DictionaryEditor({
               </tr>
             )}
             {rows.map((row) => (
-              <tr key={row.alias_id} className={row.is_duplicate ? "bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)]" : ""}>
+              <tr
+                key={row.alias_id}
+                className={[
+                  selected.has(row.alias_id)
+                    ? "outline outline-2 -outline-offset-2 outline-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
+                    : row.is_duplicate
+                      ? "bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)]"
+                      : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
                 <td>
                   <input
                     type="checkbox"
