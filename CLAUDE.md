@@ -36,11 +36,11 @@ Next.js 16 (App Router, Server Components + Server Actions), React 19, Tailwind 
 ### Route groups
 - `app/(auth)/` — `/login`, `/register`, `/recuperar` (password reset). Public.
 - `app/(app)/` — `/inicio`, `/despensa`, `/historial`, `/perfil`, `/tickets/*`, `/recetas/*`,
-  `/lista-compra`. Private, wrapped in a shared layout (`app/(app)/layout.tsx`) with a header
+  `/lista-compra`, `/gasto`. Private, wrapped in a shared layout (`app/(app)/layout.tsx`) with a header
   (`components/AppHeader.tsx`, home switcher) and a bottom tab bar (`components/BottomNav.tsx`).
-  `/recetas` and `/lista-compra` each have their own card on `/inicio` ("¿Qué puedo cocinar?" and "Lista
-  de la compra") plus links from within the recipe flow — neither is in `BottomNav` (no free slot after
-  the floating camera button).
+  `/recetas`, `/lista-compra` and `/gasto` each have their own card on `/inicio` ("¿Qué puedo cocinar?",
+  "Lista de la compra", "Control del gasto") plus links from within the recipe flow — none is in
+  `BottomNav` (no free slot after the floating camera button).
 - Route names are in Spanish (e.g. `despensa` = pantry, `historial` = history, `perfil` = profile,
   `recuperar` = recover). Follow this convention for new routes.
 
@@ -117,6 +117,22 @@ sync manually, or regenerate with `supabase gen types typescript` (noted in the 
 4. `/despensa` derives a naive "pantry view" by grouping `receipt_items` by normalized `raw_name`
    and keeping the most recent purchase — there's no real stock/quantity tracking yet; that's what
    `inventory_events` is reserved for in a later version.
+
+### Spending (`/historial`, `/gasto`)
+`lib/spending.ts` is the one shared source of month-navigation math (`getMonthBoundaries`,
+`parseMonthParam`/`formatMonthParam`, `canGoToPreviousMonth`/`canGoToNextMonth` — never past the first
+`reviewed` receipt or into the future) and `components/MonthNavigator.tsx` the one shared "‹ label ›" row
+— both `/historial` (month + year, plus a `StoreFilterSelect`) and `/gasto` ("Control del gasto": month
+only) use them, so navigation behavior can't drift between the two screens. `/historial`'s month/year
+*totals* still come from the `get_home_spending_summary()` RPC (SQL `SUM`, `reviewed` receipts of the
+active Casa only); `/gasto`'s per-store breakdown has no RPC equivalent (nothing groups by store), so
+`summarizeSpendingByStore()` (`lib/spending.ts`) does that in TS instead, over a plain `receipts` query
+with the same `home_id`/`status = 'reviewed'`/date-range filter as the RPC — it sums in **cents** so the
+displayed "Gasto del mes" total is always exactly the sum of the per-store breakdown, never two
+independently-rounded numbers that could disagree. Store names always render through
+`normalizeSupermarketName` (MAYÚSCULAS), reused from the supermarket-normalization rule above. The
+`/inicio` card for `/gasto` computes the same current-month total the same way — no separate/cached
+monthly-total column anywhere.
 
 ### Importación de tickets por JSON (`receipt_interpretation_v1`)
 Botón **Importar JSON** en `/tickets/new` (`components/tickets/ImportJsonButton.tsx`): lee el fichero en el

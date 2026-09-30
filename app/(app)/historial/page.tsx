@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/ui/Badge";
+import { MonthNavigator } from "@/components/MonthNavigator";
 import { StoreFilterSelect } from "@/components/StoreFilterSelect";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { formatCurrency } from "@/lib/format";
@@ -30,10 +31,6 @@ interface SpendingSummaryRow {
   earliest_purchase_date: string | null;
 }
 
-const ARROW_BASE = "w-11 h-11 flex items-center justify-center text-lg leading-none rounded-md";
-const ARROW_ENABLED = `${ARROW_BASE} text-[var(--color-primary-text)] hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]`;
-const ARROW_DISABLED = `${ARROW_BASE} text-[var(--color-muted)] opacity-50`;
-
 function SpendingStat({
   label,
   value,
@@ -47,27 +44,7 @@ function SpendingStat({
 }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <div className="flex items-center justify-between w-full">
-        {prevHref ? (
-          <Link href={prevHref} aria-label="Periodo anterior" className={ARROW_ENABLED}>
-            ‹
-          </Link>
-        ) : (
-          <span aria-hidden="true" className={ARROW_DISABLED}>
-            ‹
-          </span>
-        )}
-        <span className="text-[15px] text-[var(--color-muted)] text-center flex-1 px-1">{label}</span>
-        {nextHref ? (
-          <Link href={nextHref} aria-label="Periodo siguiente" className={ARROW_ENABLED}>
-            ›
-          </Link>
-        ) : (
-          <span aria-hidden="true" className={ARROW_DISABLED}>
-            ›
-          </span>
-        )}
-      </div>
+      <MonthNavigator label={label} prevHref={prevHref} nextHref={nextHref} />
       <span className="text-xl font-semibold">{value}</span>
     </div>
   );

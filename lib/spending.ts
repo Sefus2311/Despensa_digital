@@ -1,5 +1,7 @@
-// Lógica pura (sin Supabase) para el resumen de gasto de Historial --
-// separada de la página para poder testearla sin red ni base de datos.
+// Lógica pura (sin Supabase) para el resumen de gasto de Historial y de
+// Control del gasto -- separada de las páginas para poder testearla sin red
+// ni base de datos.
+import { normalizeSupermarketName } from "@/lib/supermarkets";
 
 export interface DateRange {
   /** YYYY-MM-DD, inclusive */
@@ -174,4 +176,58 @@ export function buildStoreFilterOptions(
   }
 
   return options;
+}
+
+// ----------------------------------------------------------------------------
+// Control del gasto: desglose de un mes por centro de compra.
+// ----------------------------------------------------------------------------
+
+/** Redondeo a céntimos: sumar en euros con coma flotante puede descuadrar el total frente al desglose. */
+function toCents(amount: number): number {
+  return Math.round(amount * 100);
+}
+
+export interface StoreSpending {
+  storeKey: string;
+  /** Nombre del comercio ya normalizado a MAYÚSCULAS (o "Sin identificar" en mayúsculas si no hay nombre). */
+  storeLabel: string;
+  /** Euros, 2 decimales. */
+  total: number;
+}
+
+export interface MonthlySpendingSummary {
+  /** Euros; es exactamente la suma de `byStore` (mismo cálculo, no dos totales independientes). */
+  total: number;
+  /** De mayor a menor gasto. */
+  byStore: StoreSpending[];
+}
+
+/**
+ * Agrupa por `store_key` (misma clave normalizada que usa el filtro de
+ * Historial) y suma en céntimos para que el total mostrado en la cabecera
+ * coincida exactamente con la suma del desglose, sin depender de que un
+ * segundo cálculo (p. ej. en SQL) redondee igual. No filtra por estado ni
+ * por Casa: eso ya lo hace la consulta que produce `rows` (mismo criterio
+ * que get_home_spending_summary -- home_id propio, status = 'reviewed').
+ */
+export function summarizeSpendingByStore(
+  rows: { store_key: string | null; store_name: string | null; total_amount: number | null }[]
+): MonthlySpendingSummary {
+  const centsByKey = new Map<string, number>();
+  const labelByKey = new Map<string, string>();
+
+  for (const row of rows) {
+    const key = row.store_key ?? "";
+    if (!labelByKey.has(key)) {
+      labelByKey.set(key, normalizeSupermarketName(row.store_name || UNIDENTIFIED_STORE_LABEL));
+    }
+    centsByKey.set(key, (centsByKey.get(key) ?? 0) + toCents(row.total_amount ?? 0));
+  }
+
+  const byStore = [...centsByKey.entries()]
+    .map(([storeKey, cents]) => ({ storeKey, storeLabel: labelByKey.get(storeKey)!, total: cents / 100 }))
+    .sort((a, b) => b.total - a.total);
+
+  const totalCents = [...centsByKey.values()].reduce((sum, cents) => sum + cents, 0);
+  return { total: totalCents / 100, byStore };
 }

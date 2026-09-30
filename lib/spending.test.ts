@@ -18,6 +18,7 @@ import {
   shiftMonth,
   shiftYear,
   STORE_FILTER_UNIDENTIFIED,
+  summarizeSpendingByStore,
 } from "./spending";
 
 // Usamos siempre el constructor Date(year, monthIndex, day) en vez de un
@@ -176,5 +177,73 @@ describe("buildStoreFilterOptions", () => {
 
   it("sin compras devuelve sólo la opción Todos", () => {
     expect(buildStoreFilterOptions([])).toEqual([{ value: "", label: "Todos" }]);
+  });
+});
+
+describe("summarizeSpendingByStore", () => {
+  it("agrupa por comercio y ordena de mayor a menor gasto", () => {
+    const summary = summarizeSpendingByStore([
+      { store_key: "esclat", store_name: "Esclat", total_amount: 60 },
+      { store_key: "mercadona", store_name: "Mercadona", total_amount: 100 },
+      { store_key: "mercadona", store_name: "Mercadona", total_amount: 82.4 },
+      { store_key: "esclat", store_name: "Esclat", total_amount: 66.75 },
+    ]);
+
+    expect(summary.byStore).toEqual([
+      { storeKey: "mercadona", storeLabel: "MERCADONA", total: 182.4 },
+      { storeKey: "esclat", storeLabel: "ESCLAT", total: 126.75 },
+    ]);
+  });
+
+  it("Caso 8: la suma de los centros coincide exactamente con el total (sin errores de coma flotante)", () => {
+    // 0.1 + 0.2 !== 0.3 en coma flotante -- el cálculo en céntimos evita el descuadre.
+    const summary = summarizeSpendingByStore([
+      { store_key: "a", store_name: "A", total_amount: 0.1 },
+      { store_key: "b", store_name: "B", total_amount: 0.2 },
+    ]);
+    // Re-sumar los importes ya en euros (0.1 + 0.2) reintroduce el error de
+    // coma flotante que summarizeSpendingByStore evita calculando en
+    // céntimos -- por eso aquí se redondea antes de comparar, igual que
+    // haría la propia UI al mostrar 2 decimales.
+    const sumaCentros = Math.round(summary.byStore.reduce((sum, s) => sum + s.total, 0) * 100) / 100;
+    expect(summary.total).toBe(0.3);
+    expect(sumaCentros).toBe(summary.total);
+  });
+
+  it("Caso 7: varios comercios se mantienen separados, cada uno con su propia suma", () => {
+    const summary = summarizeSpendingByStore([
+      { store_key: "mercadona", store_name: "Mercadona", total_amount: 50 },
+      { store_key: "bonarea", store_name: "Bonàrea", total_amount: 30 },
+      { store_key: "ametller-origen", store_name: "Ametller Origen", total_amount: 20 },
+    ]);
+    expect(summary.byStore).toHaveLength(3);
+    expect(summary.total).toBe(100);
+  });
+
+  it("muestra el nombre del comercio siempre en MAYÚSCULAS, venga como venga guardado", () => {
+    const summary = summarizeSpendingByStore([
+      { store_key: "bonarea", store_name: "bonàrea", total_amount: 10 },
+    ]);
+    expect(summary.byStore[0].storeLabel).toBe("BONÀREA");
+  });
+
+  it("agrupa las compras sin comercio bajo Sin identificar (en mayúsculas)", () => {
+    const summary = summarizeSpendingByStore([
+      { store_key: "", store_name: null, total_amount: 15 },
+      { store_key: "mercadona", store_name: "Mercadona", total_amount: 50 },
+    ]);
+    expect(summary.byStore).toEqual([
+      { storeKey: "mercadona", storeLabel: "MERCADONA", total: 50 },
+      { storeKey: "", storeLabel: "SIN IDENTIFICAR", total: 15 },
+    ]);
+  });
+
+  it("Caso 4: sin ninguna compra, el total es 0 y no hay desglose", () => {
+    expect(summarizeSpendingByStore([])).toEqual({ total: 0, byStore: [] });
+  });
+
+  it("trata total_amount nulo como 0 en vez de romper la suma", () => {
+    const summary = summarizeSpendingByStore([{ store_key: "mercadona", store_name: "Mercadona", total_amount: null }]);
+    expect(summary.total).toBe(0);
   });
 });
