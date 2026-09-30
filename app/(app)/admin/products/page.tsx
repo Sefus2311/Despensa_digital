@@ -11,8 +11,9 @@ type RetailerProductRowShape = RetailerProduct & {
 };
 
 // El acceso mínimo (delegate/admin) ya lo exige app/(app)/admin/layout.tsx.
-// No incluye fusión de productos: section 15/16 de la tarea la deja como
-// "preparar pero no implementar todavía" por el riesgo de mezclar historial.
+// La fusión de productos canónicos duplicados vive en /admin/dictionary
+// (Editor del Diccionario, solo admin, merge_canonical_products) -- esta
+// página sigue siendo edición/creación individual, sin unificar.
 export default async function AdminProductsPage({
   searchParams,
 }: {

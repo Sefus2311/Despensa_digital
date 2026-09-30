@@ -27,6 +27,7 @@ export default async function AdminLayout({
     { href: "/admin/interpreter/pending", label: "Pendientes" },
     { href: "/admin/interpreter/conflicts", label: "Conflictos" },
     { href: "/admin/products", label: "Productos" },
+    ...(admin ? [{ href: "/admin/dictionary", label: "Editor del Diccionario" }] : []),
     ...(admin ? [{ href: "/admin/audit", label: "Auditoría" }] : []),
   ];
 

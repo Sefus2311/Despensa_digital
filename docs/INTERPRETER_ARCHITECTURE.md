@@ -294,6 +294,76 @@ offline concurrentes (qué pasa si la app externa y un admin editan el mismo
 alias sin conexión a la vez), y autenticación/autorización de la herramienta
 externa frente a Supabase.
 
+## Editor del Diccionario (`0024_dictionary_editor.sql`, solo `admin`)
+
+Herramienta de mantenimiento masivo del conocimiento **ya aprobado**
+(`product_aliases`/`retailer_products`/`canonical_products`) en
+`/admin/dictionary` (`components/admin/dictionary/DictionaryEditor.tsx`) --
+**no** toca `interpreter_proposals` (eso sigue siendo "el Intérprete", esta
+página no lo lista ni lo modera). Restringida a `admin` explícitamente (más
+estricto que el resto del módulo, que admite `delegate`) tanto en la puerta
+de la página como en cada función SQL nueva.
+
+- **Listado**: `admin_search_dictionary()` — un alias por fila, ya unido a su
+  producto de tienda y canónico, con búsqueda/filtro/orden resueltos en SQL
+  y paginado sin `COUNT(*)` (se pide una fila de más para saber si hay
+  página siguiente, mismo criterio que `admin_list_users`). El ORDER BY
+  dinámico sólo usa `format(%I ...)` sobre una columna ya validada contra una
+  whitelist fija en PL/pgSQL — nunca interpola directamente lo recibido del
+  cliente como identificador SQL.
+- **"Posible duplicado" / "Revisar"**: primera capa determinista, sin IA.
+  "Revisar" = `confidence_score < 0.8` (mismo umbral que ya usaba el filtro
+  de `/admin/interpreter`). "Posible duplicado" = el `canonical_product` del
+  alias tiene otro `canonical_product` con `similarity() > 0` por trigramas
+  (`%`, ya indexado por GIN desde 0006) sobre `normalized_name`. Nunca
+  fusiona nada por sí solo: sólo marca, la decisión siempre es manual
+  (`admin_dictionary_summary()` usa exactamente el mismo criterio para el
+  resumen de cabecera, así nunca puede desentonar con la lista filtrada).
+  Deliberadamente no se aplica esta detección al supermercado (`retailer`):
+  es texto plano sin relaciones, un typo se corrige editando la celda
+  directamente (ver abajo), no hace falta una fusión transaccional para eso.
+- **Edición tipo Excel**: `update_dictionary_canonical_name`/
+  `update_dictionary_category` tocan un único campo cada una y nada más —
+  **no** reutilizan `update_canonical_product` (0006/0013) porque esa función
+  no hace actualización parcial: sobrescribe siempre `canonical_name`,
+  `category` y `default_unit` juntos (un `category = null` cae a `'VARIOS'`
+  vía `normalize_product_category`), así que reusarla para una edición de una
+  sola celda arriesgaba pisar los otros dos campos con valores obsoletos.
+  `update_retailer_product` (marca) sí hace `coalesce` campo a campo desde
+  0006, así que para eso no hizo falta ninguna función nueva.
+  `update_product_alias_retailer` es nueva (antes no existía ninguna forma de
+  editar el supermercado de un alias) y sólo toca `product_aliases.retailer`
+  — no `retailer_products.retailer`, que puede estar compartido por otros
+  alias del mismo producto de tienda.
+- **UNIFICAR** (`merge_canonical_products`): la operación delicada del
+  encargo que introdujo esta página — fusiona 2+ `canonical_products` en uno
+  solo. `canonical_products` tiene exactamente 3 referencias reales en todo
+  el esquema (comprobado antes de escribir la función, no se asumió nada):
+  `retailer_products.canonical_product_id` (`not null`),
+  `receta_ingredientes.producto_id` y `shopping_list_items.canonical_product_id`
+  (ambas nullable). Por cada producto de origen: sus `retailer_products` se
+  reapuntan al destino, salvo que el destino ya tenga uno equivalente (mismo
+  `retailer` + nombre comercial normalizado — el índice único de
+  `retailer_products`), en cuyo caso sus alias se reapuntan a ESE existente y
+  el duplicado se descarta; `receta_ingredientes`/`shopping_list_items` que
+  apuntaban al origen se reapuntan al destino; sólo entonces se borra la fila
+  de origen, que en ese momento ya no tiene ninguna referencia. Una única
+  función ⇒ una única transacción: cualquier error a mitad revierte todo, sin
+  estado parcialmente unificado. No hay soft delete para `canonical_products`
+  (a diferencia de `product_aliases`): en vez de añadir esa infraestructura
+  sólo para este caso, la reversibilidad la da el propio historial — el
+  estado completo de cada producto fusionado queda en `admin_audit_log`
+  (acción `canonical_products_merged`) e `interpreter_history` antes de
+  borrarlo, auditable y reconstruible a mano aunque no haya un botón de
+  "deshacer" en la UI.
+- **Exportar CSV**: `searchDictionaryForExport` reutiliza la misma
+  `admin_search_dictionary()`, sin el límite de página (tope defensivo de
+  5000 filas) — el contenido exportado siempre respeta los filtros activos,
+  nunca una segunda fuente de datos.
+- Supabase sigue siendo la única fuente de verdad; el CSV es solo para
+  análisis/backup manual, no hay importación masiva todavía (fuera de
+  alcance de esta V1).
+
 ## Datos de ejemplo (seed)
 
 `supabase/migrations/0007_interpreter_seed_data.sql` siembra un pequeño
@@ -313,10 +383,6 @@ ningún usuario.
 - Motor de IA que rellene `ai_confidence`/proponga automáticamente (hoy
   `saveReceiptReview` envía el texto tecleado a mano como propuesta, sin
   ninguna inteligencia añadida — ver más arriba).
-- Fusión de productos canónicos o de tienda duplicados (se dejó preparado
-  `find_similar_canonical_products` para localizarlos, pero fusionar
-  arrastra reasignar `product_aliases`/`interpreter_proposals` existentes,
-  con riesgo de mezclar historial — deliberadamente no implementado).
 - Permisos granulares de `delegate` por supermercado/categoría
   (`delegate_scope`): no hay infraestructura para ello todavía; si se
   necesita, iría como una tabla adicional (`delegate_id`, `scope_type`,

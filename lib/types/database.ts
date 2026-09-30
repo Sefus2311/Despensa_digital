@@ -327,3 +327,29 @@ export interface AdminMetrics {
   proposals_approved_pct: number | null;
   proposals_rejected_pct: number | null;
 }
+
+// Fila devuelta por admin_search_dictionary() (0024_dictionary_editor.sql) --
+// Editor del Diccionario, un alias por fila con su producto de tienda y
+// canónico ya unidos.
+export interface DictionaryEntry {
+  alias_id: string;
+  raw_name: string;
+  canonical_product_id: string;
+  canonical_name: string;
+  category: ProductCategory;
+  retailer: string;
+  retailer_product_id: string;
+  brand: string | null;
+  times_confirmed: number;
+  confidence_score: number | null;
+  active: boolean;
+  is_duplicate: boolean;
+  estado: "ok" | "revisar";
+}
+
+// Objeto devuelto por admin_dictionary_summary().
+export interface DictionarySummary {
+  total: number;
+  revisar: number;
+  duplicados: number;
+}

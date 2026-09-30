@@ -198,15 +198,23 @@ controls platform-wide capabilities (moderating the global product interpreter, 
 owning user or via a plain client update — a DB trigger blocks it; changes go exclusively through the
 `set_user_role`/`set_user_role_by_email` SQL RPCs, which verify the caller is an admin and log to
 `admin_audit_log`. Admin routes live under `app/(app)/admin/*` (`/admin` dashboard, `/users`,
-`/interpreter`, `/interpreter/pending`, `/interpreter/conflicts`, `/products`, `/audit`), gated in
-`layout.tsx`/`page.tsx` via `lib/roles.ts` (never rely on hiding nav links alone) — every mutating RPC
-repeats the same role check server-side, so a direct `supabase.rpc(...)` call can't bypass it either.
-See `docs/ROLES_AND_PERMISSIONS.md` for the full model/permission matrix/first-admin bootstrap, and
+`/interpreter`, `/interpreter/pending`, `/interpreter/conflicts`, `/products`, `/dictionary`, `/audit`),
+gated in `layout.tsx`/`page.tsx` via `lib/roles.ts` (never rely on hiding nav links alone) — every
+mutating RPC repeats the same role check server-side, so a direct `supabase.rpc(...)` call can't bypass
+it either. `/admin/dictionary` ("Editor del Diccionario") is `admin`-only, stricter than the rest of this
+module (which admits `delegate`) — a spreadsheet-like search/sort/filter/inline-edit/merge/CSV-export
+tool over the same **already-approved** knowledge (`product_aliases`/`retailer_products`/
+`canonical_products`), never the pending-proposals queue (that's "el Intérprete", a distinct concept from
+"el Diccionario" in this codebase's own terminology — don't conflate them). See
+`docs/ROLES_AND_PERMISSIONS.md` for the full model/permission matrix/first-admin bootstrap, and
 `docs/INTERPRETER_ARCHITECTURE.md` for the global product interpreter (`canonical_products` /
 `retailer_products` / `product_aliases` / `interpreter_proposals`, see
 `supabase/migrations/0006_interpreter_and_admin.sql`) — proposal submission/matching, approval
-(transactional, also resolves conflicts), rejection, and editing already-approved knowledge. See
-`docs/RECIPES_ARCHITECTURE.md` for the recipes module (Recipes flow above).
+(transactional, also resolves conflicts), rejection, editing already-approved knowledge, and ("Editor del
+Diccionario") merging duplicate canonical products transactionally (`merge_canonical_products`, the one
+genuinely delicate operation — reassigns every real FK to `canonical_products`, checked exhaustively
+before writing it, never leaves a partial merge). See `docs/RECIPES_ARCHITECTURE.md` for the recipes
+module (Recipes flow above).
 
 ### Supermercados y categorías (normalización)
 - Los nombres de supermercado se guardan **siempre en MAYÚSCULAS**. Única regla en TS:
