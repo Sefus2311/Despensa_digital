@@ -360,13 +360,17 @@ export function ReviewForm({
             {item.notes && (
               <p className="text-[15px] text-[var(--color-muted)]">{item.notes}</p>
             )}
-            <button
-              type="button"
-              onClick={() => removeItem(index)}
-              className="self-end text-[15px] text-[var(--color-danger-text)] font-medium py-1"
-            >
-              Eliminar línea
-            </button>
+            {/* Ticket ya confirmado: sus líneas se corrigen, no se quitan; solo
+                se puede descartar una línea añadida en esta misma edición. */}
+            {(!isEditing || index >= initialItems.length) && (
+              <button
+                type="button"
+                onClick={() => removeItem(index)}
+                className="self-end text-[15px] text-[var(--color-danger-text)] font-medium py-1"
+              >
+                Eliminar línea
+              </button>
+            )}
           </Card>
         ))}
 

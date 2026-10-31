@@ -5,23 +5,8 @@ import { Icon } from "@/components/icons/Icon";
 import { CategoryCard } from "@/components/despensa/CategoryCard";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { computeStockQuantity } from "@/lib/pantry";
-import {
-  categoryFromSlug,
-  PRODUCT_CATEGORIES,
-  type ProductCategory,
-} from "@/lib/constants/product-categories";
-
-interface PantryRow {
-  canonical_product_id: string;
-  canonical_name: string;
-  category: ProductCategory;
-  brand: string | null;
-  quantity: number;
-  package_quantity: number | null;
-  unit: string | null;
-  purchase_date: string | null;
-  raw_name: string;
-}
+import { categoryFromSlug, PRODUCT_CATEGORIES } from "@/lib/constants/product-categories";
+import type { HomePantryItem } from "@/lib/types/database";
 
 export default async function DespensaPage({
   searchParams,
@@ -39,7 +24,7 @@ export default async function DespensaPage({
 
   // Más reciente arriba, más antiguo abajo; sin fecha de compra al final
   // (fechas ISO yyyy-mm-dd: la comparación de cadenas ya es cronológica).
-  const products = ((pantryData ?? []) as PantryRow[]).sort((a, b) => {
+  const products = ((pantryData ?? []) as HomePantryItem[]).sort((a, b) => {
     if (!a.purchase_date && !b.purchase_date) return 0;
     if (!a.purchase_date) return 1;
     if (!b.purchase_date) return -1;
@@ -74,26 +59,31 @@ export default async function DespensaPage({
               const stock = computeStockQuantity(p.quantity, p.package_quantity);
               return (
                 <li key={p.canonical_product_id}>
-                  <Card>
-                    <p className="font-semibold">{p.canonical_name}</p>
-                    {p.brand && (
-                      <p className="text-[15px] text-[var(--color-muted)] mt-0.5 uppercase">{p.brand}</p>
-                    )}
-                    <div className="text-[15px] text-[var(--color-muted)] mt-1 flex justify-between items-baseline">
-                      <span>
-                        Comprado:{" "}
-                        {p.purchase_date
-                          ? new Date(p.purchase_date).toLocaleDateString("es-ES")
-                          : "—"}
-                      </span>
-                      <span
-                        className="text-[var(--color-text)] font-semibold"
-                        aria-label={`Stock: ${stock} ${p.unit ?? "unidades"}`}
-                      >
-                        {stock}
-                      </span>
-                    </div>
-                  </Card>
+                  <Link href={`/despensa/${p.canonical_product_id}`} className="block">
+                    <Card>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-semibold">{p.canonical_name}</p>
+                        <Icon name="editar" size={16} />
+                      </div>
+                      {p.brand && (
+                        <p className="text-[15px] text-[var(--color-muted)] mt-0.5 uppercase">{p.brand}</p>
+                      )}
+                      <div className="text-[15px] text-[var(--color-muted)] mt-1 flex justify-between items-baseline">
+                        <span>
+                          Comprado:{" "}
+                          {p.purchase_date
+                            ? new Date(p.purchase_date).toLocaleDateString("es-ES")
+                            : "—"}
+                        </span>
+                        <span
+                          className="text-[var(--color-text)] font-semibold"
+                          aria-label={`Stock: ${stock} ${p.unit ?? "unidades"}`}
+                        >
+                          {stock}
+                        </span>
+                      </div>
+                    </Card>
+                  </Link>
                 </li>
               );
             })}

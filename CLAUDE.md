@@ -118,6 +118,21 @@ sync manually, or regenerate with `supabase gen types typescript` (noted in the 
    and keeping the most recent purchase — there's no real stock/quantity tracking yet; that's what
    `inventory_events` is reserved for in a later version.
 
+### Editar artículos de despensa (`/despensa/[productId]`)
+Registro de compra ≠ artículo de despensa. **Registro de compra** (`receipts` + `receipt_items`): evidencia
+permanente, esta edición nunca lo toca; `0025_pantry_item_edits.sql` retira además la política de DELETE de
+`receipts`, y `saveReceiptReview` rechaza quitar líneas de un ticket `reviewed` (se corrigen, no se quitan) e
+inserta las líneas nuevas antes de borrar las anteriores. **Artículo de despensa**: sigue derivado de
+`get_home_pantry`; sus correcciones viven en `pantry_item_edits` (una fila por Casa + producto, `null` =
+heredar, sin política de DELETE, RLS por pertenencia a la Casa) y nunca en `canonical_products`, que es global.
+Las columnas sin prefijo de `get_home_pantry` ya son los valores efectivos; `catalog_*`/`purchase_*`/
+`receipt_id`/`store_name` son los originales. La cantidad corregida solo vale mientras `stock_receipt_id` sea
+el ticket de la última compra: una compra posterior vuelve a mandar. Cantidad 0 = el artículo sigue en
+despensa, pero `/recetas` lo trata como no disponible. Lógica pura: `parsePantryItemInput`/
+`buildPantryItemEdit` (`lib/pantry.ts`). El rol de sistema no interviene: admin/delegate solo editan las
+Casas de las que son miembros. Cualquier referencia nueva a `canonical_products` debe añadirse a
+`merge_canonical_products`.
+
 ### Spending (`/historial`, `/gasto`)
 `lib/spending.ts` is the one shared source of month-navigation math (`getMonthBoundaries`,
 `parseMonthParam`/`formatMonthParam`, `canGoToPreviousMonth`/`canGoToNextMonth` — never past the first

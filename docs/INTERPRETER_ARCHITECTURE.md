@@ -337,11 +337,12 @@ de la página como en cada función SQL nueva.
   alias del mismo producto de tienda.
 - **UNIFICAR** (`merge_canonical_products`): la operación delicada del
   encargo que introdujo esta página — fusiona 2+ `canonical_products` en uno
-  solo. `canonical_products` tiene exactamente 3 referencias reales en todo
+  solo. `canonical_products` tiene exactamente 4 referencias reales en todo
   el esquema (comprobado antes de escribir la función, no se asumió nada):
   `retailer_products.canonical_product_id` (`not null`),
   `receta_ingredientes.producto_id` y `shopping_list_items.canonical_product_id`
-  (ambas nullable). Por cada producto de origen: sus `retailer_products` se
+  (ambas nullable), y `pantry_item_edits.canonical_product_id` (0025; si la
+  Casa ya tiene corrección sobre el destino, gana esa). Por cada producto de origen: sus `retailer_products` se
   reapuntan al destino, salvo que el destino ya tenga uno equivalente (mismo
   `retailer` + nombre comercial normalizado — el índice único de
   `retailer_products`), en cuyo caso sus alias se reapuntan a ESE existente y

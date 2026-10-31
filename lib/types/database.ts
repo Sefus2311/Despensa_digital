@@ -128,6 +128,46 @@ export interface InventoryEvent {
 }
 
 // ----------------------------------------------------------------------------
+// Artículo de despensa (supabase/migrations/0025_pantry_item_edits.sql).
+// PantryItemEdit: correcciones de una Casa sobre un producto (null = heredar);
+// nunca modifica receipts/receipt_items. HomePantryItem: una fila de
+// get_home_pantry -- los campos sin prefijo ya son los valores efectivos.
+// ----------------------------------------------------------------------------
+export interface PantryItemEdit {
+  home_id: string;
+  canonical_product_id: string;
+  display_name: string | null;
+  category: ProductCategory | null;
+  brand: string | null;
+  stock_quantity: number | null;
+  stock_unit: string | null;
+  stock_receipt_id: string | null;
+  updated_by: string | null;
+  updated_at: string;
+}
+
+export interface HomePantryItem {
+  canonical_product_id: string;
+  canonical_name: string;
+  category: ProductCategory;
+  brand: string | null;
+  quantity: number;
+  package_quantity: number | null;
+  unit: string | null;
+  purchase_date: string | null;
+  raw_name: string;
+  catalog_name: string;
+  catalog_category: ProductCategory;
+  catalog_brand: string | null;
+  purchase_quantity: number;
+  purchase_package_quantity: number | null;
+  purchase_unit: string | null;
+  receipt_id: string;
+  store_name: string | null;
+  stock_adjusted: boolean;
+}
+
+// ----------------------------------------------------------------------------
 // Intérprete global de productos (supabase/migrations/0006_interpreter_and_admin.sql)
 // Conocimiento global de la plataforma, no ligado a ninguna Casa. Los `user`
 // sólo escriben en interpreter_proposals (vía submit_interpreter_proposal);

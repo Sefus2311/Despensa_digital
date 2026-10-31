@@ -76,13 +76,25 @@ export async function saveReceiptReview(
 
   const { data: receipt } = await supabase
     .from("receipts")
-    .select("id, home_id")
+    .select("id, home_id, status")
     .eq("id", receiptId)
     .eq("home_id", homeId)
     .maybeSingle();
 
   if (!receipt) {
     return { error: "Ticket no encontrado." };
+  }
+
+  const { data: previousItems } = await supabase
+    .from("receipt_items")
+    .select("id")
+    .eq("receipt_id", receiptId);
+  const previousItemIds = (previousItems ?? []).map((i) => i.id);
+
+  // Una compra confirmada es un registro permanente: sus líneas se pueden
+  // corregir, pero no quitar. Respaldo del botón oculto en ReviewForm.
+  if (receipt.status === "reviewed" && validItems.length < previousItemIds.length) {
+    return { error: "No se pueden eliminar productos de una compra ya registrada." };
   }
 
   const { error: updateError } = await supabase
@@ -99,8 +111,8 @@ export async function saveReceiptReview(
     return { error: "No se pudo guardar el ticket." };
   }
 
-  await supabase.from("receipt_items").delete().eq("receipt_id", receiptId);
-
+  // Primero las líneas nuevas y después el borrado de las anteriores: si algo
+  // falla, el ticket conserva sus líneas originales.
   const { error: itemsError } = await supabase.from("receipt_items").insert(
     validItems.map((item, index) => {
       const confidence = nonNegativeOrNull(item.confidence);
@@ -130,6 +142,16 @@ export async function saveReceiptReview(
 
   if (itemsError) {
     return { error: "No se pudieron guardar los productos." };
+  }
+
+  if (previousItemIds.length > 0) {
+    const { error: deleteError } = await supabase
+      .from("receipt_items")
+      .delete()
+      .in("id", previousItemIds);
+    if (deleteError) {
+      return { error: "No se pudieron actualizar los productos. Revisa el ticket." };
+    }
   }
 
   // Alimenta el intérprete global con lo que el usuario acaba de escribir.

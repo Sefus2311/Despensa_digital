@@ -35,11 +35,15 @@ export default async function RecetasPage({
   ]);
 
   const recetas = (recetasData ?? []) as Receta[];
-  const pantry: PantryStockRow[] = ((pantryData ?? []) as PantryRow[]).map((p) => ({
-    canonical_product_id: p.canonical_product_id,
-    stock: computeStockQuantity(p.quantity, p.package_quantity),
-    unit: p.unit,
-  }));
+  // Un artículo con stock 0 sigue en la despensa (su compra no desaparece), pero
+  // para cocinar cuenta como que no está.
+  const pantry: PantryStockRow[] = ((pantryData ?? []) as PantryRow[])
+    .map((p) => ({
+      canonical_product_id: p.canonical_product_id,
+      stock: computeStockQuantity(p.quantity, p.package_quantity),
+      unit: p.unit,
+    }))
+    .filter((p) => p.stock > 0);
 
   const recetaIds = recetas.map((r) => r.id);
   const { data: ingredientesData } =
