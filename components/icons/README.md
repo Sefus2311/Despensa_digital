@@ -16,7 +16,7 @@ viewBox `0 0 24 24`, área útil 20×20, trazo principal 1.5, trazo auxiliar
 **Reutilizados tal cual de RealMargin** (ya eran genéricos, sin relación
 con presupuestos/facturas/pintura): `ajustes`, `buscar`, `notificaciones`,
 `telefono`, `reloj`, `ubicacion`, `ayuda`, `cerrar`, `advertencia`, `vacio`,
-`editar`, `guardar`.
+`guardar`.
 
 **Adaptados** (misma geometría, renombrados o con el acento de marca
 sustituido por `--color-primary`, o con algún detalle de RealMargin
@@ -43,6 +43,9 @@ navegación principal, solo emoji — ver su `ICONOS.md`):
 - `calendario` — pensado para fechas de caducidad (no existía nada
   parecido en RealMargin).
 - `volver`, `menu`, `tareas`, `anadir`, `microfono`.
+- `editar` — lápiz con el cuerpo cerrado y la virola en el acento; sustituye
+  al glifo de RealMargin, que a 16px (su tamaño real en la app) no se
+  reconocía como lápiz.
 
 ## No reutilizados de RealMargin (y por qué)
 
