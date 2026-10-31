@@ -164,6 +164,14 @@ por `(retailer, normalized_raw_name)` y muestra todas las interpretaciones
 candidatas una junto a otra. Aprobar cualquiera de ellas resuelve el grupo
 entero (ver punto 4 de la aprobación arriba) — no hay una función de
 "resolución de conflicto" separada, es la misma `approve_interpreter_proposal`.
+Cada candidata se compara campo a campo (`lib/interpreter/conflicts.ts`,
+`ConflictComparison`) con lo ya aprobado para esa clave o, si no hay nada
+aprobado, con otra candidata del grupo, y lo que provoca el conflicto se
+resalta. Los criterios replican `submit_interpreter_proposal`: producto,
+categoría y marca, sin contar mayúsculas ni acentos, y una categoría o marca
+vacía en la propuesta no contradice nada. La cantidad no se compara porque no
+provoca conflictos: `proposed_quantity` es el tamaño del envase (desde 0026; antes
+era por error la cantidad comprada, ver esa migración).
 
 El selector "Activos/Eliminados/Validar" de `/admin/interpreter` tiene una
 tercera opción, "Validar", que no es un tercer valor de `product_aliases`

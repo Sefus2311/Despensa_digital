@@ -124,6 +124,7 @@ Reglas derivadas de las dos anteriores, ya aplicadas en el código:
 | `--color-success` | `= --color-primary` | — | Confirmaciones (mismo verde, sin token propio) |
 | `--color-warning` | `#a16207` | — | Avisos de caducidad, riesgo, badges/alerts/cards de "pendiente"/"conflicto" |
 | `--color-danger` | `#b65a3f` | — | Errores, acciones destructivas (ver nota de contraste en §2) |
+| `--color-highlight` | `#fde68a` | `#713f12` | Solo fondo de `.ui-mark`: resaltar un fragmento de texto, nunca una caja |
 | `--color-primary-text` | `= --color-primary` | `#698c40` | **Solo para `color` (texto)** de primary: enlaces, "Escanear"/etc. cuando van como texto, no como fondo |
 | `--color-danger-text` | `= --color-danger` | `#c86345` | **Solo para `color`** de danger: "Cerrar sesión", "Rechazar", errores |
 | `--color-warning-text` | `= --color-warning` | `#b97108` | **Solo para `color`** de warning: badges/alerts "pendiente"/"conflicto" |
@@ -242,6 +243,13 @@ caso concreto de `.ui-badge--primary` (ver §2, "verde de acento"). Se mezcla co
 `white` a secas (fix 2026-09-18): en oscuro `--color-surface` es `#171717`, así que el tinte sale oscuro en
 vez de un chip pastel claro fuera de lugar sobre una página oscura. El texto de cada tono usa la variante
 `-text` correspondiente (ver §3), no el token base.
+
+### Resaltado de texto (`.ui-mark`)
+
+Fondo `--color-highlight` sobre `<mark>`, para señalar fragmentos de texto concretos (decisión 2026-10-31: las
+diferencias de `/admin/interpreter/conflicts`). Es un amarillo propio porque el tinte de `--color-warning` sale
+beige y no se distingue de `.ui-card--warning-tint`. El texto hereda su color: `--color-text` da más de 7:1 en
+claro y en oscuro. Nunca como único indicador: ahí acompaña a un `<Badge tone="warning">Diferente</Badge>`.
 
 ### Navegación activa (`BottomNav`, `AppHeader`)
 

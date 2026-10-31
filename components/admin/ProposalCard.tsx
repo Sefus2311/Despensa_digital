@@ -2,8 +2,10 @@
 
 import { useActionState, useState } from "react";
 import { Card } from "@/components/Card";
+import { ConflictComparison } from "@/components/admin/ConflictComparison";
 import { Badge } from "@/components/ui/Badge";
 import { PRODUCT_CATEGORIES } from "@/lib/constants/product-categories";
+import type { ConflictReference } from "@/lib/interpreter/conflicts";
 import { formatCategoryBrandLine } from "@/lib/pantry";
 import {
   approveProposalAction,
@@ -22,7 +24,14 @@ const REJECTION_REASONS = [
 
 type Mode = "view" | "edit" | "reject";
 
-export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
+export function ProposalCard({
+  proposal,
+  reference,
+}: {
+  proposal: InterpreterProposal;
+  /** Solo en /admin/interpreter/conflicts: con qué compararla, si hay algo. */
+  reference?: ConflictReference | null;
+}) {
   const [mode, setMode] = useState<Mode>("view");
   const [approveState, approveAction, approvePending] = useActionState<
     ProposalActionState,
@@ -48,8 +57,10 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
         <p className="font-mono text-[15px]">{proposal.raw_name}</p>
       </div>
 
+      {reference && <ConflictComparison reference={reference} proposal={proposal} />}
+
       {mode !== "edit" ? (
-        <div>
+        !reference && <div>
           <p className="text-[15px] text-[var(--color-muted)]">Propuesta interpretada</p>
           <p className="font-medium">{proposal.proposed_canonical_name}</p>
           <p className="text-[15px] text-[var(--color-muted)]">
@@ -58,7 +69,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
               : proposal.proposed_brand?.toUpperCase() || "—"}
           </p>
           <p className="text-[15px] text-[var(--color-muted)]">
-            {proposal.proposed_quantity ?? "—"} {proposal.proposed_unit ?? ""}
+            Envase: {proposal.proposed_quantity ?? "—"} {proposal.proposed_quantity != null ? (proposal.proposed_unit ?? "") : ""}
           </p>
         </div>
       ) : (
@@ -98,7 +109,7 @@ export function ProposalCard({ proposal }: { proposal: InterpreterProposal }) {
           </label>
           <div className="flex gap-2">
             <label className="text-[15px] text-[var(--color-muted)] flex-1">
-              Cantidad
+              Cantidad por envase (no la comprada)
               <input
                 name="quantity"
                 type="number"

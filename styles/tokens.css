@@ -50,6 +50,7 @@
      verde en toda la app, en vez de dos tonos de verde compitiendo. */
   --color-success: var(--color-primary);
   --color-warning: #a16207;
+  --color-highlight: #fde68a;
   /* #d66a4a (terracota original de la paleta) da 3.49:1 sobre blanco, por
      debajo del 4.5:1 de AA para texto normal. Se oscurece un 15% de
      brillo manteniendo el mismo matiz -> 4.64:1 (decisión 2026-09-18). */
@@ -112,5 +113,6 @@
     --color-primary-text: #698c40;
     --color-danger-text: #c86345;
     --color-warning-text: #b97108;
+    --color-highlight: #713f12;
   }
 }
