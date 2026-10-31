@@ -133,6 +133,17 @@ despensa, pero `/recetas` lo trata como no disponible. Lógica pura: `parsePantr
 Casas de las que son miembros. Cualquier referencia nueva a `canonical_products` debe añadirse a
 `merge_canonical_products`.
 
+**Cantidad comprada ≠ envase.** `retailer_products.package_quantity` es el tamaño del envase; la despensa
+calcula stock = cantidad × envase, y solo si `package_unit` es en unidades (`400 g` es contenido, no se
+multiplica). Nunca enviar la cantidad comprada como `p_proposed_quantity`: se usa `proposalPackQuantity(units_per_pack)`
+(`lib/pantry.ts`). Ver `0026_package_quantity_fix.sql`, que corrigió los datos que generó ese error.
+
+**Pesos en kg.** Los tickets traen el número en kg con la etiqueta "gr.": el número es correcto y lo que se
+corrige es la unidad, a `kg` (decisión del usuario, 2026-10-31; no multiplicar por 1000). Regla única:
+`isKilogramsLabelledAsGrams` (`lib/units.ts`), aplicada al importar; `0027_weights_in_kg.sql` corrigió lo ya
+guardado. `kg` no es unidad estándar de compra (`STANDARD_UNITS`), así que `/recetas` pasa el stock por
+`toBaseUnit` antes de comparar. Guardar un ticket a mano no reetiqueta: ahí manda lo que elige el usuario.
+
 ### Spending (`/historial`, `/gasto`)
 `lib/spending.ts` is the one shared source of month-navigation math (`getMonthBoundaries`,
 `parseMonthParam`/`formatMonthParam`, `canGoToPreviousMonth`/`canGoToNextMonth` — never past the first

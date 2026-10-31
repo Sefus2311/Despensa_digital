@@ -6,6 +6,7 @@
 //  - la casa NO forma parte del payload: la aporta el servidor por separado.
 import { capitalizeFirstLetter } from "@/lib/format";
 import { normalizeSupermarketName } from "@/lib/supermarkets";
+import { isKilogramsLabelledAsGrams, isSuspiciousSmallVolume } from "@/lib/units";
 import { RECEIPT_STATUS_PENDING_REVIEW } from "@/lib/receipt-status";
 import type { ReceiptImportV1 } from "./types";
 
@@ -95,7 +96,18 @@ export function toImportPayload(
         warnings: data.warnings,
       },
     },
-    lines: data.lines.map((line) => ({
+    lines: data.lines.map((line) => {
+      // Sin dato explícito, en un producto de inventario se asume lo comprado.
+      const inventoryQuantity =
+        line.inventory_quantity ?? (line.is_inventory_item ? line.purchase_quantity : null);
+      const inKilograms = isKilogramsLabelledAsGrams(line.purchase_quantity, line.unit, inventoryQuantity);
+      const suspicious =
+        line.is_inventory_item && isSuspiciousSmallVolume(inventoryQuantity ?? line.purchase_quantity, line.unit);
+      const warning = suspicious
+        ? `Cantidad muy pequeña en ${line.unit}: comprueba si está en litros.`
+        : null;
+
+      return {
       line_number: line.line_number,
       raw_name: line.raw_text,
       // Primera letra en mayúscula, resto en minúsculas (capitalizeFirstLetter).
@@ -105,16 +117,15 @@ export function toImportPayload(
       commercial_name: line.commercial_name,
       units_per_pack: line.units_per_pack,
       quantity: line.purchase_quantity,
-      // Sin dato explícito, en un producto de inventario se asume lo comprado.
-      inventory_quantity:
-        line.inventory_quantity ?? (line.is_inventory_item ? line.purchase_quantity : null),
-      unit: line.unit,
+      inventory_quantity: inKilograms ? line.purchase_quantity : inventoryQuantity,
+      unit: inKilograms ? "kg" : line.unit,
       unit_price: line.unit_price,
       total_price: line.total_price,
       is_inventory_item: line.is_inventory_item,
       confidence: line.confidence,
-      review_required: line.review_required,
-      notes: line.notes,
-    })),
+      review_required: line.review_required || suspicious,
+      notes: [line.notes, warning].filter(Boolean).join(" ") || null,
+      };
+    }),
   };
 }

@@ -6,6 +6,7 @@ import { getCurrentUserAndHome } from "@/lib/home";
 import { isProductCategory } from "@/lib/constants/product-categories";
 import { normalizeOptionalSupermarketName } from "@/lib/supermarkets";
 import { capitalizeFirstLetter } from "@/lib/format";
+import { proposalPackQuantity } from "@/lib/pantry";
 
 export type SaveReviewState = { error?: string } | null;
 
@@ -172,8 +173,10 @@ export async function saveReceiptReview(
             : item.rawName.trim(),
           p_proposed_brand: item.brand?.trim() || null,
           p_proposed_category: item.category,
-          p_proposed_quantity: item.quantity || null,
-          p_proposed_unit: item.unit,
+          // Tamaño del envase, nunca la cantidad comprada: al aprobarse pasa a
+          // retailer_products.package_quantity, que multiplica el stock.
+          p_proposed_quantity: proposalPackQuantity(item.unitsPerPack),
+          p_proposed_unit: proposalPackQuantity(item.unitsPerPack) ? "ud." : item.unit,
         })
       )
     );

@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { canonicalizeUnit, isPurchasableUnit, normalizeStandardUnit, sameUnit, toBaseUnit } from "./units";
+import {
+  canonicalizeUnit,
+  isKilogramsLabelledAsGrams,
+  isPurchasableUnit,
+  isSuspiciousSmallVolume,
+  normalizeStandardUnit,
+  sameUnit,
+  toBaseUnit,
+} from "./units";
 
 describe("normalización de unidades", () => {
   it("G / g / gr / gramos -> gr.", () => {
@@ -77,5 +85,38 @@ describe("toBaseUnit (kg -> gr., l -> ml.)", () => {
   it("idempotente: convertir dos veces no vuelve a multiplicar", () => {
     const once = toBaseUnit(1.5, "kg");
     expect(toBaseUnit(once.cantidad, once.unidad)).toEqual(once);
+  });
+});
+
+describe("isKilogramsLabelledAsGrams", () => {
+  it("cantidad pequeña en gr.: son kg", () => {
+    expect(isKilogramsLabelledAsGrams(0.194, "gr.", null)).toBe(true);
+    expect(isKilogramsLabelledAsGrams(1.055, "gr.", 1.055)).toBe(true);
+    expect(isKilogramsLabelledAsGrams(2, "g", null)).toBe(true);
+  });
+
+  it("inventario ×1000 confirma los kg", () => {
+    expect(isKilogramsLabelledAsGrams(0.194, "gr.", 194)).toBe(true);
+  });
+
+  it("inventario distinto: la cantidad son unidades (1 queso de 350 gr.)", () => {
+    expect(isKilogramsLabelledAsGrams(1, "gr.", 350)).toBe(false);
+  });
+
+  it("gramos reales y otras unidades no cambian", () => {
+    expect(isKilogramsLabelledAsGrams(350, "gr.", null)).toBe(false);
+    expect(isKilogramsLabelledAsGrams(10, "gr.", null)).toBe(false);
+    expect(isKilogramsLabelledAsGrams(0, "gr.", null)).toBe(false);
+    expect(isKilogramsLabelledAsGrams(2, "ud.", null)).toBe(false);
+    expect(isKilogramsLabelledAsGrams(1, "ml.", null)).toBe(false);
+    expect(isKilogramsLabelledAsGrams(0.5, "kg", null)).toBe(false);
+  });
+});
+
+describe("isSuspiciousSmallVolume", () => {
+  it("menos de 10 ml. es sospechoso; lo demás no", () => {
+    expect(isSuspiciousSmallVolume(1.5, "ml.")).toBe(true);
+    expect(isSuspiciousSmallVolume(500, "ml.")).toBe(false);
+    expect(isSuspiciousSmallVolume(1.5, "gr.")).toBe(false);
   });
 });

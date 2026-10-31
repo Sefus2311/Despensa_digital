@@ -6,6 +6,7 @@ import {
   computeStockQuantity,
   formatCategoryBrandLine,
   parsePantryItemInput,
+  proposalPackQuantity,
   type PantryItemInput,
 } from "./pantry";
 import type { HomePantryItem } from "./types/database";
@@ -39,6 +40,19 @@ const UNCHANGED: PantryItemInput = {
   stock: 12,
   unit: "ud.",
 };
+
+describe("proposalPackQuantity", () => {
+  it("solo un pack real se propone como envase", () => {
+    expect(proposalPackQuantity(6)).toBe(6);
+  });
+
+  it("sin pack, o pack de 1, no se propone nada", () => {
+    expect(proposalPackQuantity(null)).toBeNull();
+    expect(proposalPackQuantity(undefined)).toBeNull();
+    expect(proposalPackQuantity(1)).toBeNull();
+    expect(proposalPackQuantity(0)).toBeNull();
+  });
+});
 
 describe("parsePantryItemInput", () => {
   const raw = { name: " yogur NATURAL ", category: "BEBIDAS", brand: " Danone ", stock: "1.5", unit: "unidades" };

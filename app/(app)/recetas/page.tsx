@@ -4,6 +4,7 @@ import { RecipeCard } from "@/components/recetas/RecipeCard";
 import { getCurrentUserAndHome } from "@/lib/home";
 import { computeStockQuantity } from "@/lib/pantry";
 import { summarizeAvailability, type PantryStockRow } from "@/lib/recipes";
+import { toBaseUnit } from "@/lib/units";
 import type { Receta, RecetaIngrediente } from "@/lib/types/database";
 
 interface PantryRow {
@@ -38,11 +39,15 @@ export default async function RecetasPage({
   // Un artículo con stock 0 sigue en la despensa (su compra no desaparece), pero
   // para cocinar cuenta como que no está.
   const pantry: PantryStockRow[] = ((pantryData ?? []) as PantryRow[])
-    .map((p) => ({
-      canonical_product_id: p.canonical_product_id,
-      stock: computeStockQuantity(p.quantity, p.package_quantity),
-      unit: p.unit,
-    }))
+    .map((p) => {
+      // La despensa puede estar en kg y la receta en gr.: se comparan en la misma unidad.
+      const base = toBaseUnit(computeStockQuantity(p.quantity, p.package_quantity), p.unit);
+      return {
+        canonical_product_id: p.canonical_product_id,
+        stock: base.cantidad ?? 0,
+        unit: base.unidad,
+      };
+    })
     .filter((p) => p.stock > 0);
 
   const recetaIds = recetas.map((r) => r.id);

@@ -79,6 +79,32 @@ export function toBaseUnit(
   };
 }
 
+// Un peso de ticket llega con el número en kg y la etiqueta "gr." ("0,194 kg" ->
+// 0.194 gr.): el número es correcto, lo que está mal es la unidad. Menos de 10 gr.
+// no es una compra real. No aplica si inventory_quantity indica otra cosa ("1
+// queso" con inventario 350 gr.: ese 1 son unidades), salvo que sea justo ×1000,
+// que confirma los kg. Equivalente en SQL: 0027_weights_in_kg.sql.
+const MAX_MISLABELLED_GRAMS = 10;
+
+export function isKilogramsLabelledAsGrams(
+  quantity: number,
+  unit: string | null | undefined,
+  inventoryQuantity: number | null
+): boolean {
+  if (normalizeStandardUnit(unit) !== "gr.") return false;
+  if (quantity <= 0 || quantity >= MAX_MISLABELLED_GRAMS) return false;
+  return (
+    inventoryQuantity === null ||
+    inventoryQuantity === quantity ||
+    Math.round(inventoryQuantity * 1000) === Math.round(quantity * 1000 * 1000)
+  );
+}
+
+/** Menos de 10 ml. tampoco es real, pero se avisa en vez de cambiarlo: puede ser "1 botella de 1L". */
+export function isSuspiciousSmallVolume(quantity: number, unit: string | null | undefined): boolean {
+  return normalizeStandardUnit(unit) === "ml." && quantity > 0 && quantity < 10;
+}
+
 /** ¿Es una unidad de compra (ud./gr./ml.)? Es lo que decide si va a la lista de la compra. */
 export function isPurchasableUnit(raw: string | null | undefined): boolean {
   return normalizeStandardUnit(raw) !== null;

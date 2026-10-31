@@ -14,6 +14,17 @@ export function computeStockQuantity(
   return purchasedQuantity * (packageQuantity ?? 1);
 }
 
+/**
+ * Lo que se propone al intérprete como unidades por envase. Nunca la cantidad
+ * comprada: comprar 2 unidades no significa que el envase traiga 2, y
+ * get_home_pantry multiplica por este valor (ver 0026_package_quantity_fix.sql).
+ */
+export function proposalPackQuantity(unitsPerPack: number | null | undefined): number | null {
+  return typeof unitsPerPack === "number" && Number.isFinite(unitsPerPack) && unitsPerPack > 1
+    ? unitsPerPack
+    : null;
+}
+
 // "CATEGORÍA · MARCA", o solo "CATEGORÍA" si no hay marca (sin separador).
 export function formatCategoryBrandLine(category: ProductCategory, brand: string | null): string {
   const trimmedBrand = brand?.trim();

@@ -12,6 +12,58 @@ function payloadFrom(json: unknown) {
   return toImportPayload(result.data);
 }
 
+describe("toImportPayload: pesos en kg", () => {
+  function weighedLine(raw_text: string, purchase_quantity: number) {
+    const json: Json = validImportJson();
+    Object.assign(json.lines[0], {
+      raw_text,
+      purchase_quantity,
+      inventory_quantity: null,
+      unit: "gr.",
+      unit_price: null,
+      total_price: 2.52,
+      review_required: false,
+      notes: null,
+    });
+    json.lines = [json.lines[0]];
+    json.receipt.total = 2.52;
+    return json;
+  }
+
+  function lineFrom(json: Json) {
+    return payloadFrom(json).lines[0];
+  }
+
+  it("etiqueta en kg una cantidad pequeña en gr., sin tocar número ni texto", () => {
+    const raw = "OFE CALAMAR GROS 0,194 kg NET x 12,99 €/kg 2,52";
+    expect(lineFrom(weighedLine(raw, 0.194))).toMatchObject({
+      raw_name: raw,
+      quantity: 0.194,
+      inventory_quantity: 0.194,
+      unit: "kg",
+      review_required: false,
+      notes: null,
+    });
+  });
+
+  it("gramos reales se quedan en gr.", () => {
+    expect(lineFrom(weighedLine("QUESO CURADO", 350))).toMatchObject({ quantity: 350, unit: "gr." });
+  });
+
+  it("un volumen muy pequeño no se cambia, pero pide revisar", () => {
+    const json = weighedLine("ZUMO 1,5", 1.5);
+    json.lines[0].unit = "ml.";
+    const line = lineFrom(json);
+    expect(line).toMatchObject({ quantity: 1.5, unit: "ml.", review_required: true });
+    expect(line.notes).toMatch(/litros/);
+  });
+
+  it("no altera una línea normal", () => {
+    const line = payloadFrom(validImportJson()).lines[1];
+    expect(line).toMatchObject({ quantity: 1, inventory_quantity: 6000, review_required: false, notes: null });
+  });
+});
+
 describe("toImportPayload", () => {
   it("11. fuerza pending_review aunque el fichero diga otro estado", () => {
     for (const status of ["PENDIENTE_REVISION", "CONFIRMADO", "IMPORTADO", "reviewed", undefined]) {
